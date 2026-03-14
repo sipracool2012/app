@@ -17,8 +17,9 @@ function App() {
 
   useEffect(() => {
     // Check if user is logged in
+    const token = localStorage.getItem('token');
     const user = localStorage.getItem('currentUser');
-    if (user) {
+    if (token && user) {
       setCurrentUser(JSON.parse(user));
       setIsAuthenticated(true);
     }
@@ -30,6 +31,7 @@ function App() {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('token');
     localStorage.removeItem('currentUser');
     setCurrentUser(null);
     setIsAuthenticated(false);

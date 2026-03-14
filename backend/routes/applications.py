@@ -1,0 +1,309 @@
+from fastapi import APIRouter, HTTPException, status, Depends, Query, Response
+from fastapi.responses import StreamingResponse
+from models.application import ApplicationCreate, Application, ApplicationStatusUpdate
+from utils.auth import get_current_user
+from utils.email import send_application_confirmation, send_application_status_update
+from datetime import datetime
+from typing import List, Optional
+import csv
+import io
+
+router = APIRouter(prefix="/api/applications", tags=["applications"])
+
+# Get database instance
+def get_db():
+    from motor.motor_asyncio import AsyncIOMotorClient
+    from dotenv import load_dotenv
+    from pathlib import Path
+    import os
+    
+    # Load environment variables
+    ROOT_DIR = Path(__file__).parent.parent
+    load_dotenv(ROOT_DIR / '.env')
+    
+    mongo_url = os.environ.get('MONGO_URL')
+    db_name = os.environ.get('DB_NAME', 'visa_app')
+    client = AsyncIOMotorClient(mongo_url)
+    return client[db_name]
+
+db = get_db()
+
+def generate_application_id() -> str:
+    """Generate unique application ID"""
+    timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+    return f"APP{timestamp[-6:]}"
+
+@router.post("", response_model=dict)
+async def create_application(
+    application_data: ApplicationCreate,
+    user_id: str = Depends(get_current_user)
+):
+    """
+    Create a new visa application
+    """
+    # Generate application ID
+    application_id = generate_application_id()
+    
+    # Create application document
+    app_dict = application_data.dict()
+    app_dict.update({
+        "applicationId": application_id,
+        "userId": user_id,
+        "status": "pending",
+        "submittedDate": datetime.utcnow(),
+        "createdAt": datetime.utcnow(),
+        "updatedAt": datetime.utcnow()
+    })
+    
+    # Insert into database
+    result = await db.applications.insert_one(app_dict)
+    
+    # Send confirmation email
+    try:
+        applicant_name = f"{application_data.givenNames} {application_data.surname}"
+        send_application_confirmation(
+            to_email=application_data.email,
+            application_id=application_id,
+            applicant_name=applicant_name
+        )
+    except Exception as e:
+        print(f"Failed to send confirmation email: {e}")
+    
+    return {
+        "id": application_id,
+        "status": "pending",
+        "submittedDate": app_dict["submittedDate"].isoformat()
+    }
+
+@router.get("", response_model=dict)
+async def get_applications(
+    status: Optional[str] = Query(None),
+    search: Optional[str] = Query(None),
+    user_id: str = Depends(get_current_user)
+):
+    """
+    Get all applications (with optional filters)
+    """
+    # Build query
+    query = {}
+    
+    if status and status != "all":
+        query["status"] = status
+    
+    if search:
+        query["$or"] = [
+            {"applicationId": {"$regex": search, "$options": "i"}},
+            {"email": {"$regex": search, "$options": "i"}},
+            {"surname": {"$regex": search, "$options": "i"}},
+            {"givenNames": {"$regex": search, "$options": "i"}}
+        ]
+    
+    # Fetch applications
+    cursor = db.applications.find(query).sort("submittedDate", -1)
+    applications = await cursor.to_list(length=1000)
+    
+    # Convert ObjectId to string
+    for app in applications:
+        app["_id"] = str(app["_id"])
+        app["id"] = app["applicationId"]
+    
+    return {
+        "applications": applications,
+        "total": len(applications)
+    }
+
+@router.patch("/{application_id}/status", response_model=dict)
+async def update_application_status(
+    application_id: str,
+    status_update: ApplicationStatusUpdate,
+    user_id: str = Depends(get_current_user)
+):
+    """
+    Update application status
+    """
+    # Find application
+    application = await db.applications.find_one({"applicationId": application_id})
+    if not application:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Application not found"
+        )
+    
+    # Update status
+    result = await db.applications.update_one(
+        {"applicationId": application_id},
+        {
+            "$set": {
+                "status": status_update.status,
+                "updatedAt": datetime.utcnow()
+            }
+        }
+    )
+    
+    # Send status update email
+    if status_update.status in ["approved", "rejected"]:
+        try:
+            applicant_name = f"{application['givenNames']} {application['surname']}"
+            send_application_status_update(
+                to_email=application["email"],
+                application_id=application_id,
+                applicant_name=applicant_name,
+                status=status_update.status
+            )
+        except Exception as e:
+            print(f"Failed to send status update email: {e}")
+    
+    return {
+        "id": application_id,
+        "status": status_update.status
+    }
+
+@router.get("/export")
+async def export_applications(
+    ids: Optional[str] = Query(None),
+    user_id: str = Depends(get_current_user)
+):
+    """
+    Export applications to CSV
+    """
+    # Build query
+    query = {}
+    if ids:
+        app_ids = ids.split(',')
+        query["applicationId"] = {"$in": app_ids}
+    
+    # Fetch applications
+    cursor = db.applications.find(query).sort("submittedDate", -1)
+    applications = await cursor.to_list(length=10000)
+    
+    if not applications:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No applications found"
+        )
+    
+    # Create CSV
+    output = io.StringIO()
+    
+    # Define CSV headers matching the required format
+    headers = [
+        'Application ID', 'Status', 'Submitted Date', 'Passport Type', 'Nationality',
+        'Port of Arrival', 'Date of Birth', 'Email', 'Expected Arrival Date',
+        'Visa Service', 'Visa Service Subtype', 'Surname', 'Given Names',
+        'Gender', 'Town of Birth', 'Country of Birth', 'Religion',
+        'Educational Qualification', 'Qualification From', 'Passport Number',
+        'Place of Issue', 'Date of Issue', 'Date of Expiry', 'House No/Street',
+        'Village/Town/City', 'Country', 'State/Province', 'Postal Code',
+        'Phone No', 'Mobile No', 'Father Name', 'Father Nationality',
+        'Mother Name', 'Mother Nationality', 'Marital Status', 'Spouse Name',
+        'Present Occupation', 'Employer Name', 'Designation', 'Employer Address',
+        'Type of Visa', 'Places to Visit', 'Duration of Visa', 'Number of Entries',
+        'Port of Arrival India', 'Visited India Before', 'Countries Visited',
+        'India Reference Name', 'India Reference Address', 'India Reference Phone',
+        'Home Reference Name', 'Home Reference Address', 'Home Reference Phone'
+    ]
+    
+    writer = csv.writer(output)
+    writer.writerow(headers)
+    
+    # Write data rows
+    for app in applications:
+        row = [
+            app.get('applicationId', ''),
+            app.get('status', ''),
+            app.get('submittedDate', ''),
+            app.get('passportType', ''),
+            app.get('nationality', ''),
+            app.get('portOfArrival', ''),
+            app.get('dateOfBirth', ''),
+            app.get('email', ''),
+            app.get('expectedArrivalDate', ''),
+            app.get('visaService', ''),
+            app.get('visaServiceSubtype', ''),
+            app.get('surname', ''),
+            app.get('givenNames', ''),
+            app.get('gender', ''),
+            app.get('townOfBirth', ''),
+            app.get('countryOfBirth', ''),
+            app.get('religion', ''),
+            app.get('educationalQualification', ''),
+            app.get('qualificationFrom', ''),
+            app.get('passportNumber', ''),
+            app.get('placeOfIssue', ''),
+            app.get('dateOfIssue', ''),
+            app.get('dateOfExpiry', ''),
+            app.get('houseNoStreet', ''),
+            app.get('villageTownCity', ''),
+            app.get('country', ''),
+            app.get('stateProvince', ''),
+            app.get('postalCode', ''),
+            app.get('phoneNo', ''),
+            app.get('mobileNo', ''),
+            app.get('fatherName', ''),
+            app.get('fatherNationality', ''),
+            app.get('motherName', ''),
+            app.get('motherNationality', ''),
+            app.get('maritalStatus', ''),
+            app.get('spouseName', ''),
+            app.get('presentOccupation', ''),
+            app.get('employerName', ''),
+            app.get('designation', ''),
+            app.get('employerAddress', ''),
+            app.get('typeOfVisa', ''),
+            app.get('placesToVisit', ''),
+            app.get('durationOfVisa', ''),
+            app.get('numberOfEntries', ''),
+            app.get('portOfArrivalIndia', ''),
+            app.get('visitedIndiaBefore', ''),
+            app.get('countriesVisited', ''),
+            app.get('indiaReferenceName', ''),
+            app.get('indiaReferenceAddress', ''),
+            app.get('indiaReferencePhone', ''),
+            app.get('homeReferenceName', ''),
+            app.get('homeReferenceAddress', ''),
+            app.get('homeReferencePhone', '')
+        ]
+        writer.writerow(row)
+    
+    # Create response
+    output.seek(0)
+    filename = f"visa_applications_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+    
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+@router.get("/{application_id}/documents")
+async def get_application_documents(
+    application_id: str,
+    user_id: str = Depends(get_current_user)
+):
+    """
+    Get presigned URLs for application documents
+    """
+    from utils.s3 import generate_presigned_url
+    
+    # Find application
+    application = await db.applications.find_one({"applicationId": application_id})
+    if not application:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Application not found"
+        )
+    
+    # Generate presigned URLs
+    passport_url = ""
+    photo_url = ""
+    
+    if application.get("passportDocument"):
+        passport_url = generate_presigned_url(application["passportDocument"])
+    
+    if application.get("photoDocument"):
+        photo_url = generate_presigned_url(application["photoDocument"])
+    
+    return {
+        "passport": passport_url,
+        "photo": photo_url
+    }

@@ -47,32 +47,42 @@ const VisaApplication = () => {
   const CurrentStepComponent = steps.find(s => s.id === currentStep)?.component;
   const progress = (currentStep / steps.length) * 100;
 
-  const handleNext = (stepData) => {
+  const handleNext = async (stepData) => {
     setFormData({ ...formData, ...stepData });
     
     if (currentStep === steps.length) {
-      // Submit application
-      const applicationId = 'APP' + Date.now().toString().slice(-6);
-      const application = {
-        id: applicationId,
-        ...formData,
-        ...stepData,
-        visaId,
-        status: 'pending',
-        submittedDate: new Date().toISOString()
-      };
+      // Submit application to backend
+      try {
+        const applicationData = { ...formData, ...stepData };
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/applications`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify(applicationData)
+        });
 
-      // Store in localStorage
-      const applications = JSON.parse(localStorage.getItem('applications') || '[]');
-      applications.push(application);
-      localStorage.setItem('applications', JSON.stringify(applications));
+        if (!response.ok) {
+          throw new Error('Failed to submit application');
+        }
 
-      toast({
-        title: 'Success!',
-        description: `Your application ${applicationId} has been submitted successfully.`,
-      });
+        const result = await response.json();
+        const applicationId = result.id;
 
-      navigate('/application-success', { state: { applicationId } });
+        toast({
+          title: 'Success!',
+          description: `Your application ${applicationId} has been submitted successfully.`,
+        });
+
+        navigate('/application-success', { state: { applicationId } });
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: 'Failed to submit application. Please try again.',
+          variant: 'destructive'
+        });
+      }
     } else {
       setCurrentStep(currentStep + 1);
     }

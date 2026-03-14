@@ -16,11 +16,29 @@ const AdminPanel = () => {
   const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
-    // Load applications from localStorage
-    const storedApps = JSON.parse(localStorage.getItem('applications') || '[]');
-    setApplications(storedApps);
-    setFilteredApps(storedApps);
-  }, []);
+    // Load applications from API
+    const fetchApplications = async () => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/applications`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        const data = await response.json();
+        setApplications(data.applications || []);
+        setFilteredApps(data.applications || []);
+      } catch (error) {
+        console.error('Failed to fetch applications:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load applications',
+          variant: 'destructive'
+        });
+      }
+    };
+    
+    fetchApplications();
+  }, [toast]);
 
   useEffect(() => {
     let filtered = applications;
@@ -43,32 +61,107 @@ const AdminPanel = () => {
     setFilteredApps(filtered);
   }, [searchTerm, statusFilter, applications]);
 
-  const updateStatus = (appId, newStatus) => {
-    const updated = applications.map(app =>
-      app.id === appId ? { ...app, status: newStatus } : app
-    );
-    setApplications(updated);
-    localStorage.setItem('applications', JSON.stringify(updated));
-    
-    toast({
-      title: 'Status Updated',
-      description: `Application ${appId} marked as ${newStatus}`,
-    });
+  const updateStatus = async (appId, newStatus) => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/applications/${appId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update status');
+      }
+
+      const updated = applications.map(app =>
+        app.applicationId === appId ? { ...app, status: newStatus } : app
+      );
+      setApplications(updated);
+      
+      toast({
+        title: 'Status Updated',
+        description: `Application ${appId} marked as ${newStatus}`,
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update status',
+        variant: 'destructive'
+      });
+    }
   };
 
-  const downloadCSV = (application) => {
-    const csvContent = generateCSV([application]);
-    downloadFile(csvContent, `${application.id}_application.csv`, 'text/csv');
+  const downloadCSV = async (application) => {
+    try {
+      const url = `${process.env.REACT_APP_BACKEND_URL}/api/applications/export?ids=${application.applicationId}`;
+      
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download');
+      }
+
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${application.applicationId}_application.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to download application',
+        variant: 'destructive'
+      });
+    }
   };
 
-  const downloadAllCSV = () => {
-    const csvContent = generateCSV(filteredApps);
-    downloadFile(csvContent, `all_applications_${new Date().toISOString().split('T')[0]}.csv`, 'text/csv');
-    
-    toast({
-      title: 'Download Started',
-      description: `Downloading ${filteredApps.length} applications`,
-    });
+  const downloadAllCSV = async () => {
+    try {
+      const ids = filteredApps.map(app => app.applicationId).join(',');
+      const url = `${process.env.REACT_APP_BACKEND_URL}/api/applications/export${ids ? `?ids=${ids}` : ''}`;
+      
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download');
+      }
+
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `applications_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+      
+      toast({
+        title: 'Download Started',
+        description: `Downloading ${filteredApps.length} applications`,
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to download applications',
+        variant: 'destructive'
+      });
+    }
   };
 
   const generateCSV = (apps) => {
@@ -300,8 +393,8 @@ const AdminPanel = () => {
                     </TableRow>
                   ) : (
                     filteredApps.map((app) => (
-                      <TableRow key={app.id}>
-                        <TableCell className="font-medium">{app.id}</TableCell>
+                      <TableRow key={app.applicationId}>
+                        <TableCell className="font-medium">{app.applicationId}</TableCell>
                         <TableCell>{app.surname} {app.givenNames}</TableCell>
                         <TableCell>{app.email}</TableCell>
                         <TableCell>{app.nationality}</TableCell>
@@ -314,7 +407,7 @@ const AdminPanel = () => {
                           <div className="flex space-x-2">
                             <Select
                               value={app.status}
-                              onValueChange={(value) => updateStatus(app.id, value)}
+                              onValueChange={(value) => updateStatus(app.applicationId, value)}
                             >
                               <SelectTrigger className="w-32">
                                 <SelectValue />

@@ -6,11 +6,14 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { useToast } from '../hooks/use-toast';
+import api from '../utils/api';
+import { setToken, setCurrentUser } from '../utils/auth';
 
 const SignUp = ({ onLogin }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -18,7 +21,7 @@ const SignUp = ({ onLogin }) => {
     confirmPassword: ''
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
@@ -30,36 +33,36 @@ const SignUp = ({ onLogin }) => {
       return;
     }
 
-    // Mock signup - store in localStorage
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    setLoading(true);
     
-    if (users.find(u => u.email === formData.email)) {
+    try {
+      const response = await api.post('/api/auth/register', {
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password
+      });
+      
+      const { token, user } = response.data;
+      
+      // Store token and user
+      setToken(token);
+      setCurrentUser(user);
+      onLogin(user);
+      
+      toast({
+        title: 'Success',
+        description: 'Account created successfully!',
+      });
+      navigate('/');
+    } catch (error) {
       toast({
         title: 'Error',
-        description: 'Email already exists',
+        description: error.response?.data?.detail || 'Failed to create account',
         variant: 'destructive'
       });
-      return;
+    } finally {
+      setLoading(false);
     }
-
-    const newUser = {
-      id: Date.now().toString(),
-      fullName: formData.fullName,
-      email: formData.email,
-      password: formData.password,
-      createdAt: new Date().toISOString()
-    };
-
-    users.push(newUser);
-    localStorage.setItem('users', JSON.stringify(users));
-    localStorage.setItem('currentUser', JSON.stringify(newUser));
-    
-    onLogin(newUser);
-    toast({
-      title: 'Success',
-      description: 'Account created successfully!',
-    });
-    navigate('/');
   };
 
   return (
@@ -145,8 +148,8 @@ const SignUp = ({ onLogin }) => {
               </div>
             </div>
 
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-              Sign up
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
+              {loading ? 'Creating account...' : 'Sign up'}
             </Button>
           </form>
 

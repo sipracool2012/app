@@ -6,37 +6,45 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { useToast } from '../hooks/use-toast';
+import api from '../utils/api';
+import { setToken, setCurrentUser } from '../utils/auth';
 
 const SignIn = ({ onLogin }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     
-    // Mock login - store in localStorage
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const user = users.find(u => u.email === formData.email && u.password === formData.password);
-    
-    if (user) {
-      localStorage.setItem('currentUser', JSON.stringify(user));
+    try {
+      const response = await api.post('/api/auth/login', formData);
+      const { token, user } = response.data;
+      
+      // Store token and user
+      setToken(token);
+      setCurrentUser(user);
       onLogin(user);
+      
       toast({
         title: 'Success',
         description: 'Logged in successfully!',
       });
       navigate('/');
-    } else {
+    } catch (error) {
       toast({
         title: 'Error',
-        description: 'Invalid email or password',
+        description: error.response?.data?.detail || 'Invalid email or password',
         variant: 'destructive'
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -90,8 +98,8 @@ const SignIn = ({ onLogin }) => {
               </div>
             </div>
 
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-              Sign in
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
+              {loading ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
 
