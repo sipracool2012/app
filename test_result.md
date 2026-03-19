@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the Clear eVisa Visa Application API backend endpoints including user authentication, visa application management, status updates, and CSV export functionality"
+user_problem_statement: "Test the Clear eVisa Visa Application API backend endpoints including user authentication, visa application management, status updates, CSV export functionality, and the new Country Visa Configuration API"
 
 backend:
   - task: "User Registration API"
@@ -189,8 +189,168 @@ backend:
         -agent: "testing"
         -comment: "GET /api/applications/export tested successfully. Returns proper CSV format with all required headers."
 
+  - task: "Get Enabled Countries API"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/countries.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "GET /api/countries/enabled implemented. Returns only countries where country_enabled=true. Tested via curl successfully."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ COMPREHENSIVE TEST PASSED: GET /api/countries/enabled returns 5 enabled countries with proper structure (code, name, flag) sorted by name. Only returns countries with country_enabled=true as required."
+
+  - task: "Get All Countries API"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/countries.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "GET /api/countries/all implemented. Returns all 195+ countries with their configuration for admin panel."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ COMPREHENSIVE TEST PASSED: GET /api/countries/all returns all 196 countries with proper structure including country_code, country_name, country_enabled and all visa configuration fields. 5 countries currently enabled."
+
+  - task: "Get Visa Options for Country API"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/countries.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "GET /api/countries/{country_code}/visa-options implemented. Returns visa options based on country config with 3-fee structure (govt + payment + processing). Also returns has_evisa_options flag for Embassy visa fallback."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ COMPREHENSIVE TEST PASSED: US visa options include tourist (30d, 1yr, 5yr), business, and medical. BE has only tourist (30d, 1yr). Price calculations correct (govt_fee + payment_fee + processing_fee). Approval dates calculated as today + 5 days. Disabled countries return embassy message."
+
+  - task: "Get Enabled Purposes for Country API"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/countries.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "GET /api/countries/{country_code}/purposes implemented. Returns enabled visa types (tourist, business, medical, transit) for purpose dropdown."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ COMPREHENSIVE TEST PASSED: US purposes include tourist, business, medical with proper value/label structure. BE correctly shows only tourist purpose. Purposes match enabled visa types in configuration."
+
+  - task: "Update Country Config API"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/countries.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "PUT /api/countries/{country_code} implemented. Allows admin to enable/disable countries and visa types with fee configuration."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ COMPREHENSIVE TEST PASSED: Successfully updated CA configuration fees and verified changes reflected in visa options. Also tested creating new country config for AU - properly creates configuration and makes country available in enabled list."
+
+  - task: "Seed Sample Countries API"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/countries.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "POST /api/countries/seed implemented. Seeds 4 sample countries (US, GB, BE, CA) with various visa configurations for testing."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ COMPREHENSIVE TEST PASSED: Seed endpoint properly handles both initial seeding and already-seeded scenarios. Creates 4 sample countries (US, GB, BE, CA) with different visa configurations for testing."
+
 frontend:
-  # Frontend testing not included in current scope
+  - task: "Dynamic Country Dropdown"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/Home.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Passport dropdown now fetches only enabled countries from API. Updates title dynamically based on selection."
+
+  - task: "Fixed India Destination"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/Home.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Traveling to field is fixed to India as per requirement."
+
+  - task: "Purpose of Travel Dropdown"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/Home.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Purpose dropdown shows only enabled visa types for selected country (Tourism, Business, Medical, Transit)."
+
+  - task: "Dynamic Visa Cards with Fee Breakdown"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/Home.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Visa cards display price from 3-fee structure (govt + payment + processing). Shows Approved by date as today + 5 days."
+
+  - task: "Embassy Visa Fallback"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/Home.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Shows Embassy visa card when no eVisa options are available for the selected country/purpose."
+
+  - task: "Admin Country Configuration Panel"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/AdminPanel.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Added Country Config tab in Admin Panel with ability to enable/disable countries, visa types, and set fees."
 
 metadata:
   created_by: "testing_agent"
@@ -200,11 +360,13 @@ metadata:
 
 test_plan:
   current_focus:
-    - "All backend API endpoints tested and working"
+    - "All backend Country Visa Configuration APIs tested and working"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
+    -agent: "main"
+    -message: "Implemented dynamic country-driven visa configuration system. Backend: Added 6 new API endpoints for country configuration management. Frontend: Updated Home page with dynamic passport dropdown showing only enabled countries, fixed India destination, purpose dropdown with enabled visa types, visa cards with 3-fee pricing structure, and Embassy visa fallback. Added Country Configuration tab in Admin Panel."
     -agent: "testing"
-    -message: "Completed comprehensive backend API testing for Clear eVisa Visa Application. All 7 endpoints tested successfully: User Registration, User Login, Get Current User, Create Visa Application, Get All Applications, Update Application Status, and Export Applications CSV. Minor issues: bcrypt version warning and SMTP not configured for email notifications, but core functionality is fully working. Backend service is running properly on supervisor."
+    -message: "✅ ALL COUNTRY VISA CONFIGURATION APIs TESTED SUCCESSFULLY: Comprehensive testing completed on all 6 new API endpoints with 100% pass rate (10/10 tests). All requirements verified: enabled countries filtering, US multi-visa options, BE tourist-only options, 3-fee price calculations, 5-day approval dates, config updates, and seeding functionality. All backend APIs are working correctly and ready for production use."

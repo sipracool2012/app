@@ -7,7 +7,7 @@ import logging
 from pathlib import Path
 
 # Import routes
-from routes import auth, applications, upload
+from routes import auth, applications, upload, countries
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -36,6 +36,7 @@ async def health_check():
 app.include_router(auth.router)
 app.include_router(applications.router)
 app.include_router(upload.router)
+app.include_router(countries.router)
 app.include_router(api_router)
 
 # CORS middleware
