@@ -63,11 +63,11 @@ export const destinations = [
 ];
 
 export const partnerLogos = [
-  { name: 'American Airlines', url: 'https://apply.joinClear eVisa.com/assets/img/partner-logos/americanairlines.svg' },
-  { name: 'British Airways', url: 'https://apply.joinClear eVisa.com/assets/img/partner-logos/britishairways.svg' },
-  { name: 'Air Canada', url: 'https://apply.joinClear eVisa.com/assets/img/partner-logos/aircanada.svg' },
-  { name: 'Expedia Group', url: 'https://apply.joinClear eVisa.com/assets/img/partner-logos/expediagroup.svg' },
-  { name: 'Air Transat', url: 'https://apply.joinClear eVisa.com/assets/img/partner-logos/airtransat.svg' }
+  { name: 'American Airlines', url: '/assets/img/partner-logos/americanairlines.svg' },
+  { name: 'British Airways', url: '/assets/img/partner-logos/britishairways.svg' },
+  { name: 'Air Canada', url: '/assets/img/partner-logos/aircanada.svg' },
+  { name: 'Expedia Group', url: '/assets/img/partner-logos/expediagroup.svg' },
+  { name: 'Air Transat', url: '/assets/img/partner-logos/airtransat.svg' }
 ];
 
 export const testimonials = [
