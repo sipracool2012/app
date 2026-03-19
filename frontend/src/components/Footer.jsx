@@ -51,7 +51,7 @@ const Footer = () => {
 
         <div className="mt-12 pt-8 border-t border-gray-200">
           <p className="text-center text-gray-600 text-sm">
-            © {currentYear} Sherpa. All rights reserved.
+            © {currentYear} Clear eVisa. All rights reserved.
           </p>
         </div>
       </div>

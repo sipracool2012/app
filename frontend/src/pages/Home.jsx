@@ -140,7 +140,7 @@ const Home = () => {
       {/* Partner Logos */}
       <section className="bg-blue-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-blue-600 font-medium mb-8">Sherpa is trusted by the best travel brands</p>
+          <p className="text-center text-blue-600 font-medium mb-8">Clear eVisa is trusted by the best travel brands</p>
           <div className="flex flex-wrap justify-center items-center gap-12">
             {partnerLogos.map((logo) => (
               <img
@@ -154,10 +154,10 @@ const Home = () => {
         </div>
       </section>
 
-      {/* How Sherpa Works */}
+      {/* How Clear eVisa Works */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-16">How Sherpa works</h2>
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-16">How Clear eVisa works</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             <div className="text-center">
               <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -194,7 +194,7 @@ const Home = () => {
       <section className="bg-gray-50 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Join over 1M+ customers who trust Sherpa with their visas</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Join over 1M+ customers who trust Clear eVisa with their visas</h2>
             <div className="flex items-center justify-center space-x-2">
               <div className="flex">
                 {[...Array(5)].map((_, i) => (

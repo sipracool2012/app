@@ -61,7 +61,7 @@ def send_application_confirmation(to_email: str, application_id: str, applicant_
     <html>
         <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <div style="background-color: #2563eb; padding: 20px; text-align: center;">
-                <h1 style="color: white; margin: 0;">sherpa°</h1>
+                <h1 style="color: white; margin: 0;">Clear eVisa°</h1>
             </div>
             <div style="padding: 30px; background-color: #f9fafb;">
                 <h2 style="color: #1f2937;">Application Submitted Successfully!</h2>
@@ -85,7 +85,7 @@ def send_application_confirmation(to_email: str, application_id: str, applicant_
             </div>
             <div style="background-color: #1f2937; padding: 20px; text-align: center;">
                 <p style="color: #9ca3af; margin: 0; font-size: 12px;">
-                    © 2026 Sherpa. All rights reserved.
+                    © 2026 Clear eVisa. All rights reserved.
                 </p>
             </div>
         </body>
@@ -117,7 +117,7 @@ def send_application_status_update(to_email: str, application_id: str, applicant
     <html>
         <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <div style="background-color: #2563eb; padding: 20px; text-align: center;">
-                <h1 style="color: white; margin: 0;">sherpa°</h1>
+                <h1 style="color: white; margin: 0;">Clear eVisa°</h1>
             </div>
             <div style="padding: 30px; background-color: #f9fafb;">
                 <h2 style="color: #1f2937;">{status_info['title']}</h2>
@@ -136,7 +136,7 @@ def send_application_status_update(to_email: str, application_id: str, applicant
             </div>
             <div style="background-color: #1f2937; padding: 20px; text-align: center;">
                 <p style="color: #9ca3af; margin: 0; font-size: 12px;">
-                    © 2026 Sherpa. All rights reserved.
+                    © 2026 Clear eVisa. All rights reserved.
                 </p>
             </div>
         </body>

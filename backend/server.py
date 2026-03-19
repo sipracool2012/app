@@ -18,7 +18,7 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 # Create the main app without a prefix
-app = FastAPI(title="Sherpa Visa Application API")
+app = FastAPI(title="Clear eVisa Visa Application API")
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
@@ -26,7 +26,7 @@ api_router = APIRouter(prefix="/api")
 # Health check endpoint
 @api_router.get("/")
 async def root():
-    return {"message": "Sherpa Visa Application API", "status": "running"}
+    return {"message": "Clear eVisa Visa Application API", "status": "running"}
 
 @api_router.get("/health")
 async def health_check():
@@ -56,7 +56,7 @@ logger = logging.getLogger(__name__)
 
 @app.on_event("startup")
 async def startup_event():
-    logger.info("Starting Sherpa Visa Application API")
+    logger.info("Starting Clear eVisa Visa Application API")
     logger.info(f"Connected to MongoDB: {os.environ.get('DB_NAME')}")
 
 @app.on_event("shutdown")

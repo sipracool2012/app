@@ -1,4 +1,4 @@
-// Mock data for Sherpa visa application clone
+// Mock data for Clear eVisa visa application clone
 
 export const visaOptions = [
   {
@@ -63,11 +63,11 @@ export const destinations = [
 ];
 
 export const partnerLogos = [
-  { name: 'American Airlines', url: 'https://apply.joinsherpa.com/assets/img/partner-logos/americanairlines.svg' },
-  { name: 'British Airways', url: 'https://apply.joinsherpa.com/assets/img/partner-logos/britishairways.svg' },
-  { name: 'Air Canada', url: 'https://apply.joinsherpa.com/assets/img/partner-logos/aircanada.svg' },
-  { name: 'Expedia Group', url: 'https://apply.joinsherpa.com/assets/img/partner-logos/expediagroup.svg' },
-  { name: 'Air Transat', url: 'https://apply.joinsherpa.com/assets/img/partner-logos/airtransat.svg' }
+  { name: 'American Airlines', url: 'https://apply.joinClear eVisa.com/assets/img/partner-logos/americanairlines.svg' },
+  { name: 'British Airways', url: 'https://apply.joinClear eVisa.com/assets/img/partner-logos/britishairways.svg' },
+  { name: 'Air Canada', url: 'https://apply.joinClear eVisa.com/assets/img/partner-logos/aircanada.svg' },
+  { name: 'Expedia Group', url: 'https://apply.joinClear eVisa.com/assets/img/partner-logos/expediagroup.svg' },
+  { name: 'Air Transat', url: 'https://apply.joinClear eVisa.com/assets/img/partner-logos/airtransat.svg' }
 ];
 
 export const testimonials = [
@@ -76,7 +76,7 @@ export const testimonials = [
     name: 'Robert Flather',
     rating: 5,
     time: '1 hour ago',
-    text: 'I have used Sherpa twice and have been very happy with their service on both occasions. Very speedy, not overpriced and very straightforward to apply for a visa.'
+    text: 'I have used Clear eVisa twice and have been very happy with their service on both occasions. Very speedy, not overpriced and very straightforward to apply for a visa.'
   },
   {
     id: 2,

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive Backend API Test Suite for Sherpa Visa Application API
+Comprehensive Backend API Test Suite for Clear eVisa Visa Application API
 Tests all the endpoints mentioned in the review request
 """
 import requests
@@ -9,10 +9,10 @@ import os
 from datetime import datetime
 
 # Configuration
-BASE_URL = "https://visa-portal-admin.preview.emergentagent.com"
+BASE_URL = "http://127.0.0.1:3000/"
 HEADERS = {"Content-Type": "application/json"}
 
-class SherpaVisaAPITester:
+class Clear eVisaVisaAPITester:
     def __init__(self):
         self.base_url = BASE_URL
         self.token = None
@@ -382,7 +382,7 @@ class SherpaVisaAPITester:
     def run_all_tests(self):
         """Run all tests in sequence"""
         print("="*60)
-        print("SHERPA VISA APPLICATION API TESTING")
+        print("Clear eVisa VISA APPLICATION API TESTING")
         print(f"Base URL: {self.base_url}")
         print("="*60)
         
@@ -426,6 +426,6 @@ class SherpaVisaAPITester:
         return passed == total
 
 if __name__ == "__main__":
-    tester = SherpaVisaAPITester()
+    tester = Clear eVisaVisaAPITester()
     success = tester.run_all_tests()
     exit(0 if success else 1)

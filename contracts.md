@@ -1,7 +1,7 @@
 # API Contracts & Integration Plan
 
 ## Overview
-This document outlines the API contracts between frontend and backend for the Sherpa Visa Application Clone.
+This document outlines the API contracts between frontend and backend for the Clear eVisa Visa Application Clone.
 
 ## Current Mock Data (to be replaced with actual APIs)
 - `mockData.js`: Contains visa options, countries, testimonials

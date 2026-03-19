@@ -52,7 +52,7 @@ const SignIn = ({ onLogin }) => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Sign in to Sherpa</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Sign in to Clear eVisa</CardTitle>
           <CardDescription className="text-center">
             Enter your credentials to access your account
           </CardDescription>

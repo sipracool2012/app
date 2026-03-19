@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the Sherpa Visa Application API backend endpoints including user authentication, visa application management, status updates, and CSV export functionality"
+user_problem_statement: "Test the Clear eVisa Visa Application API backend endpoints including user authentication, visa application management, status updates, and CSV export functionality"
 
 backend:
   - task: "User Registration API"
@@ -207,4 +207,4 @@ test_plan:
 
 agent_communication:
     -agent: "testing"
-    -message: "Completed comprehensive backend API testing for Sherpa Visa Application. All 7 endpoints tested successfully: User Registration, User Login, Get Current User, Create Visa Application, Get All Applications, Update Application Status, and Export Applications CSV. Minor issues: bcrypt version warning and SMTP not configured for email notifications, but core functionality is fully working. Backend service is running properly on supervisor."
+    -message: "Completed comprehensive backend API testing for Clear eVisa Visa Application. All 7 endpoints tested successfully: User Registration, User Login, Get Current User, Create Visa Application, Get All Applications, Update Application Status, and Export Applications CSV. Minor issues: bcrypt version warning and SMTP not configured for email notifications, but core functionality is fully working. Backend service is running properly on supervisor."
