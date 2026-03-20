@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Filter, Search, Eye, Settings, Globe, Save, ChevronDown, ChevronUp, CreditCard, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Download, Filter, Search, Eye, Settings, Globe, Save, ChevronDown, ChevronUp, CreditCard, Users, AlertTriangle } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
@@ -16,9 +17,11 @@ import UserManagement from '../components/admin/UserManagement';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const AdminPanel = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('applications');
   const [currentUser, setCurrentUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Applications state
   const [applications, setApplications] = useState([]);
@@ -38,15 +41,40 @@ const AdminPanel = () => {
     const fetchCurrentUser = async () => {
       try {
         const token = localStorage.getItem('token');
+        if (!token) {
+          navigate('/signin');
+          return;
+        }
+
         const response = await fetch(`${BACKEND_URL}/api/auth/me`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
+
+        if (!response.ok) {
+          navigate('/signin');
+          return;
+        }
+
         const data = await response.json();
+        
+        // Check if user has admin or super_admin role
+        if (data.role !== 'admin' && data.role !== 'super_admin') {
+          toast({
+            title: 'Access Denied',
+            description: 'You do not have permission to access the Admin Panel. Only administrators can access this area.',
+            variant: 'destructive'
+          });
+          navigate('/');
+          return;
+        }
+
         setCurrentUser(data);
+        setIsLoading(false);
       } catch (error) {
         console.error('Failed to fetch current user:', error);
+        navigate('/signin');
       }
     };
 
@@ -74,7 +102,7 @@ const AdminPanel = () => {
     };
     
     fetchApplications();
-  }, [toast]);
+  }, [toast, navigate]);
 
   // Fetch countries when tab changes
   useEffect(() => {
@@ -316,6 +344,18 @@ const AdminPanel = () => {
       </Badge>
     );
   };
+
+  // Show loading state while checking user role
+  if (isLoading || !currentUser) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Verifying access permissions...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
