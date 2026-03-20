@@ -9,32 +9,26 @@ import { useToast } from '../hooks/use-toast';
 // Import step components
 import Step1BasicInfo from '../components/application-steps/Step1BasicInfo';
 import Step2ApplicantDetails from '../components/application-steps/Step2ApplicantDetails';
-import Step3PassportDetails from '../components/application-steps/Step3PassportDetails';
-import Step4AddressDetails from '../components/application-steps/Step4AddressDetails';
-import Step5FamilyDetails from '../components/application-steps/Step5FamilyDetails';
-import Step6ProfessionalDetails from '../components/application-steps/Step6ProfessionalDetails';
-import Step7VisaDetails from '../components/application-steps/Step7VisaDetails';
-import Step8PreviousVisit from '../components/application-steps/Step8PreviousVisit';
-import Step9OtherInfo from '../components/application-steps/Step9OtherInfo';
-import Step10References from '../components/application-steps/Step10References';
-import Step11AdditionalQuestions from '../components/application-steps/Step11AdditionalQuestions';
-import Step12DocumentUpload from '../components/application-steps/Step12DocumentUpload';
-import Step13Payment from '../components/application-steps/Step13Payment';
+import Step3AddressDetails from '../components/application-steps/Step3AddressDetails';
+import Step4FamilyDetails from '../components/application-steps/Step4FamilyDetails';
+import Step5ProfessionalDetails from '../components/application-steps/Step5ProfessionalDetails';
+import Step6VisaDetails from '../components/application-steps/Step6VisaDetails';
+import Step7References from '../components/application-steps/Step7References';
+import Step8AdditionalQuestions from '../components/application-steps/Step8AdditionalQuestions';
+import Step9DocumentUpload from '../components/application-steps/Step9DocumentUpload';
+import Step10Payment from '../components/application-steps/Step10Payment';
 
 const steps = [
   { id: 1, name: 'Basic Info', component: Step1BasicInfo },
   { id: 2, name: 'Applicant Details', component: Step2ApplicantDetails },
-  { id: 3, name: 'Passport Details', component: Step3PassportDetails },
-  { id: 4, name: 'Address Details', component: Step4AddressDetails },
-  { id: 5, name: 'Family Details', component: Step5FamilyDetails },
-  { id: 6, name: 'Professional Details', component: Step6ProfessionalDetails },
-  { id: 7, name: 'Visa Details', component: Step7VisaDetails },
-  { id: 8, name: 'Previous Visit', component: Step8PreviousVisit },
-  { id: 9, name: 'Other Information', component: Step9OtherInfo },
-  { id: 10, name: 'References', component: Step10References },
-  { id: 11, name: 'Additional Questions', component: Step11AdditionalQuestions },
-  { id: 12, name: 'Documents', component: Step12DocumentUpload },
-  { id: 13, name: 'Payment', component: Step13Payment }
+  { id: 3, name: 'Address Details', component: Step3AddressDetails },
+  { id: 4, name: 'Family Details', component: Step4FamilyDetails },
+  { id: 5, name: 'Professional Details', component: Step5ProfessionalDetails },
+  { id: 6, name: 'Visa Details', component: Step6VisaDetails },
+  { id: 7, name: 'References', component: Step7References },
+  { id: 8, name: 'Additional Questions', component: Step8AdditionalQuestions },
+  { id: 9, name: 'Documents', component: Step9DocumentUpload },
+  { id: 10, name: 'Payment', component: Step10Payment }
 ];
 
 const VisaApplication = () => {
