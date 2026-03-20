@@ -9,6 +9,7 @@ import SignUp from "./pages/SignUp";
 import VisaApplication from "./pages/VisaApplication";
 import ApplicationSuccess from "./pages/ApplicationSuccess";
 import AdminPanel from "./pages/AdminPanel";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 import { Toaster } from "./components/ui/toaster";
 
 function App() {
@@ -81,6 +82,7 @@ function App() {
             } 
           />
           <Route path="/requirements" element={<Home />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
         </Routes>
         <Footer />
         <Toaster />
