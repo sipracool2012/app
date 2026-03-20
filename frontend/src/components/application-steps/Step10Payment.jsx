@@ -1,0 +1,184 @@
+import React, { useState, useEffect } from 'react';
+import { Button } from '../ui/button';
+import { Card, CardContent } from '../ui/card';
+import { ChevronLeft, CreditCard, AlertCircle } from 'lucide-react';
+import { Label } from '../ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { useToast } from '../../hooks/use-toast';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
+const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
+  const { toast } = useToast();
+  const [paymentMethod, setPaymentMethod] = useState('');
+  const [processing, setProcessing] = useState(false);
+  const [enabledGateways, setEnabledGateways] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Calculate fees (these should come from the visa option selected on Home page)
+  const govtFee = data?.selectedVisaOption?.govt_fee || 80;
+  const ourFee = data?.selectedVisaOption?.payment_fee || 20;
+  const govtProcessingFee = data?.selectedVisaOption?.processing_fee || (govtFee * 0.025);
+  const totalAmount = govtFee + ourFee + govtProcessingFee;
+
+  useEffect(() => {
+    fetchEnabledGateways();
+  }, []);
+
+  const fetchEnabledGateways = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/payment-gateways/enabled-gateways`);
+      const data = await response.json();
+      
+      setEnabledGateways(data.gateways || []);
+      
+      // Auto-select first gateway if only one is available
+      if (data.gateways && data.gateways.length === 1) {
+        setPaymentMethod(data.gateways[0].id);
+      }
+      
+      setLoading(false);
+    } catch (error) {
+      console.error('Failed to fetch enabled payment gateways:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load payment options',
+        variant: 'destructive'
+      });
+      setLoading(false);
+    }
+  };
+
+  const handlePayment = async () => {
+    if (!paymentMethod) {
+      toast({
+        title: 'Payment Method Required',
+        description: 'Please select a payment method',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setProcessing(true);
+
+    // Here we'll integrate with the selected payment gateway
+    // For now, we'll just pass the data forward
+    const paymentData = {
+      ...data,
+      paymentMethod,
+      paymentStatus: 'pending',
+      amount: totalAmount
+    };
+
+    // Simulate payment processing
+    setTimeout(() => {
+      setProcessing(false);
+      onNext(paymentData);
+    }, 1500);
+  };
+
+  if (loading) {
+    return <div className="flex justify-center p-8">Loading payment options...</div>;
+  }
+
+  return (
+    <div className="space-y-6">
+      <h3 className="text-xl font-semibold text-gray-900 mb-4">Payment</h3>
+      
+      {/* Fee Breakdown */}
+      <Card>
+        <CardContent className="p-6">
+          <h4 className="text-lg font-semibold mb-4">Fee Breakdown</h4>
+          <div className="space-y-3">
+            <div className="flex justify-between py-2 border-b">
+              <span className="text-gray-600">Government Fee</span>
+              <span className="font-semibold">${govtFee.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between py-2 border-b">
+              <span className="text-gray-600">Government Processing Fee (2.5%)</span>
+              <span className="font-semibold">${govtProcessingFee.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between py-2 border-b">
+              <span className="text-gray-600">Our Fee</span>
+              <span className="font-semibold">${ourFee.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between py-3 text-lg border-t-2">
+              <span className="font-bold">Total Amount</span>
+              <span className="font-bold text-blue-600">${totalAmount.toFixed(2)}</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Payment Method Selection */}
+      {enabledGateways.length > 0 ? (
+        <Card>
+          <CardContent className="p-6">
+            <h4 className="text-lg font-semibold mb-4">Select Payment Method</h4>
+            <div className="space-y-2">
+              <Label htmlFor="paymentMethod">
+                Payment Gateway <span className="text-red-500">*</span>
+              </Label>
+              <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a payment method" />
+                </SelectTrigger>
+                <SelectContent>
+                  {enabledGateways.map((gateway) => (
+                    <SelectItem key={gateway.id} value={gateway.id}>
+                      <div className="flex items-center">
+                        <CreditCard className="w-4 h-4 mr-2" />
+                        <div>
+                          <div>{gateway.name}</div>
+                          <div className="text-xs text-gray-500">{gateway.description}</div>
+                          {gateway.mode === 'sandbox' && (
+                            <div className="text-xs text-orange-600">(Test Mode)</div>
+                          )}
+                        </div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>Note:</strong> You will be redirected to a secure payment page to complete your transaction.
+                Your payment information is processed securely and is never stored on our servers.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3 text-amber-700 bg-amber-50 p-4 rounded-lg">
+              <AlertCircle className="w-6 h-6" />
+              <div>
+                <h4 className="font-semibold">No Payment Methods Available</h4>
+                <p className="text-sm">Payment gateways are currently being configured. Please contact support or try again later.</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="flex justify-between mt-6">
+        <Button type="button" variant="outline" onClick={onBack} disabled={processing}>
+          <ChevronLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+        <Button 
+          onClick={handlePayment} 
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+          disabled={processing || enabledGateways.length === 0 || !paymentMethod}
+        >
+          {processing ? 'Processing...' : `Pay $${totalAmount.toFixed(2)}`}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export default Step10Payment;

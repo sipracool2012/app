@@ -1,40 +1,70 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { ChevronLeft } from 'lucide-react';
+import { useToast } from '../../hooks/use-toast';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const Step2ApplicantDetails = ({ data, onNext, onBack }) => {
+  const { toast } = useToast();
+  const [religions, setReligions] = useState([]);
+  const [qualifications, setQualifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [formData, setFormData] = useState({
     surname: data?.surname || '',
     givenNames: data?.givenNames || '',
-    gender: data?.gender || '',
-    applicantDateOfBirth: data?.applicantDateOfBirth || '',
-    townOfBirth: data?.townOfBirth || '',
-    countryOfBirth: data?.countryOfBirth || '',
-    citizenshipNo: data?.citizenshipNo || 'NA',
     religion: data?.religion || '',
-    visibleMarks: data?.visibleMarks || 'none',
+    visibleMarks: data?.visibleMarks || 'None',
     educationalQualification: data?.educationalQualification || '',
     qualificationFrom: data?.qualificationFrom || '',
-    applicantNationality: data?.applicantNationality || '',
-    nationalityByBirth: data?.nationalityByBirth || '',
     livedTwoYears: data?.livedTwoYears || 'Yes'
   });
+
+  useEffect(() => {
+    fetchConstants();
+  }, []);
+
+  const fetchConstants = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/constants/all`);
+      const data = await response.json();
+      setReligions(data.religions || []);
+      setQualifications(data.qualifications || []);
+      setLoading(false);
+    } catch (error) {
+      console.error('Failed to fetch constants:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load form data',
+        variant: 'destructive'
+      });
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     onNext(formData);
   };
 
+  if (loading) {
+    return <div className="flex justify-center p-8">Loading...</div>;
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <h3 className="text-xl font-semibold text-gray-900 mb-4">Applicant Details</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Surname */}
         <div className="space-y-2">
-          <Label htmlFor="surname">Surname (Family Name) *</Label>
+          <Label htmlFor="surname">
+            Surname (Family Name) <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="surname"
             value={formData.surname}
@@ -43,8 +73,11 @@ const Step2ApplicantDetails = ({ data, onNext, onBack }) => {
           />
         </div>
 
+        {/* Given Names */}
         <div className="space-y-2">
-          <Label htmlFor="givenNames">Given Names (First Name) *</Label>
+          <Label htmlFor="givenNames">
+            Given Names (First Name) <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="givenNames"
             value={formData.givenNames}
@@ -53,138 +86,90 @@ const Step2ApplicantDetails = ({ data, onNext, onBack }) => {
           />
         </div>
 
+        {/* Religion */}
         <div className="space-y-2">
-          <Label htmlFor="gender">Gender *</Label>
-          <Select value={formData.gender} onValueChange={(value) => setFormData({ ...formData, gender: value })} required>
-            <SelectTrigger>
-              <SelectValue placeholder="Select gender" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Male">Male</SelectItem>
-              <SelectItem value="Female">Female</SelectItem>
-              <SelectItem value="Other">Other</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="applicantDateOfBirth">Date of Birth *</Label>
-          <Input
-            id="applicantDateOfBirth"
-            type="date"
-            value={formData.applicantDateOfBirth}
-            onChange={(e) => setFormData({ ...formData, applicantDateOfBirth: e.target.value })}
+          <Label htmlFor="religion">
+            Religion <span className="text-red-500">*</span>
+          </Label>
+          <Select 
+            value={formData.religion} 
+            onValueChange={(value) => setFormData({ ...formData, religion: value })} 
             required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="townOfBirth">Town/City of Birth *</Label>
-          <Input
-            id="townOfBirth"
-            value={formData.townOfBirth}
-            onChange={(e) => setFormData({ ...formData, townOfBirth: e.target.value })}
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="countryOfBirth">Country of Birth *</Label>
-          <Input
-            id="countryOfBirth"
-            value={formData.countryOfBirth}
-            onChange={(e) => setFormData({ ...formData, countryOfBirth: e.target.value })}
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="citizenshipNo">Citizenship/National ID No</Label>
-          <Input
-            id="citizenshipNo"
-            value={formData.citizenshipNo}
-            onChange={(e) => setFormData({ ...formData, citizenshipNo: e.target.value })}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="religion">Religion *</Label>
-          <Select value={formData.religion} onValueChange={(value) => setFormData({ ...formData, religion: value })} required>
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select religion" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Christian">Christian</SelectItem>
-              <SelectItem value="Muslim">Muslim</SelectItem>
-              <SelectItem value="Hindu">Hindu</SelectItem>
-              <SelectItem value="Buddhist">Buddhist</SelectItem>
-              <SelectItem value="Jewish">Jewish</SelectItem>
-              <SelectItem value="Other">Other</SelectItem>
+              {religions.map((religion) => (
+                <SelectItem key={religion} value={religion}>
+                  {religion}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
 
+        {/* Visible Identification Marks */}
         <div className="space-y-2">
-          <Label htmlFor="visibleMarks">Visible Identification Marks</Label>
+          <Label htmlFor="visibleMarks">
+            Visible Identification Marks
+          </Label>
           <Input
             id="visibleMarks"
             value={formData.visibleMarks}
             onChange={(e) => setFormData({ ...formData, visibleMarks: e.target.value })}
+            placeholder="None"
           />
+          <p className="text-xs text-gray-500">Default: None</p>
         </div>
 
+        {/* Educational Qualification */}
         <div className="space-y-2">
-          <Label htmlFor="educationalQualification">Educational Qualification *</Label>
-          <Select value={formData.educationalQualification} onValueChange={(value) => setFormData({ ...formData, educationalQualification: value })} required>
+          <Label htmlFor="educationalQualification">
+            Educational Qualification <span className="text-red-500">*</span>
+          </Label>
+          <Select 
+            value={formData.educationalQualification} 
+            onValueChange={(value) => setFormData({ ...formData, educationalQualification: value })} 
+            required
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select qualification" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Below Matriculation">Below Matriculation</SelectItem>
-              <SelectItem value="Higher secondary">Higher Secondary</SelectItem>
-              <SelectItem value="Graduate">Graduate</SelectItem>
-              <SelectItem value="Post Graduate">Post Graduate</SelectItem>
-              <SelectItem value="Doctorate">Doctorate</SelectItem>
+              {qualifications.map((qualification) => (
+                <SelectItem key={qualification} value={qualification}>
+                  {qualification}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
 
+        {/* Qualification From */}
         <div className="space-y-2">
-          <Label htmlFor="qualificationFrom">Qualification From (College/University) *</Label>
+          <Label htmlFor="qualificationFrom">
+            Qualification From (College/University) <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="qualificationFrom"
             value={formData.qualificationFrom}
             onChange={(e) => setFormData({ ...formData, qualificationFrom: e.target.value })}
+            placeholder="University/College name"
             required
           />
         </div>
 
+        {/* Lived Two Years */}
         <div className="space-y-2">
-          <Label htmlFor="applicantNationality">Nationality *</Label>
-          <Input
-            id="applicantNationality"
-            value={formData.applicantNationality}
-            onChange={(e) => setFormData({ ...formData, applicantNationality: e.target.value })}
+          <Label htmlFor="livedTwoYears">
+            Have you lived for at least two years in the country where you are applying visa? <span className="text-red-500">*</span>
+          </Label>
+          <Select 
+            value={formData.livedTwoYears} 
+            onValueChange={(value) => setFormData({ ...formData, livedTwoYears: value })} 
             required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="nationalityByBirth">Did you acquire nationality by birth or naturalization? *</Label>
-          <Select value={formData.nationalityByBirth} onValueChange={(value) => setFormData({ ...formData, nationalityByBirth: value })} required>
-            <SelectTrigger>
-              <SelectValue placeholder="Select option" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Birth">By Birth</SelectItem>
-              <SelectItem value="Naturalization">By Naturalization</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="livedTwoYears">Have you lived for at least two years in the country where you are applying visa? *</Label>
-          <Select value={formData.livedTwoYears} onValueChange={(value) => setFormData({ ...formData, livedTwoYears: value })} required>
+          >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>

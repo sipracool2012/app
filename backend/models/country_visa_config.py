@@ -23,9 +23,17 @@ class CountryVisaConfig(BaseModel):
     business_enabled: bool = False
     business_govt_fee: float = 0.0
     
+    # Conference Visa Configuration
+    conference_enabled: bool = False
+    conference_govt_fee: float = 0.0
+    
     # Medical Visa Configuration
     medical_enabled: bool = False
     medical_govt_fee: float = 0.0
+    
+    # Medical Attendant Visa Configuration
+    medical_attendant_enabled: bool = False
+    medical_attendant_govt_fee: float = 0.0
     
     # Transit Visa Configuration  
     transit_enabled: bool = False
@@ -55,8 +63,14 @@ class CountryVisaConfigCreate(BaseModel):
     business_enabled: bool = False
     business_govt_fee: float = 0.0
     
+    conference_enabled: bool = False
+    conference_govt_fee: float = 0.0
+    
     medical_enabled: bool = False
     medical_govt_fee: float = 0.0
+    
+    medical_attendant_enabled: bool = False
+    medical_attendant_govt_fee: float = 0.0
     
     transit_enabled: bool = False
     transit_govt_fee: float = 0.0
@@ -78,8 +92,14 @@ class CountryVisaConfigUpdate(BaseModel):
     business_enabled: Optional[bool] = None
     business_govt_fee: Optional[float] = None
     
+    conference_enabled: Optional[bool] = None
+    conference_govt_fee: Optional[float] = None
+    
     medical_enabled: Optional[bool] = None
     medical_govt_fee: Optional[float] = None
+    
+    medical_attendant_enabled: Optional[bool] = None
+    medical_attendant_govt_fee: Optional[float] = None
     
     transit_enabled: Optional[bool] = None
     transit_govt_fee: Optional[float] = None
