@@ -246,22 +246,28 @@ async def get_all_countries():
                 'tourist_enabled': False,
                 'tourist_30d_enabled': False,
                 'tourist_30d_govt_fee': 0.0,
+                'tourist_30d_our_fee': 0.0,
                 'tourist_1yr_enabled': False,
                 'tourist_1yr_govt_fee': 0.0,
+                'tourist_1yr_our_fee': 0.0,
                 'tourist_5yr_enabled': False,
                 'tourist_5yr_govt_fee': 0.0,
+                'tourist_5yr_our_fee': 0.0,
                 'business_enabled': False,
                 'business_govt_fee': 0.0,
+                'business_our_fee': 0.0,
                 'conference_enabled': False,
                 'conference_govt_fee': 0.0,
+                'conference_our_fee': 0.0,
                 'medical_enabled': False,
                 'medical_govt_fee': 0.0,
+                'medical_our_fee': 0.0,
                 'medical_attendant_enabled': False,
                 'medical_attendant_govt_fee': 0.0,
+                'medical_attendant_our_fee': 0.0,
                 'transit_enabled': False,
                 'transit_govt_fee': 0.0,
-                'payment_fee': 0.0,
-                'processing_fee': 0.0,
+                'transit_our_fee': 0.0,
             })
     
     return result
@@ -295,18 +301,22 @@ async def get_visa_options(country_code: str, purpose: str = None):
         }
     
     options = []
-    payment_fee = config.get('payment_fee', 0)
-    processing_fee = config.get('processing_fee', 0)
     
     # Calculate approval date (today + 5 days)
     approval_date = (datetime.utcnow() + timedelta(days=5)).strftime('%B %d')
+    
+    # Helper function to calculate fees
+    def calculate_total(govt_fee, our_fee):
+        processing_fee = govt_fee * 0.025  # 2.5% of govt fee
+        return govt_fee + our_fee + processing_fee, processing_fee
     
     # Filter by purpose if specified
     if purpose is None or purpose.lower() == 'tourist':
         if config.get('tourist_enabled', False):
             if config.get('tourist_30d_enabled', False):
                 govt_fee = config.get('tourist_30d_govt_fee', 0)
-                total_price = govt_fee + payment_fee + processing_fee
+                our_fee = config.get('tourist_30d_our_fee', 0)
+                total_price, processing_fee = calculate_total(govt_fee, our_fee)
                 options.append({
                     'id': f"{country_code.lower()}-tourist-30d",
                     'name': '30 day Indian Tourist eVisa',
@@ -314,8 +324,8 @@ async def get_visa_options(country_code: str, purpose: str = None):
                     'duration': '30d',
                     'price': round(total_price, 2),
                     'govt_fee': govt_fee,
-                    'payment_fee': payment_fee,
-                    'processing_fee': processing_fee,
+                    'our_fee': our_fee,
+                    'processing_fee': round(processing_fee, 2),
                     'entries': 'Double',
                     'stay_duration': '30 days',
                     'validity': '120 days',
@@ -326,7 +336,8 @@ async def get_visa_options(country_code: str, purpose: str = None):
             
             if config.get('tourist_1yr_enabled', False):
                 govt_fee = config.get('tourist_1yr_govt_fee', 0)
-                total_price = govt_fee + payment_fee + processing_fee
+                our_fee = config.get('tourist_1yr_our_fee', 0)
+                total_price, processing_fee = calculate_total(govt_fee, our_fee)
                 options.append({
                     'id': f"{country_code.lower()}-tourist-1yr",
                     'name': '1 year Indian Tourist eVisa',
@@ -334,8 +345,8 @@ async def get_visa_options(country_code: str, purpose: str = None):
                     'duration': '1yr',
                     'price': round(total_price, 2),
                     'govt_fee': govt_fee,
-                    'payment_fee': payment_fee,
-                    'processing_fee': processing_fee,
+                    'our_fee': our_fee,
+                    'processing_fee': round(processing_fee, 2),
                     'entries': 'Multiple',
                     'stay_duration': '90 days per visit',
                     'validity': '1 year',
@@ -346,7 +357,8 @@ async def get_visa_options(country_code: str, purpose: str = None):
             
             if config.get('tourist_5yr_enabled', False):
                 govt_fee = config.get('tourist_5yr_govt_fee', 0)
-                total_price = govt_fee + payment_fee + processing_fee
+                our_fee = config.get('tourist_5yr_our_fee', 0)
+                total_price, processing_fee = calculate_total(govt_fee, our_fee)
                 options.append({
                     'id': f"{country_code.lower()}-tourist-5yr",
                     'name': '5 year Indian Tourist eVisa',
@@ -354,8 +366,8 @@ async def get_visa_options(country_code: str, purpose: str = None):
                     'duration': '5yr',
                     'price': round(total_price, 2),
                     'govt_fee': govt_fee,
-                    'payment_fee': payment_fee,
-                    'processing_fee': processing_fee,
+                    'our_fee': our_fee,
+                    'processing_fee': round(processing_fee, 2),
                     'entries': 'Multiple',
                     'stay_duration': '90 days per visit',
                     'validity': '5 years',
@@ -367,7 +379,8 @@ async def get_visa_options(country_code: str, purpose: str = None):
     if purpose is None or purpose.lower() == 'business':
         if config.get('business_enabled', False):
             govt_fee = config.get('business_govt_fee', 0)
-            total_price = govt_fee + payment_fee + processing_fee
+            our_fee = config.get('business_our_fee', 0)
+            total_price, processing_fee = calculate_total(govt_fee, our_fee)
             options.append({
                 'id': f"{country_code.lower()}-business",
                 'name': '1 year Indian Business eVisa',
@@ -375,8 +388,8 @@ async def get_visa_options(country_code: str, purpose: str = None):
                 'duration': '1yr',
                 'price': round(total_price, 2),
                 'govt_fee': govt_fee,
-                'payment_fee': payment_fee,
-                'processing_fee': processing_fee,
+                'our_fee': our_fee,
+                'processing_fee': round(processing_fee, 2),
                 'entries': 'Multiple',
                 'stay_duration': '180 days per visit',
                 'validity': '1 year',
@@ -388,7 +401,8 @@ async def get_visa_options(country_code: str, purpose: str = None):
     if purpose is None or purpose.lower() == 'medical':
         if config.get('medical_enabled', False):
             govt_fee = config.get('medical_govt_fee', 0)
-            total_price = govt_fee + payment_fee + processing_fee
+            our_fee = config.get('medical_our_fee', 0)
+            total_price, processing_fee = calculate_total(govt_fee, our_fee)
             options.append({
                 'id': f"{country_code.lower()}-medical",
                 'name': 'Indian Medical eVisa',
@@ -396,8 +410,8 @@ async def get_visa_options(country_code: str, purpose: str = None):
                 'duration': '60d',
                 'price': round(total_price, 2),
                 'govt_fee': govt_fee,
-                'payment_fee': payment_fee,
-                'processing_fee': processing_fee,
+                'our_fee': our_fee,
+                'processing_fee': round(processing_fee, 2),
                 'entries': 'Triple',
                 'stay_duration': '60 days',
                 'validity': '60 days',
@@ -409,7 +423,8 @@ async def get_visa_options(country_code: str, purpose: str = None):
     if purpose is None or purpose.lower() == 'transit':
         if config.get('transit_enabled', False):
             govt_fee = config.get('transit_govt_fee', 0)
-            total_price = govt_fee + payment_fee + processing_fee
+            our_fee = config.get('transit_our_fee', 0)
+            total_price, processing_fee = calculate_total(govt_fee, our_fee)
             options.append({
                 'id': f"{country_code.lower()}-transit",
                 'name': 'Indian Transit eVisa',
@@ -417,8 +432,8 @@ async def get_visa_options(country_code: str, purpose: str = None):
                 'duration': '4d',
                 'price': round(total_price, 2),
                 'govt_fee': govt_fee,
-                'payment_fee': payment_fee,
-                'processing_fee': processing_fee,
+                'our_fee': our_fee,
+                'processing_fee': round(processing_fee, 2),
                 'entries': 'Double',
                 'stay_duration': '4 days',
                 'validity': '15 days',
@@ -430,7 +445,8 @@ async def get_visa_options(country_code: str, purpose: str = None):
     if purpose is None or purpose.lower() == 'conference':
         if config.get('conference_enabled', False):
             govt_fee = config.get('conference_govt_fee', 0)
-            total_price = govt_fee + payment_fee + processing_fee
+            our_fee = config.get('conference_our_fee', 0)
+            total_price, processing_fee = calculate_total(govt_fee, our_fee)
             options.append({
                 'id': f"{country_code.lower()}-conference",
                 'name': 'Indian Conference eVisa',
@@ -438,8 +454,8 @@ async def get_visa_options(country_code: str, purpose: str = None):
                 'duration': '120d',
                 'price': round(total_price, 2),
                 'govt_fee': govt_fee,
-                'payment_fee': payment_fee,
-                'processing_fee': processing_fee,
+                'our_fee': our_fee,
+                'processing_fee': round(processing_fee, 2),
                 'entries': 'Single',
                 'stay_duration': '120 days',
                 'validity': '120 days',
@@ -447,6 +463,34 @@ async def get_visa_options(country_code: str, purpose: str = None):
                 'approved_by': approval_date,
                 'approval_days': 5
             })
+    
+    if purpose is None or purpose.lower() == 'medical_attendant':
+        if config.get('medical_attendant_enabled', False):
+            govt_fee = config.get('medical_attendant_govt_fee', 0)
+            our_fee = config.get('medical_attendant_our_fee', 0)
+            total_price, processing_fee = calculate_total(govt_fee, our_fee)
+            options.append({
+                'id': f"{country_code.lower()}-medical-attendant",
+                'name': 'Indian Medical Attendant eVisa',
+                'visa_type': 'medical_attendant',
+                'duration': '60d',
+                'price': round(total_price, 2),
+                'govt_fee': govt_fee,
+                'our_fee': our_fee,
+                'processing_fee': round(processing_fee, 2),
+                'entries': 'Triple',
+                'stay_duration': '60 days',
+                'validity': '60 days',
+                'purpose': 'Medical Attendant',
+                'approved_by': approval_date,
+                'approval_days': 5
+            })
+    
+    return {
+        'has_evisa_options': len(options) > 0,
+        'country_name': config.get('country_name', ''),
+        'options': options
+    }
     
     if purpose is None or purpose.lower() == 'medical_attendant':
         if config.get('medical_attendant_enabled', False):
@@ -529,22 +573,28 @@ async def update_country_config(country_code: str, config_update: CountryVisaCon
             'tourist_enabled': False,
             'tourist_30d_enabled': False,
             'tourist_30d_govt_fee': 0.0,
+            'tourist_30d_our_fee': 0.0,
             'tourist_1yr_enabled': False,
             'tourist_1yr_govt_fee': 0.0,
+            'tourist_1yr_our_fee': 0.0,
             'tourist_5yr_enabled': False,
             'tourist_5yr_govt_fee': 0.0,
+            'tourist_5yr_our_fee': 0.0,
             'business_enabled': False,
             'business_govt_fee': 0.0,
+            'business_our_fee': 0.0,
             'conference_enabled': False,
             'conference_govt_fee': 0.0,
+            'conference_our_fee': 0.0,
             'medical_enabled': False,
             'medical_govt_fee': 0.0,
+            'medical_our_fee': 0.0,
             'medical_attendant_enabled': False,
             'medical_attendant_govt_fee': 0.0,
+            'medical_attendant_our_fee': 0.0,
             'transit_enabled': False,
             'transit_govt_fee': 0.0,
-            'payment_fee': 0.0,
-            'processing_fee': 0.0,
+            'transit_our_fee': 0.0,
             'created_at': datetime.utcnow(),
             'updated_at': datetime.utcnow(),
             **update_data
