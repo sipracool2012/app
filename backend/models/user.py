@@ -18,6 +18,7 @@ class UserResponse(BaseModel):
     id: str
     fullName: str
     email: str
+    role: str = "user"
 
     class Config:
         json_encoders = {ObjectId: str}
@@ -26,11 +27,15 @@ class TokenResponse(BaseModel):
     token: str
     user: UserResponse
 
+class UserRoleUpdate(BaseModel):
+    role: str  # user, admin, super_admin
+
 class User(BaseModel):
     id: Optional[str] = Field(alias="_id", default=None)
     fullName: str
     email: EmailStr
     password: str
+    role: str = "user"  # user, admin, super_admin
     createdAt: datetime = Field(default_factory=datetime.utcnow)
     updatedAt: datetime = Field(default_factory=datetime.utcnow)
 
