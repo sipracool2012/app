@@ -141,8 +141,8 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
     const minDate = new Date();
     minDate.setDate(minDate.getDate() + 4);
     const selectedDate = new Date(formData.expectedArrivalDate);
-    alert(selectedDate);
-    alert(minDate);
+    //alert(selectedDate);
+    //alert(minDate);
     if (selectedDate < minDate) {
       toast({
         title: 'Invalid Arrival Date',
