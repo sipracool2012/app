@@ -239,18 +239,28 @@ const AdminPanel = () => {
           tourist_enabled: country.tourist_enabled,
           tourist_30d_enabled: country.tourist_30d_enabled,
           tourist_30d_govt_fee: parseFloat(country.tourist_30d_govt_fee) || 0,
+          tourist_30d_our_fee: parseFloat(country.tourist_30d_our_fee) || 0,
           tourist_1yr_enabled: country.tourist_1yr_enabled,
           tourist_1yr_govt_fee: parseFloat(country.tourist_1yr_govt_fee) || 0,
+          tourist_1yr_our_fee: parseFloat(country.tourist_1yr_our_fee) || 0,
           tourist_5yr_enabled: country.tourist_5yr_enabled,
           tourist_5yr_govt_fee: parseFloat(country.tourist_5yr_govt_fee) || 0,
+          tourist_5yr_our_fee: parseFloat(country.tourist_5yr_our_fee) || 0,
           business_enabled: country.business_enabled,
           business_govt_fee: parseFloat(country.business_govt_fee) || 0,
+          business_our_fee: parseFloat(country.business_our_fee) || 0,
+          conference_enabled: country.conference_enabled,
+          conference_govt_fee: parseFloat(country.conference_govt_fee) || 0,
+          conference_our_fee: parseFloat(country.conference_our_fee) || 0,
           medical_enabled: country.medical_enabled,
           medical_govt_fee: parseFloat(country.medical_govt_fee) || 0,
+          medical_our_fee: parseFloat(country.medical_our_fee) || 0,
+          medical_attendant_enabled: country.medical_attendant_enabled,
+          medical_attendant_govt_fee: parseFloat(country.medical_attendant_govt_fee) || 0,
+          medical_attendant_our_fee: parseFloat(country.medical_attendant_our_fee) || 0,
           transit_enabled: country.transit_enabled,
           transit_govt_fee: parseFloat(country.transit_govt_fee) || 0,
-          payment_fee: parseFloat(country.payment_fee) || 0,
-          processing_fee: parseFloat(country.processing_fee) || 0,
+          transit_our_fee: parseFloat(country.transit_our_fee) || 0,
         })
       });
 
@@ -526,30 +536,7 @@ const AdminPanel = () => {
                       {/* Expanded Configuration */}
                       {expandedCountry === country.country_code && (
                         <div className="p-4 border-t bg-gray-50 space-y-6">
-                          {/* Common Fees */}
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <Label className="text-sm font-medium">Payment Fee (USD)</Label>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                value={country.payment_fee || ''}
-                                onChange={(e) => updateCountryConfig(country.country_code, 'payment_fee', e.target.value)}
-                                className="mt-1"
-                              />
-                            </div>
-                            <div>
-                              <Label className="text-sm font-medium">Processing Fee (USD)</Label>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                value={country.processing_fee || ''}
-                                onChange={(e) => updateCountryConfig(country.country_code, 'processing_fee', e.target.value)}
-                                className="mt-1"
-                              />
-                            </div>
-                          </div>
-
+                          
                           {/* Tourist Visa */}
                           <div className="border rounded p-4 bg-white">
                             <div className="flex items-center justify-between mb-4">
@@ -575,7 +562,7 @@ const AdminPanel = () => {
                                         updateCountryConfig(country.country_code, 'tourist_30d_enabled', checked)
                                       }
                                     />
-                                    <Label className="text-sm">30 Days</Label>
+                                    <Label className="text-sm font-semibold">30 Days</Label>
                                   </div>
                                   <Input
                                     type="number"
@@ -585,6 +572,20 @@ const AdminPanel = () => {
                                     onChange={(e) => updateCountryConfig(country.country_code, 'tourist_30d_govt_fee', e.target.value)}
                                     disabled={!country.tourist_30d_enabled}
                                   />
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="Our Fee"
+                                    value={country.tourist_30d_our_fee || ''}
+                                    onChange={(e) => updateCountryConfig(country.country_code, 'tourist_30d_our_fee', e.target.value)}
+                                    disabled={!country.tourist_30d_enabled}
+                                  />
+                                  {country.tourist_30d_enabled && country.tourist_30d_govt_fee && (
+                                    <div className="text-xs text-gray-600 mt-1">
+                                      <div>Processing: ${((country.tourist_30d_govt_fee || 0) * 0.025).toFixed(2)}</div>
+                                      <div className="font-semibold">Total: ${((parseFloat(country.tourist_30d_govt_fee) || 0) + (parseFloat(country.tourist_30d_our_fee) || 0) + ((country.tourist_30d_govt_fee || 0) * 0.025)).toFixed(2)}</div>
+                                    </div>
+                                  )}
                                 </div>
                                 {/* 1 Year */}
                                 <div className="space-y-2">
@@ -595,7 +596,7 @@ const AdminPanel = () => {
                                         updateCountryConfig(country.country_code, 'tourist_1yr_enabled', checked)
                                       }
                                     />
-                                    <Label className="text-sm">1 Year</Label>
+                                    <Label className="text-sm font-semibold">1 Year</Label>
                                   </div>
                                   <Input
                                     type="number"
@@ -605,6 +606,20 @@ const AdminPanel = () => {
                                     onChange={(e) => updateCountryConfig(country.country_code, 'tourist_1yr_govt_fee', e.target.value)}
                                     disabled={!country.tourist_1yr_enabled}
                                   />
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="Our Fee"
+                                    value={country.tourist_1yr_our_fee || ''}
+                                    onChange={(e) => updateCountryConfig(country.country_code, 'tourist_1yr_our_fee', e.target.value)}
+                                    disabled={!country.tourist_1yr_enabled}
+                                  />
+                                  {country.tourist_1yr_enabled && country.tourist_1yr_govt_fee && (
+                                    <div className="text-xs text-gray-600 mt-1">
+                                      <div>Processing: ${((country.tourist_1yr_govt_fee || 0) * 0.025).toFixed(2)}</div>
+                                      <div className="font-semibold">Total: ${((parseFloat(country.tourist_1yr_govt_fee) || 0) + (parseFloat(country.tourist_1yr_our_fee) || 0) + ((country.tourist_1yr_govt_fee || 0) * 0.025)).toFixed(2)}</div>
+                                    </div>
+                                  )}
                                 </div>
                                 {/* 5 Years */}
                                 <div className="space-y-2">
@@ -615,7 +630,7 @@ const AdminPanel = () => {
                                         updateCountryConfig(country.country_code, 'tourist_5yr_enabled', checked)
                                       }
                                     />
-                                    <Label className="text-sm">5 Years</Label>
+                                    <Label className="text-sm font-semibold">5 Years</Label>
                                   </div>
                                   <Input
                                     type="number"
@@ -625,6 +640,20 @@ const AdminPanel = () => {
                                     onChange={(e) => updateCountryConfig(country.country_code, 'tourist_5yr_govt_fee', e.target.value)}
                                     disabled={!country.tourist_5yr_enabled}
                                   />
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="Our Fee"
+                                    value={country.tourist_5yr_our_fee || ''}
+                                    onChange={(e) => updateCountryConfig(country.country_code, 'tourist_5yr_our_fee', e.target.value)}
+                                    disabled={!country.tourist_5yr_enabled}
+                                  />
+                                  {country.tourist_5yr_enabled && country.tourist_5yr_govt_fee && (
+                                    <div className="text-xs text-gray-600 mt-1">
+                                      <div>Processing: ${((country.tourist_5yr_govt_fee || 0) * 0.025).toFixed(2)}</div>
+                                      <div className="font-semibold">Total: ${((parseFloat(country.tourist_5yr_govt_fee) || 0) + (parseFloat(country.tourist_5yr_our_fee) || 0) + ((country.tourist_5yr_govt_fee || 0) * 0.025)).toFixed(2)}</div>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             )}
@@ -645,17 +674,77 @@ const AdminPanel = () => {
                                   <Label>Enable</Label>
                                 </div>
                                 {country.business_enabled && (
-                                  <Input
-                                    type="number"
-                                    step="0.01"
-                                    placeholder="Govt Fee"
-                                    className="w-32"
-                                    value={country.business_govt_fee || ''}
-                                    onChange={(e) => updateCountryConfig(country.country_code, 'business_govt_fee', e.target.value)}
-                                  />
+                                  <div className="flex gap-2">
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      placeholder="Govt Fee"
+                                      className="w-32"
+                                      value={country.business_govt_fee || ''}
+                                      onChange={(e) => updateCountryConfig(country.country_code, 'business_govt_fee', e.target.value)}
+                                    />
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      placeholder="Our Fee"
+                                      className="w-32"
+                                      value={country.business_our_fee || ''}
+                                      onChange={(e) => updateCountryConfig(country.country_code, 'business_our_fee', e.target.value)}
+                                    />
+                                  </div>
                                 )}
                               </div>
                             </div>
+                            {country.business_enabled && country.business_govt_fee && (
+                              <div className="text-xs text-gray-600 mt-2 text-right">
+                                Processing: ${((country.business_govt_fee || 0) * 0.025).toFixed(2)} | 
+                                <span className="font-semibold ml-1">Total: ${((parseFloat(country.business_govt_fee) || 0) + (parseFloat(country.business_our_fee) || 0) + ((country.business_govt_fee || 0) * 0.025)).toFixed(2)}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Conference Visa - NEW */}
+                          <div className="border rounded p-4 bg-white">
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-medium text-indigo-600">Conference Visa <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded ml-2">NEW</span></h4>
+                              <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2">
+                                  <Switch
+                                    checked={country.conference_enabled}
+                                    onCheckedChange={(checked) => 
+                                      updateCountryConfig(country.country_code, 'conference_enabled', checked)
+                                    }
+                                  />
+                                  <Label>Enable</Label>
+                                </div>
+                                {country.conference_enabled && (
+                                  <div className="flex gap-2">
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      placeholder="Govt Fee"
+                                      className="w-32"
+                                      value={country.conference_govt_fee || ''}
+                                      onChange={(e) => updateCountryConfig(country.country_code, 'conference_govt_fee', e.target.value)}
+                                    />
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      placeholder="Our Fee"
+                                      className="w-32"
+                                      value={country.conference_our_fee || ''}
+                                      onChange={(e) => updateCountryConfig(country.country_code, 'conference_our_fee', e.target.value)}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            {country.conference_enabled && country.conference_govt_fee && (
+                              <div className="text-xs text-gray-600 mt-2 text-right">
+                                Processing: ${((country.conference_govt_fee || 0) * 0.025).toFixed(2)} | 
+                                <span className="font-semibold ml-1">Total: ${((parseFloat(country.conference_govt_fee) || 0) + (parseFloat(country.conference_our_fee) || 0) + ((country.conference_govt_fee || 0) * 0.025)).toFixed(2)}</span>
+                              </div>
+                            )}
                           </div>
 
                           {/* Medical Visa */}
@@ -673,17 +762,77 @@ const AdminPanel = () => {
                                   <Label>Enable</Label>
                                 </div>
                                 {country.medical_enabled && (
-                                  <Input
-                                    type="number"
-                                    step="0.01"
-                                    placeholder="Govt Fee"
-                                    className="w-32"
-                                    value={country.medical_govt_fee || ''}
-                                    onChange={(e) => updateCountryConfig(country.country_code, 'medical_govt_fee', e.target.value)}
-                                  />
+                                  <div className="flex gap-2">
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      placeholder="Govt Fee"
+                                      className="w-32"
+                                      value={country.medical_govt_fee || ''}
+                                      onChange={(e) => updateCountryConfig(country.country_code, 'medical_govt_fee', e.target.value)}
+                                    />
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      placeholder="Our Fee"
+                                      className="w-32"
+                                      value={country.medical_our_fee || ''}
+                                      onChange={(e) => updateCountryConfig(country.country_code, 'medical_our_fee', e.target.value)}
+                                    />
+                                  </div>
                                 )}
                               </div>
                             </div>
+                            {country.medical_enabled && country.medical_govt_fee && (
+                              <div className="text-xs text-gray-600 mt-2 text-right">
+                                Processing: ${((country.medical_govt_fee || 0) * 0.025).toFixed(2)} | 
+                                <span className="font-semibold ml-1">Total: ${((parseFloat(country.medical_govt_fee) || 0) + (parseFloat(country.medical_our_fee) || 0) + ((country.medical_govt_fee || 0) * 0.025)).toFixed(2)}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Medical Attendant Visa - NEW */}
+                          <div className="border rounded p-4 bg-white">
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-medium text-pink-600">Medical Attendant Visa <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded ml-2">NEW</span></h4>
+                              <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2">
+                                  <Switch
+                                    checked={country.medical_attendant_enabled}
+                                    onCheckedChange={(checked) => 
+                                      updateCountryConfig(country.country_code, 'medical_attendant_enabled', checked)
+                                    }
+                                  />
+                                  <Label>Enable</Label>
+                                </div>
+                                {country.medical_attendant_enabled && (
+                                  <div className="flex gap-2">
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      placeholder="Govt Fee"
+                                      className="w-32"
+                                      value={country.medical_attendant_govt_fee || ''}
+                                      onChange={(e) => updateCountryConfig(country.country_code, 'medical_attendant_govt_fee', e.target.value)}
+                                    />
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      placeholder="Our Fee"
+                                      className="w-32"
+                                      value={country.medical_attendant_our_fee || ''}
+                                      onChange={(e) => updateCountryConfig(country.country_code, 'medical_attendant_our_fee', e.target.value)}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            {country.medical_attendant_enabled && country.medical_attendant_govt_fee && (
+                              <div className="text-xs text-gray-600 mt-2 text-right">
+                                Processing: ${((country.medical_attendant_govt_fee || 0) * 0.025).toFixed(2)} | 
+                                <span className="font-semibold ml-1">Total: ${((parseFloat(country.medical_attendant_govt_fee) || 0) + (parseFloat(country.medical_attendant_our_fee) || 0) + ((country.medical_attendant_govt_fee || 0) * 0.025)).toFixed(2)}</span>
+                              </div>
+                            )}
                           </div>
 
                           {/* Transit Visa */}
@@ -701,17 +850,33 @@ const AdminPanel = () => {
                                   <Label>Enable</Label>
                                 </div>
                                 {country.transit_enabled && (
-                                  <Input
-                                    type="number"
-                                    step="0.01"
-                                    placeholder="Govt Fee"
-                                    className="w-32"
-                                    value={country.transit_govt_fee || ''}
-                                    onChange={(e) => updateCountryConfig(country.country_code, 'transit_govt_fee', e.target.value)}
-                                  />
+                                  <div className="flex gap-2">
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      placeholder="Govt Fee"
+                                      className="w-32"
+                                      value={country.transit_govt_fee || ''}
+                                      onChange={(e) => updateCountryConfig(country.country_code, 'transit_govt_fee', e.target.value)}
+                                    />
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      placeholder="Our Fee"
+                                      className="w-32"
+                                      value={country.transit_our_fee || ''}
+                                      onChange={(e) => updateCountryConfig(country.country_code, 'transit_our_fee', e.target.value)}
+                                    />
+                                  </div>
                                 )}
                               </div>
                             </div>
+                            {country.transit_enabled && country.transit_govt_fee && (
+                              <div className="text-xs text-gray-600 mt-2 text-right">
+                                Processing: ${((country.transit_govt_fee || 0) * 0.025).toFixed(2)} | 
+                                <span className="font-semibold ml-1">Total: ${((parseFloat(country.transit_govt_fee) || 0) + (parseFloat(country.transit_our_fee) || 0) + ((country.transit_govt_fee || 0) * 0.025)).toFixed(2)}</span>
+                              </div>
+                            )}
                           </div>
 
                           {/* Save Button */}
