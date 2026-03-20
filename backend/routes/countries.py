@@ -252,8 +252,12 @@ async def get_all_countries():
                 'tourist_5yr_govt_fee': 0.0,
                 'business_enabled': False,
                 'business_govt_fee': 0.0,
+                'conference_enabled': False,
+                'conference_govt_fee': 0.0,
                 'medical_enabled': False,
                 'medical_govt_fee': 0.0,
+                'medical_attendant_enabled': False,
+                'medical_attendant_govt_fee': 0.0,
                 'transit_enabled': False,
                 'transit_govt_fee': 0.0,
                 'payment_fee': 0.0,
@@ -423,6 +427,48 @@ async def get_visa_options(country_code: str, purpose: str = None):
                 'approval_days': 5
             })
     
+    if purpose is None or purpose.lower() == 'conference':
+        if config.get('conference_enabled', False):
+            govt_fee = config.get('conference_govt_fee', 0)
+            total_price = govt_fee + payment_fee + processing_fee
+            options.append({
+                'id': f"{country_code.lower()}-conference",
+                'name': 'Indian Conference eVisa',
+                'visa_type': 'conference',
+                'duration': '120d',
+                'price': round(total_price, 2),
+                'govt_fee': govt_fee,
+                'payment_fee': payment_fee,
+                'processing_fee': processing_fee,
+                'entries': 'Single',
+                'stay_duration': '120 days',
+                'validity': '120 days',
+                'purpose': 'Conference',
+                'approved_by': approval_date,
+                'approval_days': 5
+            })
+    
+    if purpose is None or purpose.lower() == 'medical_attendant':
+        if config.get('medical_attendant_enabled', False):
+            govt_fee = config.get('medical_attendant_govt_fee', 0)
+            total_price = govt_fee + payment_fee + processing_fee
+            options.append({
+                'id': f"{country_code.lower()}-medical-attendant",
+                'name': 'Indian Medical Attendant eVisa',
+                'visa_type': 'medical_attendant',
+                'duration': '60d',
+                'price': round(total_price, 2),
+                'govt_fee': govt_fee,
+                'payment_fee': payment_fee,
+                'processing_fee': processing_fee,
+                'entries': 'Triple',
+                'stay_duration': '60 days',
+                'validity': '60 days',
+                'purpose': 'Medical Attendant',
+                'approved_by': approval_date,
+                'approval_days': 5
+            })
+    
     return {
         'has_evisa_options': len(options) > 0,
         'country_name': config.get('country_name', ''),
@@ -443,8 +489,12 @@ async def get_enabled_purposes(country_code: str):
         purposes.append({'value': 'tourist', 'label': 'Tourism'})
     if config.get('business_enabled', False):
         purposes.append({'value': 'business', 'label': 'Business'})
+    if config.get('conference_enabled', False):
+        purposes.append({'value': 'conference', 'label': 'Conference'})
     if config.get('medical_enabled', False):
         purposes.append({'value': 'medical', 'label': 'Medical'})
+    if config.get('medical_attendant_enabled', False):
+        purposes.append({'value': 'medical_attendant', 'label': 'Medical Attendant'})
     if config.get('transit_enabled', False):
         purposes.append({'value': 'transit', 'label': 'Transit'})
     
@@ -485,8 +535,12 @@ async def update_country_config(country_code: str, config_update: CountryVisaCon
             'tourist_5yr_govt_fee': 0.0,
             'business_enabled': False,
             'business_govt_fee': 0.0,
+            'conference_enabled': False,
+            'conference_govt_fee': 0.0,
             'medical_enabled': False,
             'medical_govt_fee': 0.0,
+            'medical_attendant_enabled': False,
+            'medical_attendant_govt_fee': 0.0,
             'transit_enabled': False,
             'transit_govt_fee': 0.0,
             'payment_fee': 0.0,
