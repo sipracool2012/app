@@ -31,14 +31,43 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
 
   useEffect(() => {
     fetchConstants();
-  }, []);
-
-  useEffect(() => {
-    // Fetch visa subtypes when visa service changes
-    if (formData.visaService) {
-      fetchVisaSubtypes(formData.visaService);
+    // Parse visaId if available (format: countrycode-visatype-duration)
+    if (data?.visaId) {
+      parseVisaId(data.visaId);
     }
-  }, [formData.visaService]);
+  }, [data?.visaId]);
+
+  const parseVisaId = (visaId) => {
+    // Example: "us-business" or "us-tourist-30d"
+    const parts = visaId.toLowerCase().split('-');
+    if (parts.length >= 2) {
+      const visaType = parts[1]; // business, tourist, medical, etc.
+      let visaServiceName = '';
+      
+      if (visaType === 'tourist') {
+        const duration = parts[2] || '30d';
+        if (duration === '30d') visaServiceName = '30 day Indian Tourist eVisa';
+        else if (duration === '1yr') visaServiceName = '1 year Indian Tourist eVisa';
+        else if (duration === '5yr') visaServiceName = '5 year Indian Tourist eVisa';
+      } else if (visaType === 'business') {
+        visaServiceName = '1 year Indian Business eVisa';
+      } else if (visaType === 'medical') {
+        visaServiceName = 'Indian Medical eVisa';
+      } else if (visaType === 'transit') {
+        visaServiceName = 'Indian Transit eVisa';
+      } else if (visaType === 'conference') {
+        visaServiceName = 'Indian Conference eVisa';
+      } else if (visaType.includes('attendant')) {
+        visaServiceName = 'Indian Medical Attendant eVisa';
+      }
+      
+      if (visaServiceName) {
+        setFormData(prev => ({ ...prev, visaService: visaServiceName }));
+        // Fetch subtypes for this visa type
+        fetchVisaSubtypes(visaType);
+      }
+    }
+  };
 
   const fetchConstants = async () => {
     try {
@@ -59,8 +88,15 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
 
   const fetchVisaSubtypes = async (visaType) => {
     try {
-      // Extract visa type from visa service (e.g., "Tourist (30 Days)" -> "tourist")
-      const type = visaType.toLowerCase().split('(')[0].trim().replace(/ /g, '_');
+      // Clean visa type: extract base type from full name or use directly
+      let type = visaType;
+      if (visaType.toLowerCase().includes('tourist')) type = 'tourist';
+      else if (visaType.toLowerCase().includes('business')) type = 'business';
+      else if (visaType.toLowerCase().includes('conference')) type = 'conference';
+      else if (visaType.toLowerCase().includes('medical attendant')) type = 'medical_attendant';
+      else if (visaType.toLowerCase().includes('medical')) type = 'medical';
+      else if (visaType.toLowerCase().includes('transit')) type = 'transit';
+      
       const response = await fetch(`${BACKEND_URL}/api/constants/visa-subtypes/${type}`);
       const data = await response.json();
       setVisaSubtypes(data.subtypes || []);

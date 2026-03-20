@@ -46,7 +46,9 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
   const isBusinessVisa = visaType.includes('business');
   const isConferenceVisa = visaType.includes('conference');
   const isMedicalVisa = visaType.includes('medical') && !visaType.includes('attendant');
+  const isMedicalAttendantVisa = visaType.includes('attendant') || visaType.includes('medical attendant');
   const isTransitVisa = visaType.includes('transit');
+  const isTouristVisa = visaType.includes('tourist');
 
   const handleFileUpload = async (e, fieldName) => {
     const file = e.target.files[0];
@@ -206,8 +208,8 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
 
             <DocumentUploadField
               fieldName="businessLetter"
-              label="Business Letter"
-              description="Letter from your company"
+              label="Invitation Letter from Indian Firm"
+              description="Official invitation letter"
             />
 
             <DocumentUploadField
@@ -254,8 +256,15 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
 
             <DocumentUploadField
               fieldName="medicalInvitationLetter"
-              label="Medical Invitation Letter"
-              description="System generated medical invitation letter"
+              label="System Generated Medical Invitation Letter"
+              description="Medical invitation in defined format"
+            />
+
+            <DocumentUploadField
+              fieldName="medicalDocument4"
+              label="Additional Document (Optional)"
+              description="Any additional medical document"
+              required={false}
             />
           </>
         )}
@@ -276,7 +285,7 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
             <DocumentUploadField
               fieldName="destinationVisaOrPassport"
               label="Destination Visa or Passport"
-              description="Visa/entry permit for destination country or passport of destination country (if dual nationality)"
+              description="Visa/entry permit for destination or passport of destination country"
             />
           </>
         )}
