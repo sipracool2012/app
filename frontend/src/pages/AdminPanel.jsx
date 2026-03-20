@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Filter, Search, Eye, Settings, Globe, Save, ChevronDown, ChevronUp } from 'lucide-react';
+import { Download, Filter, Search, Eye, Settings, Globe, Save, ChevronDown, ChevronUp, CreditCard, Users } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
@@ -10,12 +10,15 @@ import { useToast } from '../hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Switch } from '../components/ui/switch';
 import { Label } from '../components/ui/label';
+import PaymentGatewaySettings from '../components/admin/PaymentGatewaySettings';
+import UserManagement from '../components/admin/UserManagement';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const AdminPanel = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('applications');
+  const [currentUser, setCurrentUser] = useState(null);
   
   // Applications state
   const [applications, setApplications] = useState([]);
@@ -31,6 +34,24 @@ const AdminPanel = () => {
   const [savingCountry, setSavingCountry] = useState(null);
 
   useEffect(() => {
+    // Fetch current user info
+    const fetchCurrentUser = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${BACKEND_URL}/api/auth/me`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const data = await response.json();
+        setCurrentUser(data);
+      } catch (error) {
+        console.error('Failed to fetch current user:', error);
+      }
+    };
+
+    fetchCurrentUser();
+
     // Load applications from API
     const fetchApplications = async () => {
       try {
@@ -299,13 +320,25 @@ const AdminPanel = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Panel</h1>
-          <p className="text-gray-600 mt-2">Manage visa applications and country configurations</p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Admin Panel</h1>
+            <p className="text-gray-600 mt-2">
+              Manage visa applications and country configurations
+              {currentUser && (
+                <span className="ml-2">
+                  • Logged in as <span className="font-semibold">{currentUser.fullName}</span>
+                  <Badge className={`ml-2 ${currentUser.role === 'super_admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}`}>
+                    {currentUser.role === 'super_admin' ? 'Super Admin' : currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1)}
+                  </Badge>
+                </span>
+              )}
+            </p>
+          </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsList className={`grid w-full ${currentUser?.role === 'super_admin' ? 'max-w-4xl grid-cols-4' : 'max-w-md grid-cols-2'}`}>
             <TabsTrigger value="applications" className="flex items-center gap-2">
               <Eye className="w-4 h-4" />
               Applications
@@ -314,6 +347,18 @@ const AdminPanel = () => {
               <Globe className="w-4 h-4" />
               Country Config
             </TabsTrigger>
+            {currentUser?.role === 'super_admin' && (
+              <TabsTrigger value="payment-gateways" className="flex items-center gap-2">
+                <CreditCard className="w-4 h-4" />
+                Payment Gateways
+              </TabsTrigger>
+            )}
+            {currentUser?.role === 'super_admin' && (
+              <TabsTrigger value="users" className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                User Management
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* Applications Tab */}
@@ -905,6 +950,20 @@ const AdminPanel = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Payment Gateway Settings Tab */}
+          {currentUser?.role === 'super_admin' && (
+            <TabsContent value="payment-gateways" className="space-y-6">
+              <PaymentGatewaySettings />
+            </TabsContent>
+          )}
+
+          {/* User Management Tab */}
+          {currentUser?.role === 'super_admin' && (
+            <TabsContent value="users" className="space-y-6">
+              <UserManagement />
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>
