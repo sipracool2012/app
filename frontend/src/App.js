@@ -9,6 +9,15 @@ import SignUp from "./pages/SignUp";
 import VisaApplication from "./pages/VisaApplication";
 import ApplicationSuccess from "./pages/ApplicationSuccess";
 import AdminPanel from "./pages/AdminPanel";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import AboutUs from "./pages/AboutUs";
+import Careers from "./pages/Careers";
+import Press from "./pages/Press";
+import HelpCenter from "./pages/HelpCenter";
+import ContactUs from "./pages/ContactUs";
+import FAQ from "./pages/FAQ";
+import TermsOfService from "./pages/TermsOfService";
+import CookiePolicy from "./pages/CookiePolicy";
 import { Toaster } from "./components/ui/toaster";
 
 function App() {
@@ -81,6 +90,15 @@ function App() {
             } 
           />
           <Route path="/requirements" element={<Home />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/careers" element={<Careers />} />
+          <Route path="/press" element={<Press />} />
+          <Route path="/help" element={<HelpCenter />} />
+          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/cookies" element={<CookiePolicy />} />
         </Routes>
         <Footer />
         <Toaster />
