@@ -36,7 +36,7 @@ const VisaApplication = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({ visaId }); // Pass visaId in initial state
 
   const CurrentStepComponent = steps.find(s => s.id === currentStep)?.component;
   const progress = (currentStep / steps.length) * 100;

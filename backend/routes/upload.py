@@ -132,3 +132,60 @@ async def upload_photo(
         "key": s3_key,
         "url": f"/api/upload/file/{s3_key}" if s3_key.startswith('local:') else ""
     }
+
+
+@router.post("")
+async def upload_document(
+    file: UploadFile = File(...)
+):
+    """
+    Generic upload endpoint for any document during form filling
+    Stores file locally and returns URL
+    """
+    import shutil
+    import os
+    import uuid
+    
+    # Validate file type
+    allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']
+    if file.content_type not in allowed_types:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid file type. Only JPEG, PNG, and PDF are allowed."
+        )
+    
+    # Validate file size (max 5MB)
+    file.file.seek(0, 2)  # Seek to end
+    file_size = file.file.tell()
+    file.file.seek(0)  # Reset to beginning
+    
+    if file_size > 5 * 1024 * 1024:  # 5MB
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File size must be less than 5MB"
+        )
+    
+    # Store file locally
+    upload_dir = "/app/backend/uploads"
+    os.makedirs(upload_dir, exist_ok=True)
+    
+    # Generate unique filename
+    file_id = str(uuid.uuid4())
+    file_extension = file.filename.split('.')[-1] if '.' in file.filename else 'pdf'
+    safe_filename = f"{file_id}.{file_extension}"
+    file_path = f"{upload_dir}/{safe_filename}"
+    
+    try:
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        return {
+            "success": True,
+            "url": safe_filename,
+            "filename": file.filename
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to upload file: {str(e)}"
+        )
