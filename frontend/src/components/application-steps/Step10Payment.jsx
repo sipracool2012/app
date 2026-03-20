@@ -1,125 +1,127 @@
 import React, { useState } from 'react';
 import { Button } from '../ui/button';
-import { Label } from '../ui/label';
-import { Input } from '../ui/input';
 import { Card, CardContent } from '../ui/card';
-import { ChevronLeft, CreditCard, Check } from 'lucide-react';
+import { ChevronLeft, CreditCard } from 'lucide-react';
+import { Label } from '../ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
-const Step13Payment = ({ data, onNext, onBack }) => {
-  const [paymentData, setPaymentData] = useState({
-    cardNumber: '',
-    cardName: '',
-    expiryDate: '',
-    cvv: ''
-  });
+const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
+  const [paymentMethod, setPaymentMethod] = useState('razorpay');
+  const [processing, setProcessing] = useState(false);
 
-  const visaPrice = 72.62; // Mock price
+  // Calculate fees (these should come from the visa option selected on Home page)
+  const govtFee = data?.selectedVisaOption?.govt_fee || 80;
+  const ourFee = data?.selectedVisaOption?.payment_fee || 20;
+  const govtProcessingFee = data?.selectedVisaOption?.processing_fee || (govtFee * 0.025);
+  const totalAmount = govtFee + ourFee + govtProcessingFee;
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Mock payment - just proceed
-    onNext({ ...data, paymentData, paymentStatus: 'completed' });
+  const handlePayment = async () => {
+    setProcessing(true);
+
+    // Here we'll integrate with the selected payment gateway
+    // For now, we'll just pass the data forward
+    const paymentData = {
+      ...data,
+      paymentMethod,
+      paymentStatus: 'pending',
+      amount: totalAmount
+    };
+
+    // Simulate payment processing
+    setTimeout(() => {
+      setProcessing(false);
+      onNext(paymentData);
+    }, 1500);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="space-y-6">
       <h3 className="text-xl font-semibold text-gray-900 mb-4">Payment</h3>
       
-      {/* Order Summary */}
-      <Card className="bg-blue-50 border-blue-200">
+      {/* Fee Breakdown */}
+      <Card>
         <CardContent className="p-6">
-          <h4 className="font-semibold text-gray-900 mb-4">Order Summary</h4>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-gray-600">30 day Indian Tourist eVisa</span>
-              <span className="font-medium">USD ${visaPrice}</span>
+          <h4 className="text-lg font-semibold mb-4">Fee Breakdown</h4>
+          <div className="space-y-3">
+            <div className="flex justify-between py-2 border-b">
+              <span className="text-gray-600">Government Fee</span>
+              <span className="font-semibold">${govtFee.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Processing Fee</span>
-              <span className="font-medium">USD $0.00</span>
+            <div className="flex justify-between py-2 border-b">
+              <span className="text-gray-600">Government Processing Fee (2.5%)</span>
+              <span className="font-semibold">${govtProcessingFee.toFixed(2)}</span>
             </div>
-            <div className="border-t border-blue-200 pt-2 mt-2">
-              <div className="flex justify-between text-lg font-bold">
-                <span>Total</span>
-                <span>USD ${visaPrice}</span>
-              </div>
+            <div className="flex justify-between py-2 border-b">
+              <span className="text-gray-600">Our Fee</span>
+              <span className="font-semibold">${ourFee.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between py-3 text-lg border-t-2">
+              <span className="font-bold">Total Amount</span>
+              <span className="font-bold text-blue-600">${totalAmount.toFixed(2)}</span>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Payment Form - MOCK */}
-      <div className="space-y-4">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <p className="text-sm text-yellow-800">
-            <strong>Demo Mode:</strong> This is a mock payment form. No actual payment will be processed.
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="cardNumber">Card Number</Label>
-          <div className="relative">
-            <CreditCard className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <Input
-              id="cardNumber"
-              placeholder="1234 5678 9012 3456"
-              className="pl-10"
-              value={paymentData.cardNumber}
-              onChange={(e) => setPaymentData({ ...paymentData, cardNumber: e.target.value })}
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="cardName">Cardholder Name</Label>
-          <Input
-            id="cardName"
-            placeholder="John Doe"
-            value={paymentData.cardName}
-            onChange={(e) => setPaymentData({ ...paymentData, cardName: e.target.value })}
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
+      {/* Payment Method Selection */}
+      <Card>
+        <CardContent className="p-6">
+          <h4 className="text-lg font-semibold mb-4">Select Payment Method</h4>
           <div className="space-y-2">
-            <Label htmlFor="expiryDate">Expiry Date</Label>
-            <Input
-              id="expiryDate"
-              placeholder="MM/YY"
-              value={paymentData.expiryDate}
-              onChange={(e) => setPaymentData({ ...paymentData, expiryDate: e.target.value })}
-            />
+            <Label htmlFor="paymentMethod">
+              Payment Gateway <span className="text-red-500">*</span>
+            </Label>
+            <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="razorpay">
+                  <div className="flex items-center">
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    Razorpay (Credit/Debit Card, UPI, Net Banking)
+                  </div>
+                </SelectItem>
+                <SelectItem value="tazapay">
+                  <div className="flex items-center">
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    Tazapay (International Payments)
+                  </div>
+                </SelectItem>
+                <SelectItem value="paypal">
+                  <div className="flex items-center">
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    PayPal
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="cvv">CVV</Label>
-            <Input
-              id="cvv"
-              placeholder="123"
-              value={paymentData.cvv}
-              onChange={(e) => setPaymentData({ ...paymentData, cvv: e.target.value })}
-            />
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <strong>Note:</strong> You will be redirected to a secure payment page to complete your transaction.
+              Your payment information is processed securely and is never stored on our servers.
+            </p>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* Security Info */}
-      <div className="flex items-start space-x-2 text-sm text-gray-600">
-        <Check className="w-5 h-5 text-green-600 mt-0.5" />
-        <p>Your payment information is secure and encrypted</p>
-      </div>
-
-      <div className="flex justify-between">
-        <Button type="button" variant="outline" onClick={onBack}>
+      <div className="flex justify-between mt-6">
+        <Button type="button" variant="outline" onClick={onBack} disabled={processing}>
           <ChevronLeft className="w-4 h-4 mr-2" />
           Back
         </Button>
-        <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-          Complete Payment
+        <Button 
+          onClick={handlePayment} 
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+          disabled={processing}
+        >
+          {processing ? 'Processing...' : `Pay $${totalAmount.toFixed(2)}`}
         </Button>
       </div>
-    </form>
+    </div>
   );
 };
 
-export default Step13Payment;
+export default Step10Payment;
