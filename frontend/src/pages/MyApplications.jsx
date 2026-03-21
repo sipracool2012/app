@@ -133,11 +133,9 @@ const MyApplications = () => {
                             <StatusIcon className="w-3 h-3" />
                             {status.label}
                           </span>
-                          {app.applicationId && (
-                            <span className="text-sm font-mono text-gray-500" data-testid={`app-id-${app.id}`}>
-                              #{app.applicationId}
-                            </span>
-                          )}
+                          <span className="text-sm font-mono text-gray-500" data-testid={`app-id-${app.id}`}>
+                            #{app.applicationId || `DRAFT-${app.id.slice(-6).toUpperCase()}`}
+                          </span>
                         </div>
                         <div className="text-sm text-gray-700">
                           {app.visaService && (
