@@ -4,6 +4,9 @@ from datetime import datetime
 from bson import ObjectId
 
 class ApplicationCreate(BaseModel):
+    # Email (auto-populated from logged-in user)
+    email: str = ""
+    
     # Step 1: Basic Info (Updated)
     passportType: str  # Must be "Ordinary" to proceed
     portOfArrival: str  # Dropdown from constants
