@@ -117,7 +117,7 @@ def send_application_status_update(to_email: str, application_id: str, applicant
     <html>
         <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <div style="background-color: #2563eb; padding: 20px; text-align: center;">
-                <h1 style="color: white; margin: 0;">Clear eVisa°</h1>
+                <h1 style="color: white; margin: 0;">Clear eVisa</h1>
             </div>
             <div style="padding: 30px; background-color: #f9fafb;">
                 <h2 style="color: #1f2937;">{status_info['title']}</h2>

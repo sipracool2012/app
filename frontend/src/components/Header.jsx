@@ -43,7 +43,7 @@ const Header = ({ isAuthenticated, onLogout }) => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <span className="text-2xl font-bold text-gray-900">Clear eVisa°</span>
+            <span className="text-2xl font-bold text-gray-900">Clear eVisa</span>
           </Link>
 
           {/* Navigation */}
