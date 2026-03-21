@@ -13,10 +13,15 @@ router = APIRouter()
 # Import database
 import os
 from motor.motor_asyncio import AsyncIOMotorClient
+from dotenv import load_dotenv
+from pathlib import Path
 
-MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
+ROOT_DIR = Path(__file__).parent.parent
+load_dotenv(ROOT_DIR / '.env')
+
+MONGO_URL = os.environ.get('MONGO_URL')
 client = AsyncIOMotorClient(MONGO_URL)
-db = client.visa_applications
+db = client[os.environ.get('DB_NAME')]
 
 @router.get("/config", response_model=PaymentGatewayConfigResponse)
 async def get_payment_gateway_config(current_user_id: str = Depends(get_current_user)):

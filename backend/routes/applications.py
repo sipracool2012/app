@@ -177,10 +177,10 @@ async def get_applications(
     user_id: str = Depends(get_current_user)
 ):
     """
-    Get all applications (with optional filters)
+    Get all submitted applications (excludes drafts) for admin view.
     """
-    # Build query
-    query = {}
+    # Build query - exclude drafts from admin view
+    query = {"status": {"$ne": "draft"}}
     
     if status and status != "all":
         query["status"] = status
@@ -200,7 +200,7 @@ async def get_applications(
     # Convert ObjectId to string
     for app in applications:
         app["_id"] = str(app["_id"])
-        app["id"] = app["applicationId"]
+        app["id"] = app.get("applicationId", str(app["_id"]))
     
     return {
         "applications": applications,
