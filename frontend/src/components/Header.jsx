@@ -68,6 +68,11 @@ const Header = ({ isAuthenticated, onLogout }) => {
             {/* Auth buttons */}
             {isAuthenticated ? (
               <>
+                <Link to="/my-applications">
+                  <Button variant="outline" className="border-gray-300" data-testid="my-applications-nav-btn">
+                    My Applications
+                  </Button>
+                </Link>
                 {isAdmin && (
                   <Link to="/admin">
                     <Button variant="outline" className="border-gray-300">
@@ -79,6 +84,7 @@ const Header = ({ isAuthenticated, onLogout }) => {
                   onClick={onLogout}
                   variant="outline" 
                   className="border-gray-300"
+                  data-testid="logout-btn"
                 >
                   Logout
                 </Button>

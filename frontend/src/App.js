@@ -9,6 +9,7 @@ import SignUp from "./pages/SignUp";
 import VisaApplication from "./pages/VisaApplication";
 import ApplicationSuccess from "./pages/ApplicationSuccess";
 import AdminPanel from "./pages/AdminPanel";
+import MyApplications from "./pages/MyApplications";
 import { Toaster } from "./components/ui/toaster";
 
 function App() {
@@ -77,6 +78,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <AdminPanel />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/my-applications" 
+            element={
+              <ProtectedRoute>
+                <MyApplications />
               </ProtectedRoute>
             } 
           />

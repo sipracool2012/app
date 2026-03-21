@@ -5,6 +5,7 @@ from utils.auth import get_current_user
 from utils.email import send_application_confirmation, send_application_status_update
 from datetime import datetime
 from typing import List, Optional
+from bson import ObjectId
 import csv
 import io
 
@@ -28,6 +29,97 @@ def get_db():
 
 db = get_db()
 
+
+# ============ DRAFT ENDPOINTS ============
+
+@router.patch("/draft", response_model=dict)
+async def save_draft(
+    draft_data: dict,
+    user_id: str = Depends(get_current_user)
+):
+    """Save or update a draft application. One draft per user (upsert)."""
+    now = datetime.utcnow()
+    
+    # Remove any _id field from incoming data
+    draft_data.pop("_id", None)
+    draft_data.pop("id", None)
+    
+    draft_data.update({
+        "userId": user_id,
+        "status": "draft",
+        "updatedAt": now
+    })
+    
+    existing = await db.applications.find_one({"userId": user_id, "status": "draft"})
+    
+    if existing:
+        await db.applications.update_one(
+            {"_id": existing["_id"]},
+            {"$set": draft_data}
+        )
+        return {"message": "Draft updated", "draftId": str(existing["_id"])}
+    else:
+        draft_data["createdAt"] = now
+        result = await db.applications.insert_one(draft_data)
+        return {"message": "Draft created", "draftId": str(result.inserted_id)}
+
+
+@router.get("/draft", response_model=dict)
+async def get_draft(user_id: str = Depends(get_current_user)):
+    """Get the current user's draft application."""
+    draft = await db.applications.find_one(
+        {"userId": user_id, "status": "draft"},
+        {"_id": 0}
+    )
+    if not draft:
+        return {"draft": None}
+    return {"draft": draft}
+
+
+@router.delete("/draft/{draft_id}", response_model=dict)
+async def delete_draft(
+    draft_id: str,
+    user_id: str = Depends(get_current_user)
+):
+    """Delete a draft application."""
+    result = await db.applications.delete_one(
+        {"_id": ObjectId(draft_id), "userId": user_id, "status": "draft"}
+    )
+    if result.deleted_count == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Draft not found or not authorized"
+        )
+    return {"message": "Draft deleted"}
+
+
+# ============ MY APPLICATIONS ============
+
+@router.get("/my-applications", response_model=dict)
+async def get_my_applications(user_id: str = Depends(get_current_user)):
+    """Get all applications for the logged-in user."""
+    cursor = db.applications.find({"userId": user_id}).sort("updatedAt", -1)
+    applications = await cursor.to_list(length=500)
+    
+    result = []
+    for app in applications:
+        result.append({
+            "id": str(app["_id"]),
+            "applicationId": app.get("applicationId", ""),
+            "status": app.get("status", "draft"),
+            "visaService": app.get("visaService", ""),
+            "visaServiceSubtype": app.get("visaServiceSubtype", ""),
+            "surname": app.get("surname", ""),
+            "givenNames": app.get("givenNames", ""),
+            "email": app.get("email", ""),
+            "currentStep": app.get("currentStep", 1),
+            "createdAt": app.get("createdAt", datetime.utcnow()).isoformat() if isinstance(app.get("createdAt"), datetime) else str(app.get("createdAt", "")),
+            "updatedAt": app.get("updatedAt", datetime.utcnow()).isoformat() if isinstance(app.get("updatedAt"), datetime) else str(app.get("updatedAt", "")),
+            "submittedDate": app.get("submittedDate", "").isoformat() if isinstance(app.get("submittedDate"), datetime) else str(app.get("submittedDate", ""))
+        })
+    
+    return {"applications": result, "total": len(result)}
+
 def generate_application_id() -> str:
     """Generate unique application ID"""
     timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
@@ -39,8 +131,11 @@ async def create_application(
     user_id: str = Depends(get_current_user)
 ):
     """
-    Create a new visa application
+    Create a new visa application. Also removes any existing draft for this user.
     """
+    # Remove existing draft for this user
+    await db.applications.delete_many({"userId": user_id, "status": "draft"})
+    
     # Generate application ID
     application_id = generate_application_id()
     

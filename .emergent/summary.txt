@@ -1,0 +1,131 @@
+<analysis>**original_problem_statement:**
+The user has requested a comprehensive overhaul of an e-visa application portal. Key requirements include:
+- **Form Restructuring:** Modify the multi-step application form by removing, adding, and merging fields across various steps. This includes changing input types to dropdowns (e.g., Port of Arrival, Country lists), implementing date pickers with specific validations (e.g., arrival date must be 5+ days from today), and adding conditional logic based on the selected visa type (e.g., extra fields for Business or Conference visas).
+- **Validation Rules:** Enforce specific rules like allowing only Ordinary passports and showing an error if a user has a Pakistani heritage connection.
+- **Admin Panel Enhancements:**
+    - Implement a role-based access system (super_admin, admin, user).
+    - Redesign the Country Visa Configuration table to allow setting individual fees (Government Fee and Our Fee) for each of the 8 visa subtypes (Tourist 30D/1Y/5Y, Business, Conference, Medical, Medical Attendant, Transit). The Government Processing Fee should be auto-calculated as 2.5% of the Government Fee.
+- **Email Notifications:** A system for sending emails for various application events, with an admin option to choose between SMTP and Postmark.
+- **Payment Gateway Integration:** Integrate Razorpay, Tazapay, and PayPal, with an admin toggle to enable/disable them.
+- **User Features:**
+    - **Auto-Save/Draft:** Partially filled applications should be auto-saved, allowing users to return and continue from their last saved step.
+    - **My Applications Portal:** A portal for logged-in users to track the status of all their current and previous applications, with the ability to delete drafts.
+
+**User's preferred language**: English
+
+**what currently exists?**
+A full-stack application with a React frontend, FastAPI backend, and MongoDB database. The agent has already completed a massive restructuring of the application based on the user's initial requests. This includes:
+- A completely overhauled 10-step visa application form with conditional fields.
+- A new backend  endpoint serving dynamic data for dropdowns.
+- A functioning role-based access control (RBAC) system (, , ).
+- A revamped Admin Panel with a detailed Country Configuration UI reflecting the per-visa-type fee structure. It also includes tabs for User Management and Payment Gateway configuration, which are visible only to the .
+- The backend foundation for payment gateway integration is in place.
+- Several user-reported bugs related to form logic, file uploads, and access control have been fixed.
+
+**Last working item**:
+The user requested the implementation of auto-save/draft functionality and a My Applications portal. The agent started working on the auto-save feature.
+
+- **Last item agent was working:** Implementing the backend support for draft applications. The agent was analyzing  to add the necessary endpoints for creating, updating, and retrieving draft application data. The user then prompted the agent to continue here.
+- **Status:** IN PROGRESS
+- **Agent Testing Done:** N
+- **Which testing method agent to use?** both
+- **User Testing Done:** N
+
+**All Pending/In progress Issue list**:
+There are no pending bugs. All pending work consists of new feature implementations requested by the user.
+
+**In progress Task List**:
+- **Task 1: Implement Auto-Save and Draft Application Functionality (P0)**
+    - **Where to resume:** The agent needs to modify  to introduce endpoints for managing draft applications. The plan is to:
+        1.  Create a  endpoint to save application progress. It should create a new draft if one doesn't exist for the user or update the existing one.
+        2.  Create a  endpoint to retrieve the current user's draft.
+        3.  Update the frontend  component to periodically call the  endpoint to auto-save data.
+        4.  Modify the initial data loading logic in  to first check for and load an existing draft.
+    - **What will be achieved with this?** Users will not lose their application progress if they exit and return later. The system ensures only one draft per user.
+    - **Status:** IN PROGRESS
+    - **Should Test frontend/backend/both after fix?** both
+    - **Blocked on something:** No.
+
+**Upcoming and Future Tasks**
+- **Task 1: Implement My Applications Portal (P0)**
+    - **Description:** Create a new page accessible to logged-in users to view a list of all their applications (drafts and submitted). Users should see the status of each application and be able to delete any application that is still a draft.
+    - **Plan:**
+        - **Backend:** In , add  to fetch all applications for the logged-in user and  to remove a draft.
+        - **Frontend:** Create a new page component . Add a link to this page in the . This page will fetch and render the user's application list with relevant actions.
+    - **Status:** NOT STARTED
+
+- **Task 2: Implement Email Notification System (P1)**
+    - **Description:** Integrate an email notification system for events like welcome, application submission, payment status change, etc. The admin panel should allow a super_admin to select between SMTP and Postmark and configure the necessary credentials.
+    - **Status:** NOT STARTED
+
+- **Task 3: Test New Features and Provide Screenshots (P0)**
+    - **Description:** After implementing the auto-save and My Applications portal, conduct thorough testing and provide the user with screenshots demonstrating the new functionality.
+    - **Status:** NOT STARTED
+
+**Completed work in this session**
+- **Form Overhaul:** The visa application form was completely restructured from 13 steps to a 10-step process, with fields added, removed, and merged per user specifications.
+- **Conditional Logic:** Implemented dynamic fields that appear based on visa type selection (e.g., Business or Conference visa details).
+- **Backend Model & Fee Structure Refactor:**
+    - Restructured , , and  backend models.
+    - The fee system was changed from global fees to individual Our Fee and Government Fee fields for each of the 8 visa subtypes.
+- **Role-Based Access Control (RBAC):**
+    - Implemented , , and  roles. The first user to register automatically becomes .
+    - Secured the Admin Panel, making it accessible only to admin/super-admin roles and hiding the navigation link for regular users.
+- **Admin Panel Overhaul:**
+    - The UI was updated to manage the new per-visa-type fee structure.
+    - Added User Management and Payment Gateway Settings tabs visible only to super_admins.
+- **Bug Fixes:** Resolved issues with form auto-population, file uploads, incorrect document requirements, and access control loopholes.
+
+**Code Architecture**
+
+
+**Key Technical Concepts**
+- **Stack:** React frontend, FastAPI backend, MongoDB database.
+- **Frontend:** State management with React Hooks, routing with , and UI built with TailwindCSS and .
+- **Backend:** FastAPI with Pydantic models for data validation and  for asynchronous MongoDB operations.
+- **Authentication:** JWT-based token authentication with a custom RBAC implementation for endpoint and UI protection.
+
+**key DB schema**
+- **users:** 
+- **applications:** 
+- **country_visa_configs:**  (for all 8 visa types)
+- **payment_gateway_configs:** 
+
+**All files of reference**
+- : Core logic for application submission; will be modified for draft functionality.
+- : The parent component for the entire application form.
+- : The main interface for administrative tasks.
+- : Will need a link to the new My Applications portal.
+
+**Critical Info for New Agent**
+- **Super Admin Access:** The database is currently empty. The first user to register via the Sign Up page will automatically be assigned the  role. This is necessary to access all admin features.
+- **Current Task:** You are in the middle of implementing the auto-save/draft feature. You should resume by modifying  to add the required endpoints.
+- **Fee Calculation:** The total price for a visa is calculated as: .
+
+**Last 10 User Messages and any pending HUMAN messages**
+1.  **Request:** Pull latest from git, then implement auto-save/draft functionality and a My Applications user portal. Test and provide screenshots at the end. (IN PROGRESS)
+2.  **Reported Issue:** A user with role User can still access the admin panel. (RESOLVED)
+3.  **Reported Issue:** Super Admin panel is missing options to enable payment gateways and manage user roles. (RESOLVED)
+4.  **Reported Issue:** Purpose of travel selection isn't populating the visa service on the next page, subtypes are not loading, and file uploads are failing with incorrect document requirements. (RESOLVED)
+5.  **Reported Issue:** The admin panel still shows global Payment Fee and Processing Fee fields instead of the new per-visa-type fee structure. (RESOLVED)
+6.  **Confirmation:** User confirmed the new fee structure logic and asked to proceed. (DONE)
+7.  **Clarification Request:** Agent asked user to confirm the new fee structure before implementing. (DONE)
+8.  **Reported Issue:** The admin panel country config is not updated as requested. (RESOLVED)
+9.  **Question:** What are the super admin credentials to log in? (ANSWERED: First user to sign up becomes super admin).
+10. **Inquiry:** Asked for a status update on the admin panel's country configuration table. (ANSWERED & RESOLVED)
+
+**Project Health Check:**
+- **Broken:** None.
+- **Mocked:** None.
+
+**3rd Party Integrations**
+- **Razorpay, PayPal, Tazapay:** Backend models and admin configuration UI are implemented. Actual payment processing logic and API key integration are not yet implemented.
+
+**Testing status**
+- The agent has been performing manual checks after making changes. No automated tests or dedicated test files have been created.
+
+**Credentials to test flow:**
+No credentials exist. The first user to sign up will become the .
+
+**What agent forgot to execute**
+The agent has been diligent in addressing all user requests and has not forgotten any major tasks. The work is proceeding sequentially based on user priorities.</analysis>
