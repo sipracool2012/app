@@ -197,12 +197,27 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
                   <SelectValue placeholder="Select old visa type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Tourist">Tourist</SelectItem>
-                  <SelectItem value="Business">Business</SelectItem>
-                  <SelectItem value="Medical">Medical</SelectItem>
-                  <SelectItem value="Conference">Conference</SelectItem>
-                  <SelectItem value="Transit">Transit</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
+                  <SelectItem value="Ayush Visa">Ayush Visa</SelectItem>
+                  <SelectItem value="Business Visa">Business Visa</SelectItem>
+                  <SelectItem value="Conference Visa">Conference Visa</SelectItem>
+                  <SelectItem value="Diplomatic Visa">Diplomatic Visa</SelectItem>
+                  <SelectItem value="Double Entry">Double Entry</SelectItem>
+                  <SelectItem value="Employment Visa">Employment Visa</SelectItem>
+                  <SelectItem value="Entry Visa">Entry Visa</SelectItem>
+                  <SelectItem value="e-Visa">e-Visa</SelectItem>
+                  <SelectItem value="Film Visa">Film Visa</SelectItem>
+                  <SelectItem value="Journalist Visa">Journalist Visa</SelectItem>
+                  <SelectItem value="Medical Visa">Medical Visa</SelectItem>
+                  <SelectItem value="Missionary Visa">Missionary Visa</SelectItem>
+                  <SelectItem value="Mountaineering Visa">Mountaineering Visa</SelectItem>
+                  <SelectItem value="Official Visa">Official Visa</SelectItem>
+                  <SelectItem value="Pilgrimes Visa">Pilgrimes Visa</SelectItem>
+                  <SelectItem value="Student Visa">Student Visa</SelectItem>
+                  <SelectItem value="Tourist Visa">Tourist Visa</SelectItem>
+                  <SelectItem value="Transit Visa">Transit Visa</SelectItem>
+                  <SelectItem value="UN Diplomat">UN Diplomat</SelectItem>
+                  <SelectItem value="UN Official">UN Official</SelectItem>
+                  <SelectItem value="Visit Visa">Visit Visa</SelectItem>
                 </SelectContent>
               </Select>
             </div>
