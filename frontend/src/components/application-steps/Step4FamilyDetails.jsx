@@ -6,11 +6,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { SearchableSelect } from '../ui/searchable-select';
 import { ChevronLeft } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const Step4FamilyDetails = ({ data, onNext, onBack }) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [countries, setCountries] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -47,8 +49,8 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
     } catch (error) {
       console.error('Failed to fetch countries:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to load countries',
+        title: t('common.error'),
+        description: t('errors.formLoadFailed'),
         variant: 'destructive'
       });
       setLoading(false);
@@ -61,8 +63,8 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
     // Validate Pakistan connection
     if (formData.pakistanConnection === 'Yes') {
       toast({
-        title: 'Cannot Proceed',
-        description: 'You have indicated a Pakistani passport connection. Please contact the embassy directly for visa processing.',
+        title: t('forms.step4.cannotProceed'),
+        description: t('forms.step4.pakistaniWarning'),
         variant: 'destructive'
       });
       return;
@@ -72,24 +74,24 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
   };
 
   if (loading) {
-    return <div className="flex justify-center p-8">Loading...</div>;
+    return <div className="flex justify-center p-8">{t('common.loading')}</div>;
   }
 
   const showSpouseFields = formData.maritalStatus === 'Married';
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <h3 className="text-xl font-semibold text-gray-900 mb-4">Family Details</h3>
+      <h3 className="text-xl font-semibold text-gray-900 mb-4">{t('forms.step4.title')}</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Father's Details */}
         <div className="md:col-span-2 border-b pb-2 mb-2">
-          <h4 className="text-lg font-semibold text-gray-800">Father's Details</h4>
+          <h4 className="text-lg font-semibold text-gray-800">{t('forms.step4.fatherDetails')}</h4>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="fatherName">
-            Father's Name <span className="text-red-500">*</span>
+            {t('forms.step4.fatherName')} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="fatherName"
@@ -142,12 +144,12 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
 
         {/* Mother's Details */}
         <div className="md:col-span-2 border-b pb-2 mb-2 mt-4">
-          <h4 className="text-lg font-semibold text-gray-800">Mother's Details</h4>
+          <h4 className="text-lg font-semibold text-gray-800">{t('forms.step4.motherDetails')}</h4>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="motherName">
-            Mother's Name <span className="text-red-500">*</span>
+            {t('forms.step4.motherName')} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="motherName"
@@ -200,12 +202,12 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
 
         {/* Marital Status */}
         <div className="md:col-span-2 border-b pb-2 mb-2 mt-4">
-          <h4 className="text-lg font-semibold text-gray-800">Marital Status</h4>
+          <h4 className="text-lg font-semibold text-gray-800">{t('forms.step4.maritalStatus')}</h4>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="maritalStatus">
-            Marital Status <span className="text-red-500">*</span>
+            {t('forms.step4.maritalStatus')} <span className="text-red-500">*</span>
           </Label>
           <Select 
             value={formData.maritalStatus} 
@@ -228,12 +230,12 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
         {showSpouseFields && (
           <>
             <div className="md:col-span-2 border-b pb-2 mb-2 mt-4">
-              <h4 className="text-lg font-semibold text-gray-800">Spouse's Details</h4>
+              <h4 className="text-lg font-semibold text-gray-800">{t('forms.step4.spouseDetails')}</h4>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="spouseName">
-                Spouse's Name <span className="text-red-500">*</span>
+                {t('forms.step4.spouseName')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="spouseName"
@@ -290,7 +292,7 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
         <div className="md:col-span-2 border-t pt-4 mt-4">
           <div className="space-y-2">
             <Label htmlFor="pakistanConnection">
-              Were your Parents/Grandparents Pakistan Nationals or Belong to Pakistan held area? <span className="text-red-500">*</span>
+              {t('forms.step4.pakistanConnectionLabel')} <span className="text-red-500">*</span>
             </Label>
             <Select 
               value={formData.pakistanConnection} 
@@ -307,7 +309,7 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
             </Select>
             {formData.pakistanConnection === 'Yes' && (
               <p className="text-sm text-red-600 mt-2 font-semibold">
-                ⚠️ Cannot Proceed - You have indicated a Pakistani passport connection. Please contact the embassy directly for visa processing.
+                {t('forms.step4.pakistanWarningInline')}
               </p>
             )}
           </div>
@@ -317,10 +319,10 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
       <div className="flex justify-between">
         <Button type="button" variant="outline" onClick={onBack}>
           <ChevronLeft className="w-4 h-4 mr-2" />
-          Back
+          {t('application.back')}
         </Button>
         <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-          Continue
+          {t('application.continue')}
         </Button>
       </div>
     </form>

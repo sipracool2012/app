@@ -5,11 +5,13 @@ import { ChevronLeft, CreditCard, AlertCircle } from 'lucide-react';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useToast } from '../../hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [paymentMethod, setPaymentMethod] = useState('');
   const [processing, setProcessing] = useState(false);
   const [enabledGateways, setEnabledGateways] = useState([]);
@@ -41,8 +43,8 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
     } catch (error) {
       console.error('Failed to fetch enabled payment gateways:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to load payment options',
+        title: t('common.error'),
+        description: t('errors.formLoadFailed'),
         variant: 'destructive'
       });
       setLoading(false);
@@ -52,8 +54,8 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
   const handlePayment = async () => {
     if (!paymentMethod) {
       toast({
-        title: 'Payment Method Required',
-        description: 'Please select a payment method',
+        title: t('forms.step10.paymentRequired'),
+        description: t('forms.step10.selectPaymentMethod'),
         variant: 'destructive'
       });
       return;
@@ -78,32 +80,32 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
   };
 
   if (loading) {
-    return <div className="flex justify-center p-8">Loading payment options...</div>;
+    return <div className="flex justify-center p-8">{t('forms.step10.loadingOptions')}</div>;
   }
 
   return (
     <div className="space-y-6">
-      <h3 className="text-xl font-semibold text-gray-900 mb-4">Payment</h3>
+      <h3 className="text-xl font-semibold text-gray-900 mb-4">{t('forms.step10.title')}</h3>
       
       {/* Fee Breakdown */}
       <Card>
         <CardContent className="p-6">
-          <h4 className="text-lg font-semibold mb-4">Fee Breakdown</h4>
+          <h4 className="text-lg font-semibold mb-4">{t('forms.step10.feeBreakdown')}</h4>
           <div className="space-y-3">
             <div className="flex justify-between py-2 border-b">
-              <span className="text-gray-600">Government Fee</span>
+              <span className="text-gray-600">{t('forms.step10.governmentFee')}</span>
               <span className="font-semibold">${govtFee.toFixed(2)}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
-              <span className="text-gray-600">Government Processing Fee (2.5%)</span>
+              <span className="text-gray-600">{t('forms.step10.processingFee')}</span>
               <span className="font-semibold">${govtProcessingFee.toFixed(2)}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
-              <span className="text-gray-600">Our Fee</span>
+              <span className="text-gray-600">{t('forms.step10.ourFee')}</span>
               <span className="font-semibold">${ourFee.toFixed(2)}</span>
             </div>
             <div className="flex justify-between py-3 text-lg border-t-2">
-              <span className="font-bold">Total Amount</span>
+              <span className="font-bold">{t('forms.step10.totalAmount')}</span>
               <span className="font-bold text-blue-600">${totalAmount.toFixed(2)}</span>
             </div>
           </div>
@@ -114,14 +116,14 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
       {enabledGateways.length > 0 ? (
         <Card>
           <CardContent className="p-6">
-            <h4 className="text-lg font-semibold mb-4">Select Payment Method</h4>
+            <h4 className="text-lg font-semibold mb-4">{t('forms.step10.paymentMethod')}</h4>
             <div className="space-y-2">
               <Label htmlFor="paymentMethod">
-                Payment Gateway <span className="text-red-500">*</span>
+                {t('forms.step10.payGateway')} <span className="text-red-500">*</span>
               </Label>
               <Select value={paymentMethod} onValueChange={setPaymentMethod}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Choose a payment method" />
+                  <SelectValue placeholder={t('forms.step10.choosePaymentMethod')} />
                 </SelectTrigger>
                 <SelectContent>
                   {enabledGateways.map((gateway) => (
@@ -156,8 +158,8 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
             <div className="flex items-center space-x-3 text-amber-700 bg-amber-50 p-4 rounded-lg">
               <AlertCircle className="w-6 h-6" />
               <div>
-                <h4 className="font-semibold">No Payment Methods Available</h4>
-                <p className="text-sm">Payment gateways are currently being configured. Please contact support or try again later.</p>
+                <h4 className="font-semibold">{t('forms.step10.noPaymentMethods')}</h4>
+                <p className="text-sm">{t('forms.step10.noPaymentMethodsDesc')}</p>
               </div>
             </div>
           </CardContent>
@@ -167,14 +169,14 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
       <div className="flex justify-between mt-6">
         <Button type="button" variant="outline" onClick={onBack} disabled={processing}>
           <ChevronLeft className="w-4 h-4 mr-2" />
-          Back
+          {t('application.back')}
         </Button>
         <Button 
           onClick={handlePayment} 
           className="bg-blue-600 hover:bg-blue-700 text-white"
           disabled={processing || enabledGateways.length === 0 || !paymentMethod}
         >
-          {processing ? 'Processing...' : `Pay $${totalAmount.toFixed(2)}`}
+          {processing ? t('forms.step10.processing') : t('forms.step10.payNow', { amount: totalAmount.toFixed(2) })}
         </Button>
       </div>
     </div>

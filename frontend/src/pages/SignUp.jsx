@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -12,6 +13,7 @@ import { useAuth } from '../context/AuthProvider';
 
 const SignUp = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { handleLogin } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
@@ -71,7 +73,7 @@ const SignUp = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Create your account</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">{t('auth.signUpTitle')}</CardTitle>
           <CardDescription className="text-center">
             Sign up to start your visa application
           </CardDescription>
@@ -79,7 +81,7 @@ const SignUp = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
+              <Label htmlFor="fullName">{t('auth.fullName')}</Label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
@@ -95,7 +97,7 @@ const SignUp = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('auth.email')}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
@@ -111,7 +113,7 @@ const SignUp = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('auth.password')}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
@@ -151,14 +153,14 @@ const SignUp = () => {
             </div>
 
             <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
-              {loading ? 'Creating account...' : 'Sign up'}
+              {loading ? t('common.loading') : t('auth.signUpBtn')}
             </Button>
           </form>
 
           <div className="mt-4 text-center text-sm">
-            <span className="text-gray-600">Already have an account? </span>
+            <span className="text-gray-600">{t('auth.hasAccount')} </span>
             <Link to="/signin" className="text-blue-600 hover:text-blue-700 font-medium">
-              Sign in
+              {t('auth.signInBtn')}
             </Link>
           </div>
         </CardContent>

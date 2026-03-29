@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function HelpCenter() {
+  const { t } = useTranslation();
   const [expandedId, setExpandedId] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('getting-started');
 
@@ -125,8 +127,8 @@ export default function HelpCenter() {
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-4">Help Center</h1>
-          <p className="text-xl text-blue-100">Find answers to common questions</p>
+          <h1 className="text-5xl font-bold mb-4">{t('pages.helpCenter.title')}</h1>
+          <p className="text-xl text-blue-100">{t('pages.helpCenter.subtitle')}</p>
         </div>
       </div>
 
@@ -136,7 +138,7 @@ export default function HelpCenter() {
         <div className="mb-12">
           <input
             type="text"
-            placeholder="Search for help..."
+            placeholder={t('pages.helpCenter.searchPlaceholder')}
             className="w-full px-6 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-600"
           />
         </div>
@@ -184,7 +186,7 @@ export default function HelpCenter() {
 
         {/* Contact Support */}
         <section className="bg-blue-50 rounded-lg p-8 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Didn't find what you're looking for?</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('pages.helpCenter.didntFind')}</h2>
           <p className="text-gray-700 mb-6">
             Our support team is here to help. Contact us through email.
           </p>
@@ -193,7 +195,7 @@ export default function HelpCenter() {
               Start Live Chat
             </button>*/}
             <button className="bg-white text-blue-600 px-6 py-2 rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors">
-              Email Support
+              {t('pages.helpCenter.emailSupport')}
             </button>
           </div>
           {/*<p className="mt-6 text-sm text-gray-600">

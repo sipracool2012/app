@@ -4,8 +4,10 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { ChevronLeft } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Step8AdditionalQuestions = ({ data, onNext, onBack }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     arrestedConvicted: data?.arrestedConvicted || 'No',
     arrestedConvictedReason: data?.arrestedConvictedReason || '',
@@ -61,8 +63,8 @@ const Step8AdditionalQuestions = ({ data, onNext, onBack }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <h3 className="text-xl font-semibold text-gray-900 mb-4">Additional Questions</h3>
-      <p className="text-sm text-gray-600 mb-4">All questions default to "No". If you select "Yes", please provide a reason.</p>
+      <h3 className="text-xl font-semibold text-gray-900 mb-4">{t('forms.step8.title')}</h3>
+      <p className="text-sm text-gray-600 mb-4">{t('forms.step8.subtitle')}</p>
       
       <div className="space-y-6">
         {questions.map((question, index) => (
@@ -93,13 +95,13 @@ const Step8AdditionalQuestions = ({ data, onNext, onBack }) => {
             {formData[question.key] === 'Yes' && (
               <div className="space-y-2 pl-4 border-l-2 border-blue-500">
                 <Label htmlFor={question.reasonKey}>
-                  Please provide reason <span className="text-red-500">*</span>
+                  {t('forms.step8.provideReason')} <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id={question.reasonKey}
                   value={formData[question.reasonKey]}
                   onChange={(e) => setFormData({ ...formData, [question.reasonKey]: e.target.value })}
-                  placeholder="Provide detailed reason..."
+                  placeholder={t('forms.step8.reasonPlaceholder')}
                   required={formData[question.key] === 'Yes'}
                 />
               </div>
@@ -111,10 +113,10 @@ const Step8AdditionalQuestions = ({ data, onNext, onBack }) => {
       <div className="flex justify-between mt-6">
         <Button type="button" variant="outline" onClick={onBack}>
           <ChevronLeft className="w-4 h-4 mr-2" />
-          Back
+          {t('application.back')}
         </Button>
         <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-          Continue
+          {t('application.continue')}
         </Button>
       </div>
     </form>

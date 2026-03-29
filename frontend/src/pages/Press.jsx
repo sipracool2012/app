@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function Press() {
+  const { t } = useTranslation();
   const pressReleases = [
     {
       date: "March 15, 2026",
@@ -68,8 +70,8 @@ export default function Press() {
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-4">Press & Media</h1>
-          <p className="text-xl text-blue-100">Latest news and updates from our company</p>
+          <h1 className="text-5xl font-bold mb-4">{t('pages.press.title')}</h1>
+          <p className="text-xl text-blue-100">{t('pages.press.subtitle')}</p>
         </div>
       </div>
 
@@ -77,7 +79,7 @@ export default function Press() {
       <div className="max-w-4xl mx-auto py-16 px-4">
         {/* Press Contact */}
         <section className="mb-16 bg-white rounded-lg shadow-md p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Press Contact</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('pages.press.pressContact')}</h2>
           <div className="space-y-3 text-gray-700">
             <p><strong>Media Relations:</strong> press@clearevisa.com</p>
             {/*<p><strong>Phone:</strong> +1 (555) 123-4567</p>*/}
@@ -90,7 +92,7 @@ export default function Press() {
 
         {/* Press Releases */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Press Releases</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">{t('pages.press.pressReleases')}</h2>
           <div className="space-y-6">
             {pressReleases.map((release, idx) => (
               <article key={idx} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
@@ -98,7 +100,7 @@ export default function Press() {
                 <h3 className="text-xl font-bold text-gray-900 mb-3">{release.title}</h3>
                 <p className="text-gray-700 mb-4">{release.excerpt}</p>
                 <a href={release.link} className="text-blue-600 hover:text-blue-800 font-semibold">
-                  Read Full Release →
+                  {t('pages.press.readFullRelease')} →
                 </a>
               </article>
             ))}
@@ -107,7 +109,7 @@ export default function Press() {
 
         {/* In The News */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">In The News</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">{t('pages.press.inTheNews')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {inTheNews.map((article, idx) => (
               <article key={idx} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
@@ -121,20 +123,20 @@ export default function Press() {
 
         {/* Media Kit */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Media Kit</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">{t('pages.press.mediaKit')}</h2>
           <div className="bg-white rounded-lg shadow-md p-8">
             <p className="text-gray-700 mb-6">
               Download our media kit for logos, company photos, founder headshots, and other resources for press coverage.
             </p>
             <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
-              Download Media Kit (PDF)
+              {t('pages.press.downloadMediaKit')}
             </button>
           </div>
         </section>
 
         {/* Company Facts */}
         <section>
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Company Facts</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">{t('pages.press.companyFacts')}</h2>
           <div className="bg-white rounded-lg shadow-md p-8">
             <ul className="space-y-3 text-gray-700">
               <li>• <strong>Founded:</strong> 2025</li>

@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function Careers() {
+  const { t } = useTranslation();
   const [expandedId, setExpandedId] = React.useState(null);
 
   const jobs = [
@@ -59,8 +61,8 @@ export default function Careers() {
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-4">Careers</h1>
-          <p className="text-xl text-blue-100">Join our mission to revolutionize visa applications</p>
+          <h1 className="text-5xl font-bold mb-4">{t('pages.careers.title')}</h1>
+          <p className="text-xl text-blue-100">{t('pages.careers.subtitle')}</p>
         </div>
       </div>
 
@@ -68,7 +70,7 @@ export default function Careers() {
       <div className="max-w-4xl mx-auto py-16 px-4">
         {/* Why Join Us */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Why Join Our Team?</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">{t('pages.careers.whyJoin')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-xl font-bold text-blue-600 mb-3">🚀 Make an Impact</h3>
@@ -111,7 +113,7 @@ export default function Careers() {
 
         {/* Open Positions */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Open Positions</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">{t('pages.careers.openPositions')}</h2>
           <div className="space-y-4">
             {jobs.map((job) => (
               <div key={job.id} className="bg-white rounded-lg shadow-md">
@@ -140,8 +142,8 @@ export default function Careers() {
                 {expandedId === job.id && (
                   <div className="px-6 pb-4 border-t border-gray-200">
                     <p className="text-gray-700 mb-4">{job.description}</p>
-                    <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                      Apply Now
+                      <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                      {t('pages.careers.applyNow')}
                     </button>
                   </div>
                 )}
@@ -152,7 +154,7 @@ export default function Careers() {
 
         {/* Culture Section */}
         <section>
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Our Culture</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">{t('pages.careers.ourCulture')}</h2>
           <div className="bg-white rounded-lg shadow-md p-8">
             <p className="text-lg text-gray-700 mb-4">
               We believe in creating a workplace where great people can do their best work. Our culture is built on:

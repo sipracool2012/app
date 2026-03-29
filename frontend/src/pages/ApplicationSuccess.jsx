@@ -1,12 +1,14 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CheckCircle, Download, Home } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 
 const ApplicationSuccess = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const applicationId = location.state?.applicationId || 'APP000000';
 
   return (
@@ -20,18 +22,18 @@ const ApplicationSuccess = () => {
           </div>
 
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Application Submitted Successfully!
+            {t('appSuccess.title')}
           </h1>
 
           <p className="text-lg text-gray-600 mb-6">
-            Your visa application has been received and is being processed.
+            {t('appSuccess.subtitle')}
           </p>
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-            <p className="text-sm text-gray-600 mb-2">Your Application ID</p>
+            <p className="text-sm text-gray-600 mb-2">{t('appSuccess.yourAppId')}</p>
             <p className="text-2xl font-bold text-blue-600">{applicationId}</p>
             <p className="text-sm text-gray-600 mt-4">
-              Please save this ID for future reference. You will receive an email confirmation shortly.
+              {t('appSuccess.saveNote')}
             </p>
           </div>
 
@@ -39,22 +41,22 @@ const ApplicationSuccess = () => {
             <div className="flex items-start text-left">
               <CheckCircle className="w-5 h-5 text-green-600 mt-1 mr-3 flex-shrink-0" />
               <div>
-                <h3 className="font-semibold text-gray-900">What happens next?</h3>
-                <p className="text-gray-600">Our team will review your application within 5 business days.</p>
+                <h3 className="font-semibold text-gray-900">{t('appSuccess.whatsNext')}</h3>
+                <p className="text-gray-600">{t('appSuccess.whatsNextDesc')}</p>
               </div>
             </div>
             <div className="flex items-start text-left">
               <CheckCircle className="w-5 h-5 text-green-600 mt-1 mr-3 flex-shrink-0" />
               <div>
-                <h3 className="font-semibold text-gray-900">Email confirmation</h3>
-                <p className="text-gray-600">You'll receive an email with your application details and next steps.</p>
+                <h3 className="font-semibold text-gray-900">{t('appSuccess.emailConfirmation')}</h3>
+                <p className="text-gray-600">{t('appSuccess.emailConfirmationDesc')}</p>
               </div>
             </div>
             <div className="flex items-start text-left">
               <CheckCircle className="w-5 h-5 text-green-600 mt-1 mr-3 flex-shrink-0" />
               <div>
-                <h3 className="font-semibold text-gray-900">Visa approval</h3>
-                <p className="text-gray-600">Once approved, your eVisa will be sent to your email address.</p>
+                <h3 className="font-semibold text-gray-900">{t('appSuccess.visaApproval')}</h3>
+                <p className="text-gray-600">{t('appSuccess.visaApprovalDesc')}</p>
               </div>
             </div>
           </div>
@@ -65,7 +67,7 @@ const ApplicationSuccess = () => {
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               <Home className="w-4 h-4 mr-2" />
-              Back to Home
+              {t('appSuccess.backToHome')}
             </Button>
           </div>
         </CardContent>

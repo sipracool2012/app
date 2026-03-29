@@ -6,12 +6,14 @@ import { Label } from '../ui/label';
 import { Switch } from '../ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useToast } from '../../hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 import { Save, Eye, EyeOff } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const PaymentGatewaySettings = () => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showSecrets, setShowSecrets] = useState({
@@ -65,8 +67,8 @@ const PaymentGatewaySettings = () => {
     } catch (error) {
       console.error('Failed to fetch payment gateway config:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to load payment gateway configuration',
+        title: t('common.error'),
+        description: t('admin.failedToLoadPaymentGateway'),
         variant: 'destructive'
       });
       setLoading(false);
@@ -92,14 +94,14 @@ const PaymentGatewaySettings = () => {
       }
 
       toast({
-        title: 'Success',
-        description: 'Payment gateway configuration updated successfully'
+        title: t('common.success'),
+        description: t('admin.paymentGatewayUpdated')
       });
     } catch (error) {
       console.error('Failed to update payment gateway config:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to update payment gateway configuration',
+        title: t('common.error'),
+        description: t('admin.failedToUpdatePaymentGateway'),
         variant: 'destructive'
       });
     } finally {
@@ -115,16 +117,16 @@ const PaymentGatewaySettings = () => {
   };
 
   if (loading) {
-    return <div className="flex justify-center p-8">Loading...</div>;
+    return <div className="flex justify-center p-8">{t('common.loading')}</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Payment Gateway Settings</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('admin.paymentGatewaySettings')}</h2>
         <Button onClick={handleSave} disabled={saving} className="bg-blue-600 hover:bg-blue-700">
           <Save className="w-4 h-4 mr-2" />
-          {saving ? 'Saving...' : 'Save Changes'}
+          {saving ? t('admin.saving') : t('admin.saveChanges')}
         </Button>
       </div>
 
@@ -345,7 +347,7 @@ const PaymentGatewaySettings = () => {
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={saving} className="bg-blue-600 hover:bg-blue-700">
           <Save className="w-4 h-4 mr-2" />
-          {saving ? 'Saving...' : 'Save Changes'}
+          {saving ? t('admin.saving') : t('admin.saveChanges')}
         </Button>
       </div>
     </div>

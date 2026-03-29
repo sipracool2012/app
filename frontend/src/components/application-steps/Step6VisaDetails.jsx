@@ -6,11 +6,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { PhoneInput } from '../ui/phone-input';
 import { ChevronLeft } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const Step6VisaDetails = ({ data, onNext, onBack }) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [phoneCodes, setPhoneCodes] = useState([]);
 
   const [formData, setFormData] = useState({
@@ -78,13 +80,13 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <h3 className="text-xl font-semibold text-gray-900 mb-4">Visa Details</h3>
+      <h3 className="text-xl font-semibold text-gray-900 mb-4">{t('forms.step6.title')}</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Places to Visit */}
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="placesToVisit">
-            Places to be visited <span className="text-red-500">*</span>
+            {t('forms.step6.placesToVisit')} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="placesToVisit"
@@ -96,7 +98,7 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
 
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="placesToVisitLine2">
-            Places to be visited (Line 2)
+            {t('forms.step6.placesToVisitLine2')}
           </Label>
           <Input
             id="placesToVisitLine2"
@@ -108,7 +110,7 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
         {/* Hotel Booked */}
         <div className="space-y-2">
           <Label htmlFor="hotelBooked">
-            Have you booked any room in Hotel/Resort etc. through any Tour Operator? <span className="text-red-500">*</span>
+            {t('forms.step6.hotelBooked')} <span className="text-red-500">*</span>
           </Label>
           <Select 
             value={formData.hotelBooked} 
@@ -126,12 +128,12 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
 
         {/* Previous Visit Section */}
         <div className="md:col-span-2 border-t pt-4 mt-4">
-          <h4 className="text-lg font-semibold text-gray-900 mb-4">Previous Visit to India</h4>
+          <h4 className="text-lg font-semibold text-gray-900 mb-4">{t('forms.step6.previousVisit')}</h4>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="visitedIndiaBefore">
-            Have you ever visited India before? <span className="text-red-500">*</span>
+            {t('forms.step6.visitedIndiaBefore')} <span className="text-red-500">*</span>
           </Label>
           <Select 
             value={formData.visitedIndiaBefore} 
@@ -163,7 +165,7 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
 
             <div className="space-y-2">
               <Label htmlFor="citiesPreviouslyVisited">
-                Cities previously visited in India
+                {t('forms.step6.citiesPreviouslyVisited')}
               </Label>
               <Input
                 id="citiesPreviouslyVisited"
@@ -251,7 +253,7 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
 
         {/* Other Information Section */}
         <div className="md:col-span-2 border-t pt-4 mt-4">
-          <h4 className="text-lg font-semibold text-gray-900 mb-4">Other Information</h4>
+          <h4 className="text-lg font-semibold text-gray-900 mb-4">{t('forms.step6.otherInfo')}</h4>
         </div>
 
         <div className="space-y-2 md:col-span-2">
@@ -288,7 +290,7 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
         {isBusinessVisa && (
           <>
             <div className="md:col-span-2 border-t pt-4 mt-4">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Details of the Applicant's Company</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">{t('forms.step6.applicantCompanyDetails')}</h4>
             </div>
 
             <div className="space-y-2">
@@ -341,7 +343,7 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
             </div>
 
             <div className="md:col-span-2 border-t pt-4 mt-4">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Details of Indian Firm/Exhibitions/Trade Fairs</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">{t('forms.step6.indianFirmDetails')}</h4>
             </div>
 
             <div className="space-y-2">
@@ -399,7 +401,7 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
         {isConferenceVisa && (
           <>
             <div className="md:col-span-2 border-t pt-4 mt-4">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Conference Details</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">{t('forms.step6.conferenceDetails')}</h4>
             </div>
 
             <div className="space-y-2 md:col-span-2">
@@ -454,7 +456,7 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
             </div>
 
             <div className="md:col-span-2 border-t pt-4 mt-4">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Organizer Details</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">{t('forms.step6.organizerDetails')}</h4>
             </div>
 
             <div className="space-y-2">
@@ -512,10 +514,10 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
       <div className="flex justify-between">
         <Button type="button" variant="outline" onClick={onBack}>
           <ChevronLeft className="w-4 h-4 mr-2" />
-          Back
+          {t('application.back')}
         </Button>
         <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-          Continue
+          {t('application.continue')}
         </Button>
       </div>
     </form>

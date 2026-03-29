@@ -10,10 +10,12 @@ import ApplicationsManagement from '../components/admin/ApplicationsManagement';
 import UserManagement from '../components/admin/UserManagement';
 import { getToken, getAuthHeaders } from '../utils/auth';
 import { useAuth } from '../context/AuthProvider';
+import { useTranslation } from 'react-i18next';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const AdminPanel = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { handleLogout: contextLogout } = useAuth();
@@ -64,7 +66,7 @@ const AdminPanel = () => {
   };
 
   if (!user) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    return <div className="flex justify-center items-center h-screen">{t('common.loading')}</div>;
   }
 
   return (
@@ -74,19 +76,19 @@ const AdminPanel = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Admin Panel</h1>
+              <h1 className="text-2xl font-bold text-gray-900">{t('admin.title')}</h1>
               <p className="text-sm text-gray-500">
-                Logged in as {user.fullName} ({user.role})
+                {t('admin.loggedInAs', { name: user.fullName, role: user.role })}
               </p>
             </div>
             <div className="flex items-center space-x-4">
               <Button variant="outline" onClick={() => navigate('/')}>
                 <Globe className="w-4 h-4 mr-2" />
-                View Site
+                {t('admin.viewSite')}
               </Button>
               <Button variant="outline" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
-                Logout
+                {t('header.logout')}
               </Button>
             </div>
           </div>
@@ -97,13 +99,13 @@ const AdminPanel = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
-            <TabsTrigger value="applications">Applications</TabsTrigger>
-            <TabsTrigger value="countries">Country Configuration</TabsTrigger>
+            <TabsTrigger value="applications">{t('admin.applications')}</TabsTrigger>
+            <TabsTrigger value="countries">{t('admin.countryConfig')}</TabsTrigger>
             {user.role === 'super_admin' && (
-              <TabsTrigger value="payment-gateways">Payment Gateways</TabsTrigger>
+              <TabsTrigger value="payment-gateways">{t('admin.paymentGateways')}</TabsTrigger>
             )}
             {user.role === 'super_admin' && (
-              <TabsTrigger value="users">User Management</TabsTrigger>
+              <TabsTrigger value="users">{t('admin.userManagement')}</TabsTrigger>
             )}
           </TabsList>
 

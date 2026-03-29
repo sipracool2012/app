@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Trash2, Clock, CheckCircle, XCircle, AlertCircle, ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { useToast } from '../hooks/use-toast';
+import { getAuthHeaders } from '../utils/auth';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -16,6 +18,7 @@ const statusConfig = {
 
 const MyApplications = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,9 +29,8 @@ const MyApplications = () => {
 
   const fetchApplications = async () => {
     try {
-      const token = localStorage.getItem('token');
       const res = await fetch(`${BACKEND_URL}/api/applications/my-applications`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: getAuthHeaders()
       });
       if (res.ok) {
         const data = await res.json();
@@ -36,28 +38,27 @@ const MyApplications = () => {
       }
     } catch (err) {
       console.error('Failed to fetch applications:', err);
-      toast({ title: 'Error', description: 'Failed to load applications.', variant: 'destructive' });
+      toast({ title: t('common.error'), description: 'Failed to load applications.', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteDraft = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this draft?')) return;
+    if (!window.confirm(t('myApps.deleteDraft'))) return;
     try {
-      const token = localStorage.getItem('token');
       const res = await fetch(`${BACKEND_URL}/api/applications/draft/${id}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: getAuthHeaders()
       });
       if (res.ok) {
         setApplications(prev => prev.filter(app => app.id !== id));
-        toast({ title: 'Deleted', description: 'Draft deleted successfully.' });
+        toast({ title: t('myApps.deleted'), description: t('myApps.deletedDesc') });
       } else {
         throw new Error('Delete failed');
       }
     } catch (err) {
-      toast({ title: 'Error', description: 'Failed to delete draft.', variant: 'destructive' });
+      toast({ title: t('common.error'), description: 'Failed to delete draft.', variant: 'destructive' });
     }
   };
 
@@ -92,15 +93,15 @@ const MyApplications = () => {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900" data-testid="my-applications-title">My Applications</h1>
-            <p className="text-gray-600 mt-1">Track and manage your visa applications</p>
+            <h1 className="text-2xl font-bold text-gray-900" data-testid="my-applications-title">{t('myApps.title')}</h1>
+            <p className="text-gray-600 mt-1">{t('myApps.subtitle')}</p>
           </div>
           <Button
             onClick={() => navigate('/')}
             className="bg-blue-600 hover:bg-blue-700 text-white"
             data-testid="new-application-btn"
           >
-            New Application
+            {t('myApps.newApplication')}
           </Button>
         </div>
 
@@ -108,13 +109,13 @@ const MyApplications = () => {
           <Card data-testid="no-applications-card">
             <CardContent className="p-12 text-center">
               <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-700 mb-2">No Applications Yet</h3>
-              <p className="text-gray-500 mb-6">Start your visa application to see it here.</p>
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">{t('myApps.noApps')}</h3>
+              <p className="text-gray-500 mb-6">{t('myApps.noAppsDesc')}</p>
               <Button
                 onClick={() => navigate('/')}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
-                Start Application
+                {t('myApps.startApplication')}
               </Button>
             </CardContent>
           </Card>
@@ -148,12 +149,12 @@ const MyApplications = () => {
                           )}
                           {app.status === 'draft' && (
                             <p className="text-gray-400 text-xs mt-1">
-                              Progress: Step {app.currentStep || 1} of {steps.length}
+                              {t('myApps.progress', { step: app.currentStep || 1, total: steps.length })}
                             </p>
                           )}
                         </div>
                         <p className="text-xs text-gray-400 mt-2">
-                          {app.status === 'draft' ? 'Last saved' : 'Submitted'}: {formatDate(app.status === 'draft' ? app.updatedAt : app.submittedDate)}
+                          {app.status === 'draft' ? t('myApps.lastSaved') : t('myApps.submitted')}: {formatDate(app.status === 'draft' ? app.updatedAt : app.submittedDate)}
                         </p>
                       </div>
 

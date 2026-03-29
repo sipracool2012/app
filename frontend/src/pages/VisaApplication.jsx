@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, Check, Save } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
@@ -21,21 +22,22 @@ import Step10Payment from '../components/application-steps/Step10Payment';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const steps = [
-  { id: 1, name: 'Basic Info', component: Step1BasicInfo },
-  { id: 2, name: 'Applicant Details', component: Step2ApplicantDetails },
-  { id: 3, name: 'Address Details', component: Step3AddressDetails },
-  { id: 4, name: 'Family Details', component: Step4FamilyDetails },
-  { id: 5, name: 'Professional Details', component: Step5ProfessionalDetails },
-  { id: 6, name: 'Visa Details', component: Step6VisaDetails },
-  { id: 7, name: 'References', component: Step7References },
-  { id: 8, name: 'Additional Questions', component: Step8AdditionalQuestions },
-  { id: 9, name: 'Documents', component: Step9DocumentUpload },
-  { id: 10, name: 'Payment', component: Step10Payment }
+  { id: 1, nameKey: 'steps.basicInfo', component: Step1BasicInfo },
+  { id: 2, nameKey: 'steps.applicantDetails', component: Step2ApplicantDetails },
+  { id: 3, nameKey: 'steps.addressDetails', component: Step3AddressDetails },
+  { id: 4, nameKey: 'steps.familyDetails', component: Step4FamilyDetails },
+  { id: 5, nameKey: 'steps.professionalDetails', component: Step5ProfessionalDetails },
+  { id: 6, nameKey: 'steps.visaDetails', component: Step6VisaDetails },
+  { id: 7, nameKey: 'steps.references', component: Step7References },
+  { id: 8, nameKey: 'steps.additionalQuestions', component: Step8AdditionalQuestions },
+  { id: 9, nameKey: 'steps.documents', component: Step9DocumentUpload },
+  { id: 10, nameKey: 'steps.payment', component: Step10Payment }
 ];
 
 const VisaApplication = () => {
   const { visaId } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({ visaId });
@@ -77,8 +79,8 @@ const VisaApplication = () => {
             setFormData(prev => ({ ...prev, ...draft, visaId }));
             setCurrentStep(savedStep);
             toast({
-              title: 'Draft Loaded',
-              description: `Resuming your application from Step ${savedStep}.`,
+              title: t('application.draftLoaded'),
+              description: t('application.draftLoadedDesc', { step: savedStep }),
             });
           }
         }
@@ -170,14 +172,14 @@ const VisaApplication = () => {
 
         const result = await response.json();
         toast({
-          title: 'Success!',
-          description: `Your application ${result.id} has been submitted successfully.`,
+          title: t('common.success'),
+          description: t('application.submitSuccess', { id: result.id }),
         });
         navigate('/application-success', { state: { applicationId: result.id } });
       } catch (error) {
         toast({
-          title: 'Error',
-          description: 'Failed to submit application. Please try again.',
+          title: t('common.error'),
+          description: t('application.submitError'),
           variant: 'destructive'
         });
       }
@@ -202,7 +204,7 @@ const VisaApplication = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center space-y-3">
           <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-gray-600">Loading your application...</p>
+          <p className="text-gray-600">{t('application.loading')}</p>
         </div>
       </div>
     );
@@ -216,20 +218,20 @@ const VisaApplication = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-900">
-                Step {currentStep} of {steps.length}: {steps[currentStep - 1].name}
+                {t('application.step', { current: currentStep, total: steps.length })}: {t(steps[currentStep - 1].nameKey)}
               </h2>
               <div className="flex items-center gap-3">
                 {saving && (
                   <span className="text-xs text-blue-600 flex items-center gap-1" data-testid="saving-indicator">
-                    <Save className="w-3 h-3 animate-pulse" /> Saving...
+                    <Save className="w-3 h-3 animate-pulse" /> {t('application.saving')}
                   </span>
                 )}
                 {lastSaved && !saving && (
                   <span className="text-xs text-green-600" data-testid="saved-indicator">
-                    Auto-saved
+                    {t('application.autoSaved')}
                   </span>
                 )}
-                <span className="text-sm text-gray-600">{Math.round(progress)}% Complete</span>
+                <span className="text-sm text-gray-600">{t('application.complete', { percent: Math.round(progress) })}</span>
               </div>
             </div>
             <Progress value={progress} className="h-2" />
@@ -249,7 +251,7 @@ const VisaApplication = () => {
                   >
                     {step.id < currentStep ? <Check className="w-4 h-4" /> : step.id}
                   </div>
-                  <span className="text-xs mt-1 text-gray-600 hidden lg:block">{step.name}</span>
+                  <span className="text-xs mt-1 text-gray-600 hidden lg:block">{t(step.nameKey)}</span>
                 </div>
               ))}
             </div>
