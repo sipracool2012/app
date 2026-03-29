@@ -7,6 +7,7 @@ import { Switch } from '../ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useToast } from '../../hooks/use-toast';
 import { Save, Eye, EyeOff } from 'lucide-react';
+import { getAuthHeaders } from '../../utils/auth';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -48,11 +49,8 @@ const PaymentGatewaySettings = () => {
 
   const fetchConfig = async () => {
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`${BACKEND_URL}/api/payment-gateways/config/admin`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: getAuthHeaders()
       });
 
       if (!response.ok) {
@@ -77,13 +75,9 @@ const PaymentGatewaySettings = () => {
     setSaving(true);
 
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`${BACKEND_URL}/api/payment-gateways/config`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(config)
       });
 

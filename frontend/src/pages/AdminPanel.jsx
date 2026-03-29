@@ -13,6 +13,7 @@ import { Switch } from '../components/ui/switch';
 import { Label } from '../components/ui/label';
 import PaymentGatewaySettings from '../components/admin/PaymentGatewaySettings';
 import UserManagement from '../components/admin/UserManagement';
+import { getToken, getAuthHeaders } from '../utils/auth';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -40,16 +41,14 @@ const AdminPanel = () => {
     // Fetch current user info
     const fetchCurrentUser = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = getToken();
         if (!token) {
           navigate('/signin');
           return;
         }
 
         const response = await fetch(`${BACKEND_URL}/api/auth/me`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          headers: getAuthHeaders()
         });
 
         if (!response.ok) {
@@ -84,9 +83,7 @@ const AdminPanel = () => {
     const fetchApplications = async () => {
       try {
         const response = await fetch(`${BACKEND_URL}/api/applications`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
+          headers: getAuthHeaders()
         });
         const data = await response.json();
         setApplications(data.applications || []);
@@ -168,10 +165,7 @@ const AdminPanel = () => {
     try {
       const response = await fetch(`${BACKEND_URL}/api/applications/${appId}/status`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ status: newStatus })
       });
 
@@ -202,9 +196,7 @@ const AdminPanel = () => {
       const url = `${BACKEND_URL}/api/applications/export?ids=${application.applicationId}`;
       
       const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        headers: getAuthHeaders()
       });
 
       if (!response.ok) {
@@ -235,9 +227,7 @@ const AdminPanel = () => {
       const url = `${BACKEND_URL}/api/applications/export${ids ? `?ids=${ids}` : ''}`;
       
       const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        headers: getAuthHeaders()
       });
 
       if (!response.ok) {

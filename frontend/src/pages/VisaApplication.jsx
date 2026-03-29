@@ -5,6 +5,7 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Progress } from '../components/ui/progress';
 import { useToast } from '../hooks/use-toast';
+import { getAuthHeaders, getCurrentUser } from '../utils/auth';
 
 // Import step components
 import Step1BasicInfo from '../components/application-steps/Step1BasicInfo';
@@ -46,21 +47,16 @@ const VisaApplication = () => {
 
   // Get logged-in user's email from localStorage
   const getUserEmail = () => {
-    try {
-      const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
-      return user.email || '';
-    } catch {
-      return '';
-    }
+    const user = getCurrentUser();
+    return user?.email || '';
   };
 
   // Load draft on mount
   useEffect(() => {
     const loadDraft = async () => {
       try {
-        const token = localStorage.getItem('token');
         const res = await fetch(`${BACKEND_URL}/api/applications/draft`, {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: getAuthHeaders()
         });
         if (res.ok) {
           const data = await res.json();
@@ -105,7 +101,6 @@ const VisaApplication = () => {
   const saveDraft = useCallback(async (data, step) => {
     try {
       setSaving(true);
-      const token = localStorage.getItem('token');
       const userEmail = getUserEmail();
       const payload = {
         ...data,
@@ -121,10 +116,7 @@ const VisaApplication = () => {
 
       const res = await fetch(`${BACKEND_URL}/api/applications/draft`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(payload)
       });
       if (res.ok) {
@@ -159,10 +151,7 @@ const VisaApplication = () => {
         const applicationData = { ...updatedData, email: updatedData.email || userEmail };
         const response = await fetch(`${BACKEND_URL}/api/applications`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
+          headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify(applicationData)
         });
 
@@ -183,6 +172,27 @@ const VisaApplication = () => {
       }
     } else {
       const nextStep = currentStep + 1;
+
+      // When moving to the Document Upload step (step 9), generate an application ID
+      if (nextStep === 9 && !updatedData.applicationId) {
+        try {
+          const res = await fetch(`${BACKEND_URL}/api/applications/assign-id`, {
+            method: 'POST',
+            headers: getAuthHeaders()
+          });
+          if (res.ok) {
+            const { applicationId } = await res.json();
+            const dataWithId = { ...updatedData, applicationId };
+            setFormData(dataWithId);
+            setCurrentStep(nextStep);
+            triggerAutoSave(dataWithId, nextStep);
+            return;
+          }
+        } catch (err) {
+          console.error('Failed to assign application ID:', err);
+        }
+      }
+
       setCurrentStep(nextStep);
       // Auto-save draft on step change
       triggerAutoSave(updatedData, nextStep);

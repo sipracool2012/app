@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Depends, UploadFile, File
+from fastapi import APIRouter, HTTPException, status, Depends, UploadFile, File, Query
 from utils.auth import get_current_user
 from utils.s3 import upload_file_to_s3
 from datetime import datetime
@@ -121,8 +121,13 @@ async def upload_photo(
 
 
 @router.post("")
-async def upload_document(file: UploadFile = File(...)):
-    """Generic upload endpoint for any document during form filling"""
+async def upload_document(
+    file: UploadFile = File(...),
+    application_id: str = Query(..., description="Application ID (required)"),
+    field_name: str = Query(..., description="Form field name for this document"),
+    user_id: str = Depends(get_current_user)
+):
+    """Upload a document for a specific application during form filling"""
     allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']
     if file.content_type not in allowed_types:
         raise HTTPException(
@@ -140,11 +145,14 @@ async def upload_document(file: UploadFile = File(...)):
             detail="File size must be less than 5MB"
         )
 
-    # Generate unique filename
-    file_id = str(uuid.uuid4())
-    file_extension = file.filename.split('.')[-1] if '.' in file.filename else 'pdf'
-    safe_filename = f"{file_id}.{file_extension}"
-    file_path = UPLOAD_DIR / safe_filename
+    # Create application-specific folder
+    app_folder = UPLOAD_DIR / application_id
+    os.makedirs(app_folder, exist_ok=True)
+
+    # Build filename: {application_id}_{field_name}_{original_filename}
+    original_name = file.filename or "document"
+    safe_filename = f"{application_id}_{field_name}_{original_name}"
+    file_path = app_folder / safe_filename
 
     try:
         with open(file_path, "wb") as buffer:
@@ -153,7 +161,7 @@ async def upload_document(file: UploadFile = File(...)):
         return {
             "success": True,
             "url": safe_filename,
-            "filename": file.filename
+            "filename": safe_filename
         }
     except Exception as e:
         raise HTTPException(
