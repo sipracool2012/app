@@ -79,9 +79,9 @@ export default function Press() {
         <section className="mb-16 bg-white rounded-lg shadow-md p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Press Contact</h2>
           <div className="space-y-3 text-gray-700">
-            <p><strong>Media Relations:</strong> press@visaapp.com</p>
-            <p><strong>Phone:</strong> +1 (555) 123-4567</p>
-            <p><strong>Address:</strong> [Your Company Address]</p>
+            <p><strong>Media Relations:</strong> press@clearevisa.com</p>
+            {/*<p><strong>Phone:</strong> +1 (555) 123-4567</p>*/}
+            <p><strong>Address:</strong> B1109 - Graffiti Glover Commercial, Pune, MH, 411036, India</p>
             <p className="mt-4">
               For press inquiries, interview requests, or media kits, please contact our press team at the email above.
             </p>
@@ -137,14 +137,14 @@ export default function Press() {
           <h2 className="text-3xl font-bold text-gray-900 mb-8">Company Facts</h2>
           <div className="bg-white rounded-lg shadow-md p-8">
             <ul className="space-y-3 text-gray-700">
-              <li>• <strong>Founded:</strong> 2023</li>
-              <li>• <strong>Headquarters:</strong> San Francisco, CA</li>
+              <li>• <strong>Founded:</strong> 2025</li>
+              <li>• <strong>Headquarters:</strong> Pune, Maharashtra, India</li>
               <li>• <strong>Team Size:</strong> 50+ employees globally</li>
               <li>• <strong>Countries Served:</strong> 150+</li>
               <li>• <strong>Applications Processed:</strong> 50,000+</li>
               <li>• <strong>Success Rate:</strong> 98%</li>
               <li>• <strong>Languages Supported:</strong> 25+</li>
-              <li>• <strong>Funding:</strong> Series A: $10M</li>
+             {/* <li>•  <strong>Funding:</strong> Series A: $10M </li> */}
             </ul>
           </div>
         </section>

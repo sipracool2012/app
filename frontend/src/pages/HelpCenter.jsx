@@ -186,19 +186,19 @@ export default function HelpCenter() {
         <section className="bg-blue-50 rounded-lg p-8 text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Didn't find what you're looking for?</h2>
           <p className="text-gray-700 mb-6">
-            Our support team is here to help. Contact us through chat, email, or phone.
+            Our support team is here to help. Contact us through email.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+           {/*} <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
               Start Live Chat
-            </button>
+            </button>*/}
             <button className="bg-white text-blue-600 px-6 py-2 rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors">
               Email Support
             </button>
           </div>
-          <p className="mt-6 text-sm text-gray-600">
+          {/*<p className="mt-6 text-sm text-gray-600">
             📞 Phone: +1 (555) 123-4567 | Available 24/7
-          </p>
+          </p>*/}
         </section>
       </div>
     </div>

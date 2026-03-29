@@ -279,9 +279,9 @@ export default function CookiePolicy() {
             </p>
             <div className="bg-gray-100 p-4 rounded">
               <p><strong>Visa Application Platform</strong></p>
-              <p>Email: privacy@visaapp.com</p>
-              <p>Address: [Your Company Address]</p>
-              <p>Phone: [Your Phone Number]</p>
+              <p>Email: privacy@clearevisa.com</p>
+              <p>Address: B1109 - Graffiti Glover Commercial, Pune, Maharashtra, 411036, India</p>
+              {/* <p>Phone: [Your Phone Number]</p> */}
             </div>
           </section>
         </div>

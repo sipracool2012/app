@@ -16,7 +16,7 @@ export default function Careers() {
       id: 2,
       title: "Customer Success Manager",
       department: "Operations",
-      location: "New York, USA",
+      location: "Remote",
       type: "Full-time",
       description: "Help our customers succeed by providing exceptional support and guidance throughout their visa application journey."
     },
@@ -24,7 +24,7 @@ export default function Careers() {
       id: 3,
       title: "Immigration Consultant",
       department: "Compliance",
-      location: "London, UK",
+      location: "Remote",
       type: "Full-time",
       description: "Join our team of immigration experts to help users navigate complex visa requirements across different countries."
     },
@@ -40,7 +40,7 @@ export default function Careers() {
       id: 5,
       title: "UI/UX Designer",
       department: "Design",
-      location: "San Francisco, USA",
+      location: "Remote",
       type: "Full-time",
       description: "Create beautiful and intuitive user experiences for millions of visa applicants worldwide."
     },

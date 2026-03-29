@@ -234,9 +234,9 @@ export default function TermsOfService() {
             </p>
             <div className="bg-gray-100 p-4 rounded mt-4">
               <p><strong>Visa Application Platform</strong></p>
-              <p>Email: legal@visaapp.com</p>
-              <p>Address: [Your Company Address]</p>
-              <p>Phone: [Your Phone Number]</p>
+              <p>Email: legal@clearevisa.com</p>
+              <p>Address: B1109 - Graffiti Glover Commercial, Pune, Maharashtra, 411036, India</p>
+              {/* <p>Phone: [Your Phone Number]</p> */}
             </div>
           </section>
         </div>

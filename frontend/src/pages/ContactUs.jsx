@@ -48,29 +48,29 @@ export default function ContactUs() {
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-2">📧 Email</h3>
               <p className="text-gray-600 mb-1">General Inquiries</p>
-              <p className="text-blue-600 font-semibold">hello@visaapp.com</p>
-              <p className="text-gray-600 mb-1 mt-3">Support</p>
-              <p className="text-blue-600 font-semibold">support@visaapp.com</p>
+              <p className="text-blue-600 font-semibold">hello@clearevisa.com</p>
+              <p className="text-gray-600 mb-1 mt-3">Customer Support</p>
+              <p className="text-blue-600 font-semibold">support@clearevisa.com</p>
               <p className="text-gray-600 mb-1 mt-3">Press</p>
-              <p className="text-blue-600 font-semibold">press@visaapp.com</p>
+              <p className="text-blue-600 font-semibold">press@clearevisa.com</p>
             </div>
 
-            {/* Phone */}
+            {/* Phone 
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-3">📱 Phone</h3>
               <p className="text-gray-700">
                 <strong>+1 (555) 123-4567</strong>
               </p>
               <p className="text-gray-600 text-sm mt-2">Available 24/7</p>
-            </div>
+            </div>*/}
 
             {/* Address */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-3">📍 Address</h3>
               <p className="text-gray-700">
-                123 Visa Avenue<br />
-                San Francisco, CA 94105<br />
-                United States
+                B1109 - Graffiti Glover Commercial<br />
+                Pune, Maharashtra, 411036<br />
+                India
               </p>
             </div>
 
@@ -197,11 +197,11 @@ export default function ContactUs() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Other Ways to Reach Us</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <h3 className="font-bold text-gray-900 mb-2">💬 Live Chat</h3>
+              <h3 className="font-bold text-gray-900 mb-2">💬 Live Chat(Coming Soon)</h3>
               <p className="text-gray-700">Chat with our support team in real-time for immediate assistance.</p>
             </div>
             <div>
-              <h3 className="font-bold text-gray-900 mb-2">📱 Mobile App</h3>
+              <h3 className="font-bold text-gray-900 mb-2">📱 Mobile App(Coming Soon)</h3>
               <p className="text-gray-700">Contact support directly through our mobile application.</p>
             </div>
             <div>
