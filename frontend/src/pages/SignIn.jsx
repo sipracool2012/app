@@ -8,10 +8,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { useToast } from '../hooks/use-toast';
 import api from '../utils/api';
 import { setToken, setCurrentUser } from '../utils/auth';
+import { useAuth } from '../context/AuthProvider';
 
-const SignIn = ({ onLogin }) => {
+const SignIn = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { handleLogin } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -30,7 +32,7 @@ const SignIn = ({ onLogin }) => {
       // Store token and user
       setToken(token);
       setCurrentUser(user);
-      onLogin(user);
+      handleLogin(user);
       
       toast({
         title: 'Success',

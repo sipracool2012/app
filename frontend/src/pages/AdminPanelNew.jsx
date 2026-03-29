@@ -8,12 +8,15 @@ import CountryConfiguration from '../components/admin/CountryConfiguration';
 import PaymentGatewaySettings from '../components/admin/PaymentGatewaySettings';
 import ApplicationsManagement from '../components/admin/ApplicationsManagement';
 import UserManagement from '../components/admin/UserManagement';
+import { getToken, getAuthHeaders } from '../utils/auth';
+import { useAuth } from '../context/AuthProvider';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const AdminPanel = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { handleLogout: contextLogout } = useAuth();
   const [activeTab, setActiveTab] = useState('applications');
   const [user, setUser] = useState(null);
 
@@ -23,16 +26,14 @@ const AdminPanel = () => {
 
   const fetchCurrentUser = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       if (!token) {
         navigate('/signin');
         return;
       }
 
       const response = await fetch(`${BACKEND_URL}/api/auth/me`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: getAuthHeaders()
       });
 
       if (!response.ok) {
@@ -58,7 +59,7 @@ const AdminPanel = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    contextLogout();
     navigate('/signin');
   };
 

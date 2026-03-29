@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getToken, removeToken, removeCurrentUser } from './auth';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -13,7 +14,7 @@ const api = axios.create({
 // Add request interceptor to include token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -30,8 +31,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Token expired or invalid
-      localStorage.removeItem('token');
-      localStorage.removeItem('currentUser');
+      removeToken();
+      removeCurrentUser();
       window.location.href = '/signin';
     }
     return Promise.reject(error);
