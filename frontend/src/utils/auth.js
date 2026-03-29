@@ -27,3 +27,11 @@ export const logout = () => {
   removeToken();
   removeCurrentUser();
 };
+
+export const getAuthHeaders = (extraHeaders = {}) => {
+  const token = getToken();
+  return {
+    ...extraHeaders,
+    ...(token ? { Authorization: `Bearer ${token}` } : {})
+  };
+};

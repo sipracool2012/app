@@ -4,12 +4,14 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { ChevronLeft, Upload, FileText, X } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
+import { getAuthHeaders } from '../../utils/auth';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const Step9DocumentUpload = ({ data, onNext, onBack }) => {
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
+  const applicationId = data?.applicationId || '';
 
   const [formData, setFormData] = useState({
     passportDocument: data?.passportDocument || '',
@@ -54,6 +56,15 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    if (!applicationId) {
+      toast({
+        title: 'Error',
+        description: 'Application ID not assigned yet. Please go back and try again.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast({
@@ -79,9 +90,12 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
     const formDataUpload = new FormData();
     formDataUpload.append('file', file);
 
+    const url = `${BACKEND_URL}/api/upload?application_id=${encodeURIComponent(applicationId)}&field_name=${encodeURIComponent(fieldName)}`;
+
     try {
-      const response = await fetch(`${BACKEND_URL}/api/upload`, {
+      const response = await fetch(url, {
         method: 'POST',
+        headers: getAuthHeaders(),
         body: formDataUpload
       });
 
@@ -98,7 +112,7 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
 
       setFileNames({
         ...fileNames,
-        [fieldName]: file.name
+        [fieldName]: result.filename
       });
 
       toast({
@@ -180,7 +194,14 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <h3 className="text-xl font-semibold text-gray-900 mb-4">Document Upload</h3>
-      
+
+      {applicationId && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center gap-3">
+          <span className="text-sm text-blue-700 font-medium">Application ID:</span>
+          <span className="text-sm font-bold text-blue-900 tracking-wide">{applicationId}</span>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Required Documents for All */}
         <div className="md:col-span-2 border-b pb-2 mb-2">

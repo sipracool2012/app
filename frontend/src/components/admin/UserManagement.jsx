@@ -5,6 +5,7 @@ import { Badge } from '../ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useToast } from '../../hooks/use-toast';
 import { Users, Shield, UserCog } from 'lucide-react';
+import { getAuthHeaders } from '../../utils/auth';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -20,11 +21,8 @@ const UserManagement = () => {
 
   const fetchUsers = async () => {
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`${BACKEND_URL}/api/auth/users`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: getAuthHeaders()
       });
 
       if (!response.ok) {
@@ -48,13 +46,9 @@ const UserManagement = () => {
   const updateUserRole = async (userId, newRole) => {
     setUpdatingUser(userId);
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`${BACKEND_URL}/api/auth/users/${userId}/role`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ role: newRole })
       });
 

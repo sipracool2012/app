@@ -4,6 +4,7 @@ import { FileText, Trash2, Clock, CheckCircle, XCircle, AlertCircle, ArrowRight 
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { useToast } from '../hooks/use-toast';
+import { getAuthHeaders } from '../utils/auth';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -26,9 +27,8 @@ const MyApplications = () => {
 
   const fetchApplications = async () => {
     try {
-      const token = localStorage.getItem('token');
       const res = await fetch(`${BACKEND_URL}/api/applications/my-applications`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: getAuthHeaders()
       });
       if (res.ok) {
         const data = await res.json();
@@ -45,10 +45,9 @@ const MyApplications = () => {
   const handleDeleteDraft = async (id) => {
     if (!window.confirm('Are you sure you want to delete this draft?')) return;
     try {
-      const token = localStorage.getItem('token');
       const res = await fetch(`${BACKEND_URL}/api/applications/draft/${id}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: getAuthHeaders()
       });
       if (res.ok) {
         setApplications(prev => prev.filter(app => app.id !== id));

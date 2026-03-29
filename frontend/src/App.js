@@ -20,6 +20,7 @@ import FAQ from "./pages/FAQ";
 import TermsOfService from "./pages/TermsOfService";
 import CookiePolicy from "./pages/CookiePolicy";
 import { Toaster } from "./components/ui/toaster";
+import { getToken, getCurrentUser, logout } from "./utils/auth";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -27,10 +28,10 @@ function App() {
 
   useEffect(() => {
     // Check if user is logged in
-    const token = localStorage.getItem('token');
-    const user = localStorage.getItem('currentUser');
+    const token = getToken();
+    const user = getCurrentUser();
     if (token && user) {
-      setCurrentUser(JSON.parse(user));
+      setCurrentUser(user);
       setIsAuthenticated(true);
     }
   }, []);
@@ -41,8 +42,7 @@ function App() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('currentUser');
+    logout();
     setCurrentUser(null);
     setIsAuthenticated(false);
   };
