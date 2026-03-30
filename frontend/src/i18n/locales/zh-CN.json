@@ -13,7 +13,7 @@
     "travelingTo": "前往",
     "purposeOfTravel": "旅行目的",
     "searchVisa": "搜索签证",
-    "visaNeeded": "持{{passport}}护照前往{{destination}}需要签证",
+    "visaNeeded": "持{{passportCountry}}护照前往{{destination}}需要签证",
     "visaOptions": "{{destination}}的签证选项",
     "electronicVisa": "电子签证 (eVisa)",
     "applyOnline": "在线申请",

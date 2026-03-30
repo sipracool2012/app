@@ -13,7 +13,7 @@
     "travelingTo": "Reiser til",
     "purposeOfTravel": "Reisens formål",
     "searchVisa": "Søk visum",
-    "visaNeeded": "Du trenger visum til {{destination}} hvis du har et {{passport}} pass",
+    "visaNeeded": "Du trenger visum til {{destination}} hvis du har et {{passportCountry}} pass",
     "visaOptions": "Visumalternativer for {{destination}}",
     "electronicVisa": "Elektronisk visum (eVisa)",
     "applyOnline": "Søk online",

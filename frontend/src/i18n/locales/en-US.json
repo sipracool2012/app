@@ -32,8 +32,8 @@
     "selectCountry": "Select country",
     "noOptions": "No options available",
     "selectPurpose": "Select purpose",
-    "visaNeeded": "You need a visa for India if you have a {{passport}} passport",
-    "visaRequirements": "Visa requirements for {{passport}} passport holders",
+    "visaNeeded": "You need a visa for {{destination}} if you have a {{passportCountry}} passport",
+    "visaRequirements": "Visa requirements for {{destination}} — {{passportCountry}} passport holders",
     "visaOptionsCount": "Visa options for India ({{count}})",
     "electronicVisa": "Electronic visa (eVisa)",
     "applyOnline": "Apply online",
@@ -167,7 +167,9 @@
       "country": "Country",
       "selectCountry": "Select country",
       "stateProvince": "State/Province/District",
-      "postalCode": "Postal/Zip Code"
+      "postalCode": "Postal/Zip Code",
+      "searchCountries": "Search countries...",
+      "phoneNo": "Phone No."
     },
     "step4": {
       "title": "Family Details",
@@ -196,7 +198,12 @@
       "selectNationality": "Select nationality",
       "selectPrevNationality": "Select if applicable",
       "pakistanConnectionLabel": "Were your Parents/Grandparents Pakistan Nationals or Belong to Pakistan held area?",
-      "pakistanWarningInline": "⚠️ Cannot Proceed - You have indicated a Pakistani passport connection. Please contact the embassy directly for visa processing."
+      "pakistanWarningInline": "⚠️ Cannot Proceed - You have indicated a Pakistani passport connection. Please contact the embassy directly for visa processing.",
+      "single": "Single",
+      "married": "Married",
+      "divorced": "Divorced",
+      "widowed": "Widowed",
+      "searchCountries": "Search countries..."
     },
     "step5": {
       "title": "Professional/Occupation Details",
@@ -209,7 +216,14 @@
       "employerPhone": "Phone",
       "pastOccupation": "Past Occupation if any",
       "militaryService": "Are/were you in a Military/Semi-Military/Police/Security Organization?",
-      "pastOccupationIfAny": "Past occupation if any"
+      "pastOccupationIfAny": "Past occupation if any",
+      "privateService": "Private Service",
+      "governmentService": "Government Service",
+      "selfEmployed": "Self Employed",
+      "studentOcc": "Student",
+      "retired": "Retired",
+      "housewife": "Housewife",
+      "others": "Others"
     },
     "step6": {
       "title": "Visa Details",
@@ -250,7 +264,29 @@
       "organizerDetails": "Organizer Details",
       "citiesPreviouslyVisited": "Cities previously visited in India",
       "lastVisaNoFull": "Last Indian Visa No/Currently valid Indian Visa No",
-      "oldVisaTypeFull": "Old Visa Type"
+      "oldVisaTypeFull": "Old Visa Type",
+      "ayushVisa": "Ayush Visa",
+      "businessVisa": "Business Visa",
+      "conferenceVisa": "Conference Visa",
+      "diplomaticVisa": "Diplomatic Visa",
+      "doubleEntry": "Double Entry",
+      "employmentVisa": "Employment Visa",
+      "entryVisa": "Entry Visa",
+      "eVisa": "e-Visa",
+      "filmVisa": "Film Visa",
+      "journalistVisa": "Journalist Visa",
+      "medicalVisa": "Medical Visa",
+      "missionaryVisa": "Missionary Visa",
+      "mountaineeringVisa": "Mountaineering Visa",
+      "officialVisa": "Official Visa",
+      "pilgrimVisa": "Pilgrimage Visa",
+      "studentVisa": "Student Visa",
+      "touristVisa": "Tourist Visa",
+      "transitVisa": "Transit Visa",
+      "unDiplomat": "UN Diplomat",
+      "unOfficial": "UN Official",
+      "visitVisa": "Visit Visa",
+      "phoneNo": "Phone No."
     },
     "step7": {
       "title": "References",
@@ -261,7 +297,8 @@
       "homeReference": "Reference in Your Home Country",
       "homeReferenceName": "Name of Reference in Home Country",
       "homeReferenceAddress": "Address of Reference in Home Country",
-      "homeReferencePhone": "Phone of Reference in Home Country"
+      "homeReferencePhone": "Phone of Reference in Home Country",
+      "phoneNo": "Phone No."
     },
     "step8": {
       "title": "Additional Questions",
@@ -300,7 +337,29 @@
       "businessDocs": "Business Visa Documents",
       "conferenceDocs": "Conference Visa Documents",
       "medicalDocs": "Medical Visa Documents",
-      "transitDocs": "Transit Visa Documents"
+      "transitDocs": "Transit Visa Documents",
+      "passportCopyLabel": "Passport Copy",
+      "passportCopyHint": "First and last page of passport",
+      "recentPhotoLabel": "Recent Photograph",
+      "recentPhotoHint": "Passport size photo with white background",
+      "indianFirmInvitationLabel": "Invitation Letter from Indian Firm",
+      "indianFirmInvitationHint": "Official invitation letter",
+      "businessCardLabel": "Business Card",
+      "businessCardHint": "Your business card",
+      "organizerInvitationLabel": "Invitation from Organizer",
+      "organizerInvitationHint": "Official invitation letter",
+      "meaClearanceLabel": "Political Clearance from MEA",
+      "meaClearanceHint": "Ministry of External Affairs clearance",
+      "mhaClearanceLabel": "Event Clearance from MHA",
+      "mhaClearanceHint": "Ministry of Home Affairs clearance",
+      "medicalInvitationLabel": "System Generated Medical Invitation Letter",
+      "medicalInvitationHint": "Medical invitation in defined format",
+      "additionalDocLabel": "Additional Document (Optional)",
+      "additionalDocHint": "Any additional medical document",
+      "travelTicketLabel": "Confirmed Travel Ticket",
+      "travelTicketHint": "Ticket to India and onward journey",
+      "destVisaLabel": "Destination Visa or Passport",
+      "destVisaHint": "Visa/entry permit for destination or passport of destination country"
     },
     "step10": {
       "title": "Payment",
@@ -322,7 +381,8 @@
       "noPaymentMethods": "No Payment Methods Available",
       "noPaymentMethodsDesc": "Payment gateways are currently being configured. Please contact support or try again later.",
       "securePayment": "Secure Payment",
-      "securePaymentDesc": "Your payment is secured with 256-bit SSL encryption."
+      "securePaymentDesc": "Your payment is secured with 256-bit SSL encryption.",
+      "paymentNote": "You will be redirected to a secure payment page to complete your transaction."
     }
   },
   "errors": {
@@ -374,7 +434,8 @@
     "loginError": "Invalid email or password",
     "registerSuccess": "Account created successfully!",
     "registerError": "Failed to create account",
-    "passwordMismatch": "Passwords do not match"
+    "passwordMismatch": "Passwords do not match",
+    "yourName": "John Doe"
   },
   "admin": {
     "title": "Admin Panel",
@@ -527,7 +588,11 @@
       "selectCategory": "Select a category",
       "otherWays": "Other Ways to Reach Us",
       "messageSentTitle": "Thank you for your message!",
-      "messageSentDesc": "We'll get back to you as soon as possible."
+      "messageSentDesc": "We'll get back to you as soon as possible.",
+      "yourName": "Your name",
+      "yourEmail": "your@email.com",
+      "howCanWeHelp": "How can we help?",
+      "yourMessage": "Your message here..."
     },
     "faq": {
       "title": "Frequently Asked Questions",

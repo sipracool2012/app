@@ -13,7 +13,7 @@
     "travelingTo": "Bepergian ke",
     "purposeOfTravel": "Tujuan perjalanan",
     "searchVisa": "Cari Visa",
-    "visaNeeded": "Anda memerlukan visa ke {{destination}} jika memiliki paspor {{passport}}",
+    "visaNeeded": "Anda memerlukan visa ke {{destination}} jika memiliki paspor {{passportCountry}}",
     "visaOptions": "Pilihan visa untuk {{destination}}",
     "electronicVisa": "Visa elektronik (eVisa)",
     "applyOnline": "Lamar secara online",

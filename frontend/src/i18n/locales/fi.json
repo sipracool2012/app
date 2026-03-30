@@ -13,7 +13,7 @@
     "travelingTo": "Matkakohde",
     "purposeOfTravel": "Matkan tarkoitus",
     "searchVisa": "Hae viisumia",
-    "visaNeeded": "Tarvitset viisumin kohteeseen {{destination}}, jos sinulla on {{passport}} passi",
+    "visaNeeded": "Tarvitset viisumin kohteeseen {{destination}}, jos sinulla on {{passportCountry}} passi",
     "visaOptions": "Viisumivaihtoehdat kohteeseen {{destination}}",
     "electronicVisa": "Sähköinen viisumi (eVisa)",
     "applyOnline": "Hae verkossa",

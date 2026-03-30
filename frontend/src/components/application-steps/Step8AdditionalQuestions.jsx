@@ -86,8 +86,8 @@ const Step8AdditionalQuestions = ({ data, onNext, onBack }) => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="No">No</SelectItem>
-                  <SelectItem value="Yes">Yes</SelectItem>
+                  <SelectItem value="No">{t('forms.no')}</SelectItem>
+                  <SelectItem value="Yes">{t('forms.yes')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -146,7 +146,7 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
 
             <div className="mt-4 p-4 bg-blue-50 rounded-lg">
               <p className="text-sm text-blue-800">
-                <strong>Note:</strong> You will be redirected to a secure payment page to complete your transaction.
+                <strong>Note:</strong> {t('forms.step10.paymentNote')}
                 Your payment information is processed securely and is never stored on our servers.
               </p>
             </div>

@@ -13,7 +13,7 @@
     "travelingTo": "Reizen naar",
     "purposeOfTravel": "Reisdoel",
     "searchVisa": "Visum zoeken",
-    "visaNeeded": "U heeft een visum nodig voor {{destination}} als u een {{passport}} paspoort heeft",
+    "visaNeeded": "U heeft een visum nodig voor {{destination}} als u een {{passportCountry}} paspoort heeft",
     "visaOptions": "Visum opties voor {{destination}}",
     "electronicVisa": "Elektronisch visum (eVisa)",
     "applyOnline": "Online aanvragen",

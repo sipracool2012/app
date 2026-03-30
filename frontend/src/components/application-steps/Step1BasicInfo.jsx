@@ -315,8 +315,8 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="No">No</SelectItem>
-              <SelectItem value="Yes">Yes</SelectItem>
+              <SelectItem value="No">{t('forms.no')}</SelectItem>
+              <SelectItem value="Yes">{t('forms.yes')}</SelectItem>
             </SelectContent>
           </Select>
         </div>

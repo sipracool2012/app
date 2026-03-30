@@ -13,7 +13,7 @@
     "travelingTo": "သွားရောက်သောနိုင်ငံ",
     "purposeOfTravel": "ခရီးသွားရည်ရွယ်ချက်",
     "searchVisa": "ဗီဇာရှာဖွေမည်",
-    "visaNeeded": "{{passport}} ပတ်စ်ပို့ဖြင့် {{destination}} သို့ သွားရောက်ရန် ဗီဇာလိုအပ်သည်",
+    "visaNeeded": "{{passportCountry}} ပတ်စ်ပို့ဖြင့် {{destination}} သို့ သွားရောက်ရန် ဗီဇာလိုအပ်သည်",
     "visaOptions": "{{destination}} အတွက် ဗီဇာရွေးချယ်မှုများ",
     "electronicVisa": "အီလက်ထရောနစ်ဗီဇာ (eVisa)",
     "applyOnline": "အွန်လိုင်းမှ လျှောက်ထားမည်",

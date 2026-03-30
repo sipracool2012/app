@@ -13,7 +13,7 @@
     "travelingTo": "여행 목적지",
     "purposeOfTravel": "여행 목적",
     "searchVisa": "비자 검색",
-    "visaNeeded": "{{passport}} 여권 소지자는 {{destination}} 입국 시 비자가 필요합니다",
+    "visaNeeded": "{{passportCountry}} 여권 소지자는 {{destination}} 입국 시 비자가 필요합니다",
     "visaOptions": "{{destination}} 비자 옵션",
     "electronicVisa": "전자비자 (eVisa)",
     "applyOnline": "온라인 신청",

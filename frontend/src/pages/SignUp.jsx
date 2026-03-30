@@ -87,7 +87,7 @@ const SignUp = () => {
                 <Input
                   id="fullName"
                   type="text"
-                  placeholder="John Doe"
+                  placeholder={t('auth.yourName')}
                   className="pl-10"
                   value={formData.fullName}
                   onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}

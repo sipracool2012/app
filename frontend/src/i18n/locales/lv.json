@@ -13,7 +13,7 @@
     "travelingTo": "Ceļojums uz",
     "purposeOfTravel": "Ceļojuma mērķis",
     "searchVisa": "Meklēt vīzu",
-    "visaNeeded": "Jums ir nepieciešama vīza, lai dotos uz {{destination}}, ja jums ir {{passport}} pase",
+    "visaNeeded": "Jums ir nepieciešama vīza, lai dotos uz {{destination}}, ja jums ir {{passportCountry}} pase",
     "visaOptions": "Vīzu iespējas {{destination}}",
     "electronicVisa": "Elektroniskā vīza (eVīza)",
     "applyOnline": "Pieteikties tiešsaistē",

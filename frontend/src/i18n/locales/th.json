@@ -13,7 +13,7 @@
     "travelingTo": "เดินทางไปยัง",
     "purposeOfTravel": "วัตถุประสงค์การเดินทาง",
     "searchVisa": "ค้นหาวีซ่า",
-    "visaNeeded": "คุณต้องมีวีซ่าสำหรับ {{destination}} ด้วยหนังสือเดินทาง {{passport}}",
+    "visaNeeded": "คุณต้องมีวีซ่าสำหรับ {{destination}} ด้วยหนังสือเดินทาง {{passportCountry}}",
     "visaOptions": "ตัวเลือกวีซ่าสำหรับ {{destination}}",
     "electronicVisa": "วีซ่าอิเล็กทรอนิกส์ (eVisa)",
     "applyOnline": "สมัครออนไลน์",

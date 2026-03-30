@@ -91,12 +91,12 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
 
         {/* Country */}
         <SearchableSelect
-          label="Country"
+          label={t('forms.step3.country')}
           value={formData.country}
           onValueChange={(value) => setFormData({ ...formData, country: value })}
           options={countries}
-          placeholder="Select country"
-          searchPlaceholder="Search countries..."
+          placeholder={t('forms.step3.selectCountry')}
+          searchPlaceholder={t('forms.step3.searchCountries')}
           required
         />
 
@@ -129,7 +129,7 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
         {/* Phone Number with Country Code */}
         <div className="md:col-span-2">
           <PhoneInput
-            label="Phone No."
+            label={t('forms.step3.phoneNo')}
             countryCode={formData.phoneCountryCode}
             phoneNumber={formData.phoneNumber}
             onCountryCodeChange={(value) => setFormData({ ...formData, phoneCountryCode: value })}

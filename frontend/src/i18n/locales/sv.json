@@ -13,7 +13,7 @@
     "travelingTo": "Reser till",
     "purposeOfTravel": "Resans syfte",
     "searchVisa": "Sök visum",
-    "visaNeeded": "Du behöver visum till {{destination}} med ett {{passport}} pass",
+    "visaNeeded": "Du behöver visum till {{destination}} med ett {{passportCountry}} pass",
     "visaOptions": "Visumalternativ för {{destination}}",
     "electronicVisa": "Elektroniskt visum (eVisa)",
     "applyOnline": "Ansök online",

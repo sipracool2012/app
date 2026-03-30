@@ -13,7 +13,7 @@
     "travelingTo": "Viajando a",
     "purposeOfTravel": "Propósito del viaje",
     "searchVisa": "Buscar visado",
-    "visaNeeded": "Necesitas un visado para {{destination}} si tienes pasaporte de {{passport}}",
+    "visaNeeded": "Necesitas un visado para {{destination}} si tienes pasaporte de {{passportCountry}}",
     "visaOptions": "Opciones de visado para {{destination}}",
     "electronicVisa": "Visado electrónico (eVisa)",
     "applyOnline": "Solicitar en línea",

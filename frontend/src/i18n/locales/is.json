@@ -13,7 +13,7 @@
     "travelingTo": "Ferðast til",
     "purposeOfTravel": "Tilgangur ferðar",
     "searchVisa": "Leita að vegabréfsáritun",
-    "visaNeeded": "Þú þarft vegabréfsáritun til {{destination}} ef þú ert með {{passport}} vegabréf",
+    "visaNeeded": "Þú þarft vegabréfsáritun til {{destination}} ef þú ert með {{passportCountry}} vegabréf",
     "visaOptions": "Vegabréfsáritunarval fyrir {{destination}}",
     "electronicVisa": "Rafræn vegabréfsáritun (eVisa)",
     "applyOnline": "Sækja um á netinu",

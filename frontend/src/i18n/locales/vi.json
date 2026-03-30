@@ -13,7 +13,7 @@
     "travelingTo": "Đến",
     "purposeOfTravel": "Mục đích du lịch",
     "searchVisa": "Tìm kiếm visa",
-    "visaNeeded": "Bạn cần visa tới {{destination}} với hộ chiếu {{passport}}",
+    "visaNeeded": "Bạn cần visa tới {{destination}} với hộ chiếu {{passportCountry}}",
     "visaOptions": "Tùy chọn visa cho {{destination}}",
     "electronicVisa": "Visa điện tử (eVisa)",
     "applyOnline": "Đăng ký trực tuyến",

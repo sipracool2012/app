@@ -13,7 +13,7 @@
     "travelingTo": "Gidilen Yer",
     "purposeOfTravel": "Seyahat Amacı",
     "searchVisa": "Vize Ara",
-    "visaNeeded": "{{passport}} pasaportunuzla {{destination}} için vize gerekiyor",
+    "visaNeeded": "{{passportCountry}} pasaportunuzla {{destination}} için vize gerekiyor",
     "visaOptions": "{{destination}} için vize seçenekleri",
     "electronicVisa": "Elektronik Vize (eVisa)",
     "applyOnline": "Çevrimiçi Başvur",

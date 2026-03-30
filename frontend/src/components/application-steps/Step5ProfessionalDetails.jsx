@@ -36,13 +36,13 @@ const Step5ProfessionalDetails = ({ data, onNext, onBack }) => {
               <SelectValue placeholder={t('forms.step5.selectOccupation')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Private service">Private Service</SelectItem>
-              <SelectItem value="Government service">Government Service</SelectItem>
-              <SelectItem value="Self employed">Self Employed</SelectItem>
-              <SelectItem value="Student">Student</SelectItem>
-              <SelectItem value="Retired">Retired</SelectItem>
-              <SelectItem value="Housewife">Housewife</SelectItem>
-              <SelectItem value="Others">Others</SelectItem>
+              <SelectItem value="Private service">{t('forms.step5.privateService')}</SelectItem>
+              <SelectItem value="Government service">{t('forms.step5.governmentService')}</SelectItem>
+              <SelectItem value="Self employed">{t('forms.step5.selfEmployed')}</SelectItem>
+              <SelectItem value="Student">{t('forms.step5.studentOcc')}</SelectItem>
+              <SelectItem value="Retired">{t('forms.step5.retired')}</SelectItem>
+              <SelectItem value="Housewife">{t('forms.step5.housewife')}</SelectItem>
+              <SelectItem value="Others">{t('forms.step5.others')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -102,8 +102,8 @@ const Step5ProfessionalDetails = ({ data, onNext, onBack }) => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="No">No</SelectItem>
-              <SelectItem value="Yes">Yes</SelectItem>
+              <SelectItem value="No">{t('forms.no')}</SelectItem>
+              <SelectItem value="Yes">{t('forms.yes')}</SelectItem>
             </SelectContent>
           </Select>
         </div>

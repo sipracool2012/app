@@ -113,7 +113,7 @@ export default function ContactUs() {
                     onChange={handleChange}
                     required
                     className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-600"
-                    placeholder="Your name"
+                    placeholder={t('pages.contact.yourName')}
                   />
                 </div>
 
@@ -160,7 +160,7 @@ export default function ContactUs() {
                     onChange={handleChange}
                     required
                     className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-600"
-                    placeholder="How can we help?"
+                    placeholder={t('pages.contact.howCanWeHelp')}
                   />
                 </div>
 
@@ -174,7 +174,7 @@ export default function ContactUs() {
                     required
                     rows="5"
                     className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-600"
-                    placeholder="Your message here..."
+                    placeholder={t('pages.contact.yourMessage')}
                   ></textarea>
                 </div>
 

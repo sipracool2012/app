@@ -176,8 +176,8 @@ const Step2ApplicantDetails = ({ data, onNext, onBack }) => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Yes">Yes</SelectItem>
-              <SelectItem value="No">No</SelectItem>
+              <SelectItem value="Yes">{t('forms.yes')}</SelectItem>
+              <SelectItem value="No">{t('forms.no')}</SelectItem>
             </SelectContent>
           </Select>
         </div>

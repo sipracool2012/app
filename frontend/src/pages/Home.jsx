@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Search, Check, ArrowRight, Clock, Info } from 'lucide-react';
+import { Search, ArrowRight, Clock, Info } from 'lucide-react';
+import { FlagIcon } from '../components/ui/FlagIcon';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
@@ -129,7 +130,10 @@ const Home = () => {
                       <SelectContent className="max-h-[300px]">
                         {enabledCountries.map((country) => (
                           <SelectItem key={country.code} value={country.code}>
-                            {country.flag} {country.name}
+                            <span className="flex items-center gap-2">
+                              <FlagIcon code={country.code} width={16} height={12} />
+                              {country.name}
+                            </span>
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -139,8 +143,9 @@ const Home = () => {
                   {/* Fixed India Destination */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">{t('home.travelingTo')}</label>
-                    <div className="w-full h-10 px-3 py-2 border rounded-md bg-gray-50 flex items-center text-gray-700">
-                      🇮🇳 India
+                    <div className="w-full h-10 px-3 py-2 border rounded-md bg-gray-50 flex items-center gap-2 text-gray-700">
+                      <FlagIcon code="IN" width={16} height={12} />
+                      India
                     </div>
                   </div>
                 </div>
@@ -177,8 +182,8 @@ const Home = () => {
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900 mb-4">
                     {hasEvisaOptions 
-                      ? t('home.visaNeeded', { passport: getSelectedCountryName() })
-                      : t('home.visaRequirements', { passport: getSelectedCountryName() })
+                      ? t('home.visaNeeded', { destination: 'India', passportCountry: getSelectedCountryName() })
+                      : t('home.visaRequirements', { destination: 'India', passportCountry: getSelectedCountryName() })
                     }
                   </h1>
                   <p className="text-gray-600 text-lg">

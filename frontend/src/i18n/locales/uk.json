@@ -13,7 +13,7 @@
     "travelingTo": "Подорожую до",
     "purposeOfTravel": "Мета подорожі",
     "searchVisa": "Шукати візу",
-    "visaNeeded": "Вам потрібна віза до {{destination}} з паспортом {{passport}}",
+    "visaNeeded": "Вам потрібна віза до {{destination}} з паспортом {{passportCountry}}",
     "visaOptions": "Варіанти візи для {{destination}}",
     "electronicVisa": "Електронна віза (eVisa)",
     "applyOnline": "Подати заявку онлайн",

@@ -120,8 +120,8 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="No">No</SelectItem>
-              <SelectItem value="Yes">Yes</SelectItem>
+              <SelectItem value="No">{t('forms.no')}</SelectItem>
+              <SelectItem value="Yes">{t('forms.yes')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -143,8 +143,8 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="No">No</SelectItem>
-              <SelectItem value="Yes">Yes</SelectItem>
+              <SelectItem value="No">{t('forms.no')}</SelectItem>
+              <SelectItem value="Yes">{t('forms.yes')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -199,27 +199,27 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
                   <SelectValue placeholder="Select old visa type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Ayush Visa">Ayush Visa</SelectItem>
-                  <SelectItem value="Business Visa">Business Visa</SelectItem>
-                  <SelectItem value="Conference Visa">Conference Visa</SelectItem>
-                  <SelectItem value="Diplomatic Visa">Diplomatic Visa</SelectItem>
-                  <SelectItem value="Double Entry">Double Entry</SelectItem>
-                  <SelectItem value="Employment Visa">Employment Visa</SelectItem>
-                  <SelectItem value="Entry Visa">Entry Visa</SelectItem>
-                  <SelectItem value="e-Visa">e-Visa</SelectItem>
-                  <SelectItem value="Film Visa">Film Visa</SelectItem>
-                  <SelectItem value="Journalist Visa">Journalist Visa</SelectItem>
-                  <SelectItem value="Medical Visa">Medical Visa</SelectItem>
-                  <SelectItem value="Missionary Visa">Missionary Visa</SelectItem>
-                  <SelectItem value="Mountaineering Visa">Mountaineering Visa</SelectItem>
-                  <SelectItem value="Official Visa">Official Visa</SelectItem>
-                  <SelectItem value="Pilgrimes Visa">Pilgrimes Visa</SelectItem>
-                  <SelectItem value="Student Visa">Student Visa</SelectItem>
-                  <SelectItem value="Tourist Visa">Tourist Visa</SelectItem>
-                  <SelectItem value="Transit Visa">Transit Visa</SelectItem>
-                  <SelectItem value="UN Diplomat">UN Diplomat</SelectItem>
-                  <SelectItem value="UN Official">UN Official</SelectItem>
-                  <SelectItem value="Visit Visa">Visit Visa</SelectItem>
+                  <SelectItem value="Ayush Visa">{t('forms.step6.ayushVisa')}</SelectItem>
+                  <SelectItem value="Business Visa">{t('forms.step6.businessVisa')}</SelectItem>
+                  <SelectItem value="Conference Visa">{t('forms.step6.conferenceVisa')}</SelectItem>
+                  <SelectItem value="Diplomatic Visa">{t('forms.step6.diplomaticVisa')}</SelectItem>
+                  <SelectItem value="Double Entry">{t('forms.step6.doubleEntry')}</SelectItem>
+                  <SelectItem value="Employment Visa">{t('forms.step6.employmentVisa')}</SelectItem>
+                  <SelectItem value="Entry Visa">{t('forms.step6.entryVisa')}</SelectItem>
+                  <SelectItem value="e-Visa">{t('forms.step6.eVisa')}</SelectItem>
+                  <SelectItem value="Film Visa">{t('forms.step6.filmVisa')}</SelectItem>
+                  <SelectItem value="Journalist Visa">{t('forms.step6.journalistVisa')}</SelectItem>
+                  <SelectItem value="Medical Visa">{t('forms.step6.medicalVisa')}</SelectItem>
+                  <SelectItem value="Missionary Visa">{t('forms.step6.missionaryVisa')}</SelectItem>
+                  <SelectItem value="Mountaineering Visa">{t('forms.step6.mountaineeringVisa')}</SelectItem>
+                  <SelectItem value="Official Visa">{t('forms.step6.officialVisa')}</SelectItem>
+                  <SelectItem value="Pilgrimes Visa">{t('forms.step6.pilgrimVisa')}</SelectItem>
+                  <SelectItem value="Student Visa">{t('forms.step6.studentVisa')}</SelectItem>
+                  <SelectItem value="Tourist Visa">{t('forms.step6.touristVisa')}</SelectItem>
+                  <SelectItem value="Transit Visa">{t('forms.step6.transitVisa')}</SelectItem>
+                  <SelectItem value="UN Diplomat">{t('forms.step6.unDiplomat')}</SelectItem>
+                  <SelectItem value="UN Official">{t('forms.step6.unOfficial')}</SelectItem>
+                  <SelectItem value="Visit Visa">{t('forms.step6.visitVisa')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -280,8 +280,8 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="No">No</SelectItem>
-              <SelectItem value="Yes">Yes</SelectItem>
+              <SelectItem value="No">{t('forms.no')}</SelectItem>
+              <SelectItem value="Yes">{t('forms.yes')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -319,7 +319,7 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
 
             <div className="md:col-span-2">
               <PhoneInput
-                label="Phone no"
+                label={t('forms.step6.phoneNo')}
                 countryCode={formData.companyPhoneCountryCode}
                 phoneNumber={formData.companyPhoneNumber}
                 onCountryCodeChange={(value) => setFormData({ ...formData, companyPhoneCountryCode: value })}
@@ -372,7 +372,7 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
 
             <div className="md:col-span-2">
               <PhoneInput
-                label="Phone no"
+                label={t('forms.step6.phoneNo')}
                 countryCode={formData.indianFirmPhoneCountryCode}
                 phoneNumber={formData.indianFirmPhoneNumber}
                 onCountryCodeChange={(value) => setFormData({ ...formData, indianFirmPhoneCountryCode: value })}
@@ -485,7 +485,7 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
 
             <div className="md:col-span-2">
               <PhoneInput
-                label="Phone no"
+                label={t('forms.step6.phoneNo')}
                 countryCode={formData.organizerPhoneCountryCode}
                 phoneNumber={formData.organizerPhoneNumber}
                 onCountryCodeChange={(value) => setFormData({ ...formData, organizerPhoneCountryCode: value })}

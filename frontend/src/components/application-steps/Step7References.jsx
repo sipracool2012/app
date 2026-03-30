@@ -92,7 +92,7 @@ const Step7References = ({ data, onNext, onBack }) => {
 
             <div className="md:col-span-2">
               <PhoneInput
-                label="Phone No."
+                label={t('forms.step7.phoneNo')}
                 countryCode={formData.indiaReferencePhoneCountryCode}
                 phoneNumber={formData.indiaReferencePhoneNumber}
                 onCountryCodeChange={(value) => setFormData({ ...formData, indiaReferencePhoneCountryCode: value })}
@@ -135,7 +135,7 @@ const Step7References = ({ data, onNext, onBack }) => {
 
             <div className="md:col-span-2">
               <PhoneInput
-                label="Phone No."
+                label={t('forms.step7.phoneNo')}
                 countryCode={formData.homeReferencePhoneCountryCode}
                 phoneNumber={formData.homeReferencePhoneNumber}
                 onCountryCodeChange={(value) => setFormData({ ...formData, homeReferencePhoneCountryCode: value })}

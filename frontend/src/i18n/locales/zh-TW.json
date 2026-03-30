@@ -13,7 +13,7 @@
     "travelingTo": "前往",
     "purposeOfTravel": "旅遊目的",
     "searchVisa": "搜尋簽證",
-    "visaNeeded": "持{{passport}}護照前往{{destination}}需要簽證",
+    "visaNeeded": "持{{passportCountry}}護照前往{{destination}}需要簽證",
     "visaOptions": "{{destination}}的簽證選項",
     "electronicVisa": "電子簽證 (eVisa)",
     "applyOnline": "線上申請",

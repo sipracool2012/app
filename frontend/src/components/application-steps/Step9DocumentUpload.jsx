@@ -191,14 +191,14 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
 
         <DocumentUploadField
           fieldName="passportDocument"
-          label="Passport Copy"
-          description="First and last page of passport"
+          label={t('forms.step9.passportCopyLabel')}
+          description={t('forms.step9.passportCopyHint')}
         />
 
         <DocumentUploadField
           fieldName="photoDocument"
-          label="Recent Photograph"
-          description="Passport size photo with white background"
+          label={t('forms.step9.recentPhotoLabel')}
+          description={t('forms.step9.recentPhotoHint')}
         />
 
         {/* Business Visa Specific Documents */}
@@ -210,14 +210,14 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
 
             <DocumentUploadField
               fieldName="businessLetter"
-              label="Invitation Letter from Indian Firm"
-              description="Official invitation letter"
+              label={t('forms.step9.indianFirmInvitationLabel')}
+              description={t('forms.step9.indianFirmInvitationHint')}
             />
 
             <DocumentUploadField
               fieldName="businessCard"
-              label="Business Card"
-              description="Your business card"
+              label={t('forms.step9.businessCardLabel')}
+              description={t('forms.step9.businessCardHint')}
             />
           </>
         )}
@@ -231,20 +231,20 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
 
             <DocumentUploadField
               fieldName="organizerInvitation"
-              label="Invitation from Organizer"
-              description="Official invitation letter"
+              label={t('forms.step9.organizerInvitationLabel')}
+              description={t('forms.step9.organizerInvitationHint')}
             />
 
             <DocumentUploadField
               fieldName="meaPoliticalClearance"
-              label="Political Clearance from MEA"
-              description="Ministry of External Affairs clearance"
+              label={t('forms.step9.meaClearanceLabel')}
+              description={t('forms.step9.meaClearanceHint')}
             />
 
             <DocumentUploadField
               fieldName="mhaEventClearance"
-              label="Event Clearance from MHA"
-              description="Ministry of Home Affairs clearance"
+              label={t('forms.step9.mhaClearanceLabel')}
+              description={t('forms.step9.mhaClearanceHint')}
             />
           </>
         )}
@@ -258,14 +258,14 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
 
             <DocumentUploadField
               fieldName="medicalInvitationLetter"
-              label="System Generated Medical Invitation Letter"
-              description="Medical invitation in defined format"
+              label={t('forms.step9.medicalInvitationLabel')}
+              description={t('forms.step9.medicalInvitationHint')}
             />
 
             <DocumentUploadField
               fieldName="medicalDocument4"
-              label="Additional Document (Optional)"
-              description="Any additional medical document"
+              label={t('forms.step9.additionalDocLabel')}
+              description={t('forms.step9.additionalDocHint')}
               required={false}
             />
           </>
@@ -280,14 +280,14 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
 
             <DocumentUploadField
               fieldName="confirmedTravelTicket"
-              label="Confirmed Travel Ticket"
-              description="Ticket to India and onward journey"
+              label={t('forms.step9.travelTicketLabel')}
+              description={t('forms.step9.travelTicketHint')}
             />
 
             <DocumentUploadField
               fieldName="destinationVisaOrPassport"
-              label="Destination Visa or Passport"
-              description="Visa/entry permit for destination or passport of destination country"
+              label={t('forms.step9.destVisaLabel')}
+              description={t('forms.step9.destVisaHint')}
             />
           </>
         )}
