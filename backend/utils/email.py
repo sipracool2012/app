@@ -1,55 +1,65 @@
 import os
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from typing import Optional
 import logging
+import mailchimp_transactional
+from mailchimp_transactional.api_client import ApiClientError
 
 logger = logging.getLogger(__name__)
 
-# Email Configuration
-SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
-SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
-SMTP_USER = os.environ.get("SMTP_USER", "")
-SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
-FROM_EMAIL = os.environ.get("FROM_EMAIL", SMTP_USER)
+# Mandrill (Mailchimp Transactional) Configuration
+MANDRILL_API_KEY = os.environ.get("MANDRILL_API_KEY", "")
+FROM_EMAIL = os.environ.get("FROM_EMAIL", "no-reply@clearevisa.com")
+FROM_NAME = os.environ.get("FROM_NAME", "Clear eVisa")
+
 
 def send_email(to_email: str, subject: str, html_content: str) -> bool:
     """
-    Send email using SMTP
+    Send a transactional email via the Mandrill API.
+
     Args:
         to_email: Recipient email address
-        subject: Email subject
-        html_content: HTML email body
+        subject: Email subject line
+        html_content: HTML body of the email
     Returns:
-        True if sent successfully, False otherwise
+        True if the message was queued/sent successfully, False otherwise
     """
-    if not SMTP_USER or not SMTP_PASSWORD:
-        logger.warning("SMTP credentials not configured, skipping email")
+    if not MANDRILL_API_KEY:
+        logger.warning("MANDRILL_API_KEY not configured – skipping email send")
         return False
-    
+
     try:
-        # Create message
-        message = MIMEMultipart('alternative')
-        message['Subject'] = subject
-        message['From'] = FROM_EMAIL
-        message['To'] = to_email
-        
-        # Attach HTML content
-        html_part = MIMEText(html_content, 'html')
-        message.attach(html_part)
-        
-        # Send email
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-            server.starttls()
-            server.login(SMTP_USER, SMTP_PASSWORD)
-            server.send_message(message)
-        
-        logger.info(f"Email sent successfully to {to_email}")
-        return True
-    
+        client = mailchimp_transactional.Client(MANDRILL_API_KEY)
+
+        message = {
+            "from_email": FROM_EMAIL,
+            "from_name": FROM_NAME,
+            "to": [{"email": to_email, "type": "to"}],
+            "subject": subject,
+            "html": html_content,
+            "track_opens": True,
+            "track_clicks": True,
+            "auto_text": True,
+        }
+
+        response = client.messages.send({"message": message})
+
+        # response is a list; each item has a 'status' field
+        if isinstance(response, list) and response:
+            sent_status = response[0].get("status")
+            if sent_status in ("sent", "queued", "scheduled"):
+                logger.info(f"Email sent via Mandrill to {to_email} (status: {sent_status})")
+                return True
+            else:
+                logger.warning(f"Mandrill returned unexpected status '{sent_status}' for {to_email}")
+                return False
+
+        logger.warning(f"Unexpected Mandrill response format: {response}")
+        return False
+
+    except ApiClientError as e:
+        logger.error(f"Mandrill API error sending to {to_email}: {e.text}")
+        return False
     except Exception as e:
-        logger.error(f"Failed to send email: {e}")
+        logger.error(f"Failed to send email to {to_email}: {e}")
         return False
 
 def send_application_confirmation(to_email: str, application_id: str, applicant_name: str) -> bool:
