@@ -30,6 +30,18 @@ class TokenResponse(BaseModel):
 class UserRoleUpdate(BaseModel):
     role: str  # user, admin, super_admin
 
+
+class OTPVerifyRequest(BaseModel):
+    """Request body for /api/auth/verify-otp."""
+    email: EmailStr
+    otp: str
+
+
+class LoginInitiateResponse(BaseModel):
+    """Returned by /api/auth/login when OTP has been dispatched."""
+    otp_required: bool = True
+    message: str
+
 class User(BaseModel):
     id: Optional[str] = Field(alias="_id", default=None)
     fullName: str

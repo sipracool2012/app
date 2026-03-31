@@ -156,7 +156,7 @@ async def create_application(
     # Send confirmation email
     try:
         applicant_name = f"{application_data.givenNames} {application_data.surname}"
-        send_application_confirmation(
+        await send_application_confirmation(
             to_email=application_data.email,
             application_id=application_id,
             applicant_name=applicant_name
@@ -239,7 +239,7 @@ async def update_application_status(
     if status_update.status in ["approved", "rejected"]:
         try:
             applicant_name = f"{application['givenNames']} {application['surname']}"
-            send_application_status_update(
+            await send_application_status_update(
                 to_email=application["email"],
                 application_id=application_id,
                 applicant_name=applicant_name,

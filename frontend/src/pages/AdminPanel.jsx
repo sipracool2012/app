@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download, Filter, Search, Eye, Settings, Globe, Save, ChevronDown, ChevronUp, CreditCard, Users, AlertTriangle } from 'lucide-react';
+import { Download, Filter, Search, Eye, Settings, Globe, Save, ChevronDown, ChevronUp, CreditCard, Users, AlertTriangle, Mail } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
@@ -13,6 +13,7 @@ import { Switch } from '../components/ui/switch';
 import { Label } from '../components/ui/label';
 import PaymentGatewaySettings from '../components/admin/PaymentGatewaySettings';
 import UserManagement from '../components/admin/UserManagement';
+import EmailProviderSettings from '../components/admin/EmailProviderSettings';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -378,21 +379,34 @@ const AdminPanel = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className={`grid w-full ${currentUser?.role === 'super_admin' ? 'max-w-4xl grid-cols-4' : 'max-w-md grid-cols-2'}`}>
+          {/* Super Admin sees 5 tabs; regular Admin sees 1 tab (Applications only) */}
+          <TabsList className={`grid w-full ${currentUser?.role === 'super_admin' ? 'max-w-5xl grid-cols-5' : 'max-w-xs grid-cols-1'}`}>
             <TabsTrigger value="applications" className="flex items-center gap-2">
               <Eye className="w-4 h-4" />
               Applications
             </TabsTrigger>
-            <TabsTrigger value="countries" className="flex items-center gap-2">
-              <Globe className="w-4 h-4" />
-              Country Config
-            </TabsTrigger>
+            {/* Country Config — Super Admin only */}
+            {currentUser?.role === 'super_admin' && (
+              <TabsTrigger value="countries" className="flex items-center gap-2">
+                <Globe className="w-4 h-4" />
+                Country Config
+              </TabsTrigger>
+            )}
+            {/* Payment Gateways — Super Admin only */}
             {currentUser?.role === 'super_admin' && (
               <TabsTrigger value="payment-gateways" className="flex items-center gap-2">
                 <CreditCard className="w-4 h-4" />
                 Payment Gateways
               </TabsTrigger>
             )}
+            {/* Email Providers — Super Admin only */}
+            {currentUser?.role === 'super_admin' && (
+              <TabsTrigger value="email-providers" className="flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                Email Providers
+              </TabsTrigger>
+            )}
+            {/* User Management — Super Admin only */}
             {currentUser?.role === 'super_admin' && (
               <TabsTrigger value="users" className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
@@ -554,8 +568,8 @@ const AdminPanel = () => {
             </Card>
           </TabsContent>
 
-          {/* Country Configuration Tab */}
-          <TabsContent value="countries" className="space-y-6">
+          {/* Country Configuration Tab — Super Admin only */}
+          {currentUser?.role === 'super_admin' && <TabsContent value="countries" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -990,11 +1004,19 @@ const AdminPanel = () => {
               </CardContent>
             </Card>
           </TabsContent>
+          }
 
-          {/* Payment Gateway Settings Tab */}
+          {/* Payment Gateway Settings Tab — Super Admin only */}
           {currentUser?.role === 'super_admin' && (
             <TabsContent value="payment-gateways" className="space-y-6">
               <PaymentGatewaySettings />
+            </TabsContent>
+          )}
+
+          {/* Email Providers Tab — Super Admin only */}
+          {currentUser?.role === 'super_admin' && (
+            <TabsContent value="email-providers" className="space-y-6">
+              <EmailProviderSettings />
             </TabsContent>
           )}
 

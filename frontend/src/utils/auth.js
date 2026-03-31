@@ -16,7 +16,16 @@ export const setCurrentUser = (user) => {
 
 export const getCurrentUser = () => {
   const user = localStorage.getItem('currentUser');
-  return user ? JSON.parse(user) : null;
+  if (!user || user === 'undefined' || user === 'null') {
+    localStorage.removeItem('currentUser'); // clean up any corrupted value
+    return null;
+  }
+  try {
+    return JSON.parse(user);
+  } catch {
+    localStorage.removeItem('currentUser'); // clean up unparseable value
+    return null;
+  }
 };
 
 export const removeCurrentUser = () => {

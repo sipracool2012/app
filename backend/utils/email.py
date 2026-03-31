@@ -1,68 +1,66 @@
-import os
+"""
+Email utility helpers
+======================
+All transactional email delivery is delegated to the unified email provider
+dispatcher (utils.email_providers), which supports Mandrill, SendPulse, and
+Postmark with automatic fallback.
+
+# CHANGELOG REMINDER: Update CHANGELOG.md when adding or changing email templates.
+"""
+
 import logging
-import mailchimp_transactional
-from mailchimp_transactional.api_client import ApiClientError
 
 logger = logging.getLogger(__name__)
 
-# Mandrill (Mailchimp Transactional) Configuration
-MANDRILL_API_KEY = os.environ.get("MANDRILL_API_KEY", "")
-FROM_EMAIL = os.environ.get("FROM_EMAIL", "no-reply@clearevisa.com")
-FROM_NAME = os.environ.get("FROM_NAME", "Clear eVisa")
 
-
-def send_email(to_email: str, subject: str, html_content: str) -> bool:
+async def send_email(to_email: str, subject: str, html_content: str) -> bool:
     """
-    Send a transactional email via the Mandrill API.
-
-    Args:
-        to_email: Recipient email address
-        subject: Email subject line
-        html_content: HTML body of the email
-    Returns:
-        True if the message was queued/sent successfully, False otherwise
+    Send a transactional email via the active provider chain.
+    Delegates to the unified dispatcher in utils.email_providers.
     """
-    if not MANDRILL_API_KEY:
-        logger.warning("MANDRILL_API_KEY not configured – skipping email send")
-        return False
+    from utils.email_providers import send_email_via_providers
+    return await send_email_via_providers(to_email, subject, html_content)
 
-    try:
-        client = mailchimp_transactional.Client(MANDRILL_API_KEY)
 
-        message = {
-            "from_email": FROM_EMAIL,
-            "from_name": FROM_NAME,
-            "to": [{"email": to_email, "type": "to"}],
-            "subject": subject,
-            "html": html_content,
-            "track_opens": True,
-            "track_clicks": True,
-            "auto_text": True,
-        }
+async def send_otp_email(to_email: str, otp: str, full_name: str) -> bool:
+    """
+    Send an OTP (one-time password) email for sign-in verification.
+    The OTP is valid for 5 minutes.
+    """
+    subject = "Your Clear eVisa Sign-In Verification Code"
+    html_content = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background-color: #2563eb; padding: 20px; text-align: center;">
+                <h1 style="color: white; margin: 0;">Clear eVisa&deg;</h1>
+            </div>
+            <div style="padding: 30px; background-color: #f9fafb;">
+                <h2 style="color: #1f2937;">Sign-In Verification</h2>
+                <p style="color: #4b5563; font-size: 16px;">Dear {full_name},</p>
+                <p style="color: #4b5563; font-size: 16px;">
+                    Use the following one-time verification code to complete your sign-in.
+                    This code expires in <strong>5 minutes</strong>.
+                </p>
+                <div style="background-color: #dbeafe; border-left: 4px solid #2563eb; padding: 20px; margin: 20px 0; text-align: center;">
+                    <p style="margin: 0; color: #1e40af; font-weight: bold; font-size: 14px;">Your Verification Code</p>
+                    <p style="margin: 10px 0 0 0; color: #1e40af; font-size: 36px; font-weight: bold; letter-spacing: 8px;">{otp}</p>
+                </div>
+                <p style="color: #6b7280; font-size: 14px;">
+                    If you did not attempt to sign in, please ignore this email and ensure your account is secure.
+                </p>
+            </div>
+            <div style="background-color: #1f2937; padding: 20px; text-align: center;">
+                <p style="color: #9ca3af; margin: 0; font-size: 12px;">
+                    &copy; 2026 Clear eVisa. All rights reserved.
+                </p>
+            </div>
+        </body>
+    </html>
+    """
+    return await send_email(to_email, subject, html_content)
 
-        response = client.messages.send({"message": message})
 
-        # response is a list; each item has a 'status' field
-        if isinstance(response, list) and response:
-            sent_status = response[0].get("status")
-            if sent_status in ("sent", "queued", "scheduled"):
-                logger.info(f"Email sent via Mandrill to {to_email} (status: {sent_status})")
-                return True
-            else:
-                logger.warning(f"Mandrill returned unexpected status '{sent_status}' for {to_email}")
-                return False
-
-        logger.warning(f"Unexpected Mandrill response format: {response}")
-        return False
-
-    except ApiClientError as e:
-        logger.error(f"Mandrill API error sending to {to_email}: {e.text}")
-        return False
-    except Exception as e:
-        logger.error(f"Failed to send email to {to_email}: {e}")
-        return False
-
-def send_application_confirmation(to_email: str, application_id: str, applicant_name: str) -> bool:
+async def send_application_confirmation(to_email: str, application_id: str, applicant_name: str) -> bool:
     """
     Send application confirmation email
     """
@@ -101,9 +99,9 @@ def send_application_confirmation(to_email: str, application_id: str, applicant_
         </body>
     </html>
     """
-    return send_email(to_email, subject, html_content)
+    return await send_email(to_email, subject, html_content)
 
-def send_application_status_update(to_email: str, application_id: str, applicant_name: str, status: str) -> bool:
+async def send_application_status_update(to_email: str, application_id: str, applicant_name: str, status: str) -> bool:
     """
     Send application status update email
     """
@@ -152,4 +150,4 @@ def send_application_status_update(to_email: str, application_id: str, applicant
         </body>
     </html>
     """
-    return send_email(to_email, subject, html_content)
+    return await send_email(to_email, subject, html_content)

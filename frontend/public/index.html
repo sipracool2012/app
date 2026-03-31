@@ -22,7 +22,24 @@
         Learn how to configure a non-root public URL by running `npm run build`.
         -->
         <title>Clear eVisa Services</title>
-        <script>window.addEventListener("error",function(e){if(e.error instanceof DOMException&&e.error.name==="DataCloneError"&&e.message&&e.message.includes("PerformanceServerTiming")){e.stopImmediatePropagation();e.preventDefault()}},true);</script>
+        <script>
+          // Polyfill performance.clearMarks for browsers that lack it (fixes PostHog mgt clearMarks error)
+          if(window.performance && !window.performance.clearMarks){
+            window.performance.clearMarks = function(){};
+            window.performance.clearMeasures = function(){};
+            window.performance.clearResourceTimings = function(){};
+          }
+          // Suppress known third-party performance-API errors (PostHog session recorder, DataCloneError)
+          window.addEventListener("error",function(e){
+            var msg = e.message || '';
+            if(e.error instanceof DOMException && e.error.name==="DataCloneError" && msg.includes("PerformanceServerTiming")){
+              e.stopImmediatePropagation(); e.preventDefault(); return;
+            }
+            if(msg.includes("clearMarks") || msg.includes("clearMeasures") || msg.includes("is not a function") && e.filename && e.filename.includes("posthog")){
+              e.stopImmediatePropagation(); e.preventDefault();
+            }
+          },true);
+        </script>
     <!--<script src="https://assets.emergent.sh/scripts/emergent-main.js"></script>-->        </head>
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
