@@ -333,14 +333,33 @@ const AdminPanel = () => {
     }
   };
 
+  // Status workflow
+  // pending   → (system only, set when app is started)
+  // submitted → set when user clicks Pay
+  // paid      → set when payment is confirmed
+  // processed → admin marks as processed
+  // approved  → admin final approval
+  // rejected  → admin final rejection
+  const ALLOWED_TRANSITIONS = {
+    pending:   ['submitted'],           // admin can manually advance if needed
+    submitted: ['paid', 'rejected'],
+    paid:      ['processed', 'rejected'],
+    processed: ['approved', 'rejected'],
+    approved:  [],                      // terminal
+    rejected:  [],                      // terminal
+  };
+
   const getStatusBadge = (status) => {
     const colors = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      approved: 'bg-green-100 text-green-800',
-      rejected: 'bg-red-100 text-red-800'
+      pending:   'bg-yellow-100 text-yellow-800',
+      submitted: 'bg-blue-100 text-blue-800',
+      paid:      'bg-indigo-100 text-indigo-800',
+      processed: 'bg-purple-100 text-purple-800',
+      approved:  'bg-green-100 text-green-800',
+      rejected:  'bg-red-100 text-red-800',
     };
     return (
-      <Badge className={colors[status] || ''}>
+      <Badge className={colors[status] || 'bg-gray-100 text-gray-800'}>
         {status?.toUpperCase()}
       </Badge>
     );
@@ -418,41 +437,61 @@ const AdminPanel = () => {
           {/* Applications Tab */}
           <TabsContent value="applications" className="space-y-6">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">Total Applications</CardTitle>
+                  <CardTitle className="text-xs font-medium text-gray-600">Total</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-3xl font-bold">{applications.length}</p>
+                  <p className="text-2xl font-bold">{applications.length}</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">Pending</CardTitle>
+                  <CardTitle className="text-xs font-medium text-gray-600">Pending</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-3xl font-bold text-yellow-600">
+                  <p className="text-2xl font-bold text-yellow-600">
                     {applications.filter(a => a.status === 'pending').length}
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">Approved</CardTitle>
+                  <CardTitle className="text-xs font-medium text-gray-600">Submitted</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-3xl font-bold text-green-600">
+                  <p className="text-2xl font-bold text-blue-600">
+                    {applications.filter(a => a.status === 'submitted').length}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-xs font-medium text-gray-600">Paid</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold text-indigo-600">
+                    {applications.filter(a => a.status === 'paid').length}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-xs font-medium text-gray-600">Approved</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold text-green-600">
                     {applications.filter(a => a.status === 'approved').length}
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">Rejected</CardTitle>
+                  <CardTitle className="text-xs font-medium text-gray-600">Rejected</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-3xl font-bold text-red-600">
+                  <p className="text-2xl font-bold text-red-600">
                     {applications.filter(a => a.status === 'rejected').length}
                   </p>
                 </CardContent>
@@ -482,6 +521,9 @@ const AdminPanel = () => {
                     <SelectContent>
                       <SelectItem value="all">All Status</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="submitted">Submitted</SelectItem>
+                      <SelectItem value="paid">Paid</SelectItem>
+                      <SelectItem value="processed">Processed</SelectItem>
                       <SelectItem value="approved">Approved</SelectItem>
                       <SelectItem value="rejected">Rejected</SelectItem>
                     </SelectContent>
@@ -536,19 +578,44 @@ const AdminPanel = () => {
                             </TableCell>
                             <TableCell>
                               <div className="flex space-x-2">
-                                <Select
-                                  value={app.status}
-                                  onValueChange={(value) => updateStatus(app.applicationId, value)}
-                                >
-                                  <SelectTrigger className="w-32">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="approved">Approved</SelectItem>
-                                    <SelectItem value="rejected">Rejected</SelectItem>
-                                  </SelectContent>
-                                </Select>
+                                {/* Super admin can move to any status freely.
+                                    Regular admin is restricted to ALLOWED_TRANSITIONS only.
+                                    Terminal statuses (approved/rejected) show a read-only badge for non-super-admins. */}
+                                {currentUser?.role === 'super_admin' || (ALLOWED_TRANSITIONS[app.status] || []).length > 0 ? (
+                                  <Select
+                                    value={app.status}
+                                    onValueChange={(value) => updateStatus(app.applicationId, value)}
+                                  >
+                                    <SelectTrigger className="w-36">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {currentUser?.role === 'super_admin' ? (
+                                        // Super admin sees every status
+                                        ['pending', 'submitted', 'paid', 'processed', 'approved', 'rejected'].map(s => (
+                                          <SelectItem key={s} value={s}>
+                                            {s.charAt(0).toUpperCase() + s.slice(1)}
+                                            {s === app.status ? ' (current)' : ''}
+                                          </SelectItem>
+                                        ))
+                                      ) : (
+                                        // Regular admin: current status as disabled reference + allowed next states only
+                                        <>
+                                          <SelectItem value={app.status} disabled>
+                                            {app.status.charAt(0).toUpperCase() + app.status.slice(1)} (current)
+                                          </SelectItem>
+                                          {(ALLOWED_TRANSITIONS[app.status] || []).map(next => (
+                                            <SelectItem key={next} value={next}>
+                                              {next.charAt(0).toUpperCase() + next.slice(1)}
+                                            </SelectItem>
+                                          ))}
+                                        </>
+                                      )}
+                                    </SelectContent>
+                                  </Select>
+                                ) : (
+                                  getStatusBadge(app.status)
+                                )}
                                 <Button
                                   size="sm"
                                   variant="outline"

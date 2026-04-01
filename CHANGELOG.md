@@ -6,6 +6,36 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-01] - Super Admin unrestricted status override (AdminPanel.jsx)
+
+### Enhanced
+- **Super Admin can set any application status** (`frontend/src/pages/AdminPanel.jsx`)
+  - Super Admin's status dropdown shows all 6 statuses (`pending`, `submitted`, `paid`, `processed`, `approved`, `rejected`) regardless of the current state — allowing corrections and manual overrides.
+  - Regular Admin retains the enforced `ALLOWED_TRANSITIONS` rules; terminal states still show a read-only badge.
+
+---
+
+## [2026-04-01] - Application status workflow with enforced transitions (AdminPanel.jsx)
+
+### Added
+- **Status workflow** (`frontend/src/pages/AdminPanel.jsx`)
+  - Defined five distinct application statuses reflecting the full lifecycle:
+    - `pending` — Application started but not yet submitted (user has not reached the payment step).
+    - `submitted` — User clicked the Pay button.
+    - `paid` — Payment confirmed.
+    - `processed` — Admin has reviewed and processed the application.
+    - `approved` / `rejected` — Admin's final decision (terminal states).
+  - `ALLOWED_TRANSITIONS` map enforces one-way, forward-only status changes. Admins can only move an application to the next valid state(s); backward transitions are impossible via the UI.
+  - Per-row action dropdown shows **only the allowed next statuses** for each application's current state. Once `approved` or `rejected`, the dropdown is replaced by a read-only badge — preventing accidental changes to terminal states.
+  - Stats bar expanded from 4 to 6 cards: Total · Pending · Submitted · Paid · Approved · Rejected.
+  - Status filter dropdown updated to include all 6 statuses.
+  - `getStatusBadge` updated with distinct colours for all statuses: yellow (pending), blue (submitted), indigo (paid), purple (processed), green (approved), red (rejected).
+
+### Notes
+- Status transitions for `submitted` (user pays) and `paid` (payment webhook) are set by the system/payment flow; the AdminPanel enforces the admin-side transitions only (`paid → processed → approved/rejected`).
+
+---
+
 ## [2026-04-01] - SendPulse SMTP fix, admin panel deduplication, and bootstrap OTP fallback
 
 ### Fixed
