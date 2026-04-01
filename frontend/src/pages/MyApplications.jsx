@@ -10,10 +10,92 @@ import { getAuthHeaders } from '../utils/auth';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const statusConfig = {
-  draft: { label: 'Draft', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
-  pending: { label: 'Pending Review', color: 'bg-blue-100 text-blue-800', icon: AlertCircle },
-  approved: { label: 'Approved', color: 'bg-green-100 text-green-800', icon: CheckCircle },
-  rejected: { label: 'Rejected', color: 'bg-red-100 text-red-800', icon: XCircle },
+  draft:     { label: 'Draft',          color: 'bg-yellow-100 text-yellow-800', icon: Clock },
+  pending:   { label: 'Pending Review', color: 'bg-yellow-100 text-yellow-800', icon: AlertCircle },
+  submitted: { label: 'Submitted',      color: 'bg-blue-100 text-blue-800',   icon: AlertCircle },
+  paid:      { label: 'Paid',           color: 'bg-indigo-100 text-indigo-800', icon: CheckCircle },
+  processed: { label: 'Processed',      color: 'bg-purple-100 text-purple-800', icon: AlertCircle },
+  approved:  { label: 'Approved',       color: 'bg-green-100 text-green-800',  icon: CheckCircle },
+  rejected:  { label: 'Rejected',       color: 'bg-red-100 text-red-800',     icon: XCircle },
+};
+
+// Ordered workflow steps shown in the stepper.
+// 'rejected' is handled separately as a terminal branch.
+const WORKFLOW_STEPS = [
+  { key: 'pending',   label: 'Pending' },
+  { key: 'submitted', label: 'Submitted' },
+  { key: 'paid',      label: 'Paid' },
+  { key: 'processed', label: 'Processed' },
+  { key: 'approved',  label: 'Approved' },
+];
+
+const stepIndex = Object.fromEntries(WORKFLOW_STEPS.map((s, i) => [s.key, i]));
+
+/**
+ * Horizontal stepper that visualises where an application sits in the
+ * Pending → Submitted → Paid → Processed → Approved workflow.
+ * Rejected applications show a red terminal indicator instead.
+ */
+const StatusStepper = ({ status }) => {
+  if (status === 'draft') return null;
+
+  const isRejected = status === 'rejected';
+  const currentIdx  = isRejected ? -1 : (stepIndex[status] ?? 0);
+
+  return (
+    <div className="mt-4 px-1">
+      {isRejected ? (
+        <div className="flex items-center gap-2 text-sm text-red-600 font-medium">
+          <XCircle className="w-4 h-4" />
+          Application Rejected
+        </div>
+      ) : (
+        <div className="flex items-center w-full">
+          {WORKFLOW_STEPS.map((step, idx) => {
+            const done    = idx < currentIdx;
+            const active  = idx === currentIdx;
+            const future  = idx > currentIdx;
+
+            return (
+              <React.Fragment key={step.key}>
+                {/* Step node */}
+                <div className="flex flex-col items-center shrink-0">
+                  <div
+                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-colors
+                      ${ done   ? 'bg-blue-600 border-blue-600 text-white'
+                       : active ? 'bg-white border-blue-600 text-blue-600'
+                       :          'bg-white border-gray-300 text-gray-400'}`}
+                  >
+                    {done ? (
+                      <CheckCircle className="w-3.5 h-3.5" />
+                    ) : (
+                      idx + 1
+                    )}
+                  </div>
+                  <span
+                    className={`mt-1 text-xs whitespace-nowrap
+                      ${ done   ? 'text-blue-600 font-medium'
+                       : active ? 'text-blue-700 font-semibold'
+                       :          'text-gray-400'}`}
+                  >
+                    {step.label}
+                  </span>
+                </div>
+
+                {/* Connector line between steps */}
+                {idx < WORKFLOW_STEPS.length - 1 && (
+                  <div
+                    className={`flex-1 h-0.5 mx-1 mb-4 transition-colors
+                      ${done ? 'bg-blue-600' : 'bg-gray-200'}`}
+                  />
+                )}
+              </React.Fragment>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
 };
 
 const MyApplications = () => {
@@ -127,7 +209,9 @@ const MyApplications = () => {
               return (
                 <Card key={app.id} className="hover:shadow-md transition-shadow" data-testid={`application-card-${app.id}`}>
                   <CardContent className="p-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    {/* Status progress stepper — hidden for drafts */}
+                    {app.status !== 'draft' && <StatusStepper status={app.status} />}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 mb-2">
                           <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${status.color}`} data-testid={`status-badge-${app.id}`}>

@@ -6,6 +6,20 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-01] - Application status progress stepper on My Applications page
+
+### Added
+- **`StatusStepper` component** (`frontend/src/pages/MyApplications.jsx`)
+  - Horizontal stepper renders above each non-draft application card on `/my-applications`.
+  - Five ordered nodes: **Pending → Submitted → Paid → Processed → Approved**.
+  - Completed steps shown in solid blue with a checkmark icon; active step shown as a blue-outlined circle; future steps grayed out.
+  - Connector lines between nodes fill blue as steps are completed.
+  - **Rejected** applications display a red `XCircle` terminal indicator instead of the stepper.
+  - Draft applications suppress the stepper entirely (progress bar not relevant pre-submission).
+- Updated `statusConfig` to include `submitted`, `paid`, and `processed` entries with matching badge colours (blue, indigo, purple).
+
+---
+
 ## [2026-04-01] - Super Admin unrestricted status override (AdminPanel.jsx)
 
 ### Enhanced
