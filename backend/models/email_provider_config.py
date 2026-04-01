@@ -22,8 +22,8 @@ class EmailProviderConfig(BaseModel):
 
     # --- SendPulse SMTP ---
     sendpulse_enabled: bool = False
-    sendpulse_smtp_host: str = "smtp.sendpulse.com"
-    sendpulse_smtp_port: int = 465
+    sendpulse_smtp_host: str = "smtp-pulse.com"
+    sendpulse_smtp_port: int = 587  # 465 is blocked on most servers; 587 STARTTLS is the safe default
     sendpulse_smtp_user: str = ""
     sendpulse_smtp_password: str = ""
 

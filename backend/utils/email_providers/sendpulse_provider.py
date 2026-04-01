@@ -35,11 +35,11 @@ class SendPulseProvider:
         # DB config takes precedence; fall back to environment variables.
         self._smtp_host = (
             config.get("sendpulse_smtp_host")
-            or os.environ.get("SENDPULSE_SMTP_HOST", "smtp.sendpulse.com")
+            or os.environ.get("SENDPULSE_SMTP_HOST", "smtp-pulse.com")
         )
         self._smtp_port = int(
             config.get("sendpulse_smtp_port")
-            or os.environ.get("SENDPULSE_SMTP_PORT", 465)
+            or os.environ.get("SENDPULSE_SMTP_PORT", 587)  # 587 STARTTLS; 465 SSL is usually blocked
         )
         self._smtp_user = (
             config.get("sendpulse_smtp_user")
@@ -60,7 +60,9 @@ class SendPulseProvider:
         """Synchronous SMTP send – run via executor to avoid blocking the event loop."""
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
-        msg["From"] = f"{FROM_NAME} <{self._smtp_user}>"
+        # Use the verified sender domain (FROM_EMAIL), not the SMTP login credential.
+        # SendPulse rejects messages where the From domain is not verified in the account.
+        msg["From"] = f"{FROM_NAME} <{FROM_EMAIL}>"
         msg["To"] = to_email
         msg.attach(MIMEText(html_content, "html"))
 
@@ -69,14 +71,14 @@ class SendPulseProvider:
                 # SSL connection
                 with smtplib.SMTP_SSL(self._smtp_host, self._smtp_port, timeout=15) as server:
                     server.login(self._smtp_user, self._smtp_password)
-                    server.sendmail(self._smtp_user, to_email, msg.as_string())
+                    server.sendmail(FROM_EMAIL, to_email, msg.as_string())
             else:
                 # STARTTLS connection (port 587)
                 with smtplib.SMTP(self._smtp_host, self._smtp_port, timeout=15) as server:
                     server.ehlo()
                     server.starttls()
                     server.login(self._smtp_user, self._smtp_password)
-                    server.sendmail(self._smtp_user, to_email, msg.as_string())
+                    server.sendmail(FROM_EMAIL, to_email, msg.as_string())
 
             logger.info(f"[SendPulse] Email sent to {to_email}")
             return True
