@@ -6,6 +6,45 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-01] - SendPulse SMTP fix, admin panel deduplication, and bootstrap OTP fallback
+
+### Fixed
+- **SendPulse SMTP delivery broken** (`backend/utils/email_providers/sendpulse_provider.py`)
+  - SMTP host changed from unreachable `smtp.sendpulse.com` to `smtp-pulse.com` (confirmed reachable).
+  - Default port changed from `465` (SSL, firewall-blocked) to `587` (STARTTLS, open).
+  - Envelope `MAIL FROM` was incorrectly set to the SMTP login credential (`smtp_user`). SendPulse rejected this with `554 5.9.2 Sender domain is not valid`. Fixed to use `FROM_EMAIL` (the verified sender domain) for both the `From:` header and the SMTP envelope sender.
+  - DB record updated: `sendpulse_smtp_port` corrected from `465` → `587`.
+  - Model and route defaults updated to match (`backend/models/email_provider_config.py`, `backend/routes/email_providers.py`).
+
+- **OTP falling back to console log** (`backend/routes/auth.py`)
+  - Root cause was the broken SendPulse delivery above. After the SMTP fix all three issues were resolved and OTPs now deliver to the user's inbox via SendPulse.
+  - OTP console fallback is retained as a safety net only for the case where no email provider is configured at all (bootstrap scenario).
+
+- **Approve/Reject email errors silently swallowed** (`backend/routes/applications.py`)
+  - Replaced bare `except: print(...)` with `logger.exception(...)` so SMTP failures are now visible in `/tmp/backend.log`.
+  - Also hardened `applicant_name` construction to use `.get()` instead of direct key access to avoid `KeyError` on incomplete records.
+
+- **Site crash on load — `JSON.parse("undefined")` in AuthProvider** (`frontend/src/utils/auth.js`)
+  - A prior failed login stored the literal string `"undefined"` in `localStorage.currentUser`.
+  - `AuthProvider` called `JSON.parse("undefined")` on every page load, crashing React before anything rendered.
+  - Fixed `getCurrentUser()` to guard against the strings `"undefined"` and `"null"`, wrap `JSON.parse` in try/catch, and auto-clear the corrupted key.
+
+- **`mgt.clearMarks is not a function` console error** (`frontend/build/index.html`, `frontend/public/index.html`)
+  - PostHog session-recording script references `performance.clearMarks` which is absent in some browsers.
+  - Added a polyfill for `performance.clearMarks`, `clearMeasures`, and `clearResourceTimings` before any other script runs.
+  - Extended the existing error suppressor to catch remaining PostHog-originated `"is not a function"` errors.
+
+### Changed
+- **Admin panel deduplication** (`frontend/src/pages/AdminPanel.jsx`)
+  - All new functionality (Email Providers tab, Super Admin restrictions) migrated into the canonical `AdminPanel.jsx`.
+  - `AdminPanelNew.jsx` deleted — it was an unused duplicate never referenced by the router.
+  - `Country Config` tab trigger and `TabsContent` restricted to `super_admin` only.
+  - `Email Providers` tab added with `<EmailProviderSettings />` component, visible to `super_admin` only.
+  - Tab grid updated from `grid-cols-4` to `grid-cols-5` for super_admin.
+  - Imported `EmailProviderSettings` and `Mail` icon into `AdminPanel.jsx`.
+
+---
+
 ## [2026-03-31] - Multi-provider email delivery, OTP sign-in, and Email Providers admin tab
 
 ### Added
