@@ -6,8 +6,10 @@ from utils.email import send_application_confirmation, send_application_status_u
 from datetime import datetime
 from typing import List, Optional
 from bson import ObjectId
+from pathlib import Path
 import csv
 import io
+import os
 
 router = APIRouter(prefix="/api/applications", tags=["applications"])
 
@@ -120,10 +122,86 @@ async def get_my_applications(user_id: str = Depends(get_current_user)):
     
     return {"applications": result, "total": len(result)}
 
+BASE_DIR = Path(__file__).parent.parent
+UPLOAD_DIR = BASE_DIR / "uploads"
+
 def generate_application_id() -> str:
-    """Generate unique application ID"""
+    """Generate unique application ID using full timestamp"""
     timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
-    return f"APP{timestamp[-6:]}"
+    return f"APP{timestamp}"
+
+
+@router.post("/assign-id", response_model=dict)
+async def assign_application_id(user_id: str = Depends(get_current_user)):
+    """
+    Generate an application ID for the user's draft and create the upload folder.
+    Called when the user reaches the Document Upload step.
+    """
+    # Check if draft already has an application ID
+    existing = await db.applications.find_one({"userId": user_id, "status": "draft"})
+    if existing and existing.get("applicationId"):
+        application_id = existing["applicationId"]
+    else:
+        application_id = generate_application_id()
+        now = datetime.utcnow()
+        if existing:
+            await db.applications.update_one(
+                {"_id": existing["_id"]},
+                {"$set": {"applicationId": application_id, "updatedAt": now}}
+            )
+        else:
+            await db.applications.insert_one({
+                "userId": user_id,
+                "applicationId": application_id,
+                "status": "draft",
+                "createdAt": now,
+                "updatedAt": now
+            })
+
+    # Create the upload folder for this application
+    app_folder = UPLOAD_DIR / application_id
+    os.makedirs(app_folder, exist_ok=True)
+
+    return {"applicationId": application_id}
+
+
+@router.post("/generate-csv", response_model=dict)
+async def generate_application_csv(
+    application_data: dict,
+    user_id: str = Depends(get_current_user)
+):
+    """
+    Generate a transposed CSV file with all application data and save it to the
+    uploads/{applicationId}/ folder. Called when user clicks Pay.
+    """
+    application_id = application_data.get("applicationId")
+    if not application_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="applicationId is required"
+        )
+
+    app_folder = UPLOAD_DIR / application_id
+    os.makedirs(app_folder, exist_ok=True)
+
+    csv_path = app_folder / f"{application_id}_application.csv"
+
+    # Write transposed CSV: one row per field (Field, Value)
+    skip_fields = {"_id", "userId", "passportDocument", "photoDocument",
+                   "businessLetter", "businessCard", "organizerInvitation",
+                   "meaPoliticalClearance", "mhaEventClearance",
+                   "medicalInvitationLetter", "confirmedTravelTicket",
+                   "destinationVisaOrPassport"}
+
+    with open(csv_path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["Field", "Value"])
+        for key, value in application_data.items():
+            if key not in skip_fields:
+                writer.writerow([key, value if value is not None else ""])
+
+    return {"success": True, "csvFile": f"{application_id}_application.csv"}
+
 
 @router.post("", response_model=dict)
 async def create_application(

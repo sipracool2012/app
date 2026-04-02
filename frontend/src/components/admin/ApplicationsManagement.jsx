@@ -6,6 +6,7 @@ import { useToast } from '../../hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { Eye, Download, Search } from 'lucide-react';
 import { Input } from '../ui/input';
+import { getAuthHeaders } from '../../utils/auth';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -22,11 +23,8 @@ const ApplicationsManagement = () => {
 
   const fetchApplications = async () => {
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`${BACKEND_URL}/api/applications`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: getAuthHeaders()
       });
 
       if (!response.ok) {

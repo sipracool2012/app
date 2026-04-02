@@ -6,6 +6,7 @@ import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useToast } from '../../hooks/use-toast';
 import { useTranslation } from 'react-i18next';
+import { getAuthHeaders } from '../../utils/auth';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -62,6 +63,17 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
     }
 
     setProcessing(true);
+
+    // Generate the application CSV before processing payment
+    try {
+      await fetch(`${BACKEND_URL}/api/applications/generate-csv`, {
+        method: 'POST',
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(data)
+      });
+    } catch (err) {
+      console.error('Failed to generate application CSV:', err);
+    }
 
     // Here we'll integrate with the selected payment gateway
     // For now, we'll just pass the data forward
