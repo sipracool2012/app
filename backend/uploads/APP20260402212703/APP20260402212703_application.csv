@@ -1,0 +1,106 @@
+Field,Value
+visaId,draft
+email,admin@clearevisa.com
+passportType,Ordinary
+portOfArrival,Ahmedabad Airport
+expectedArrivalDate,2026-04-07
+visaService,30 day Indian Tourist eVisa
+visaServiceSubtype,"Tourism, Recreation, Sight-seeing"
+passportNumber,A123123123
+dateOfIssue,2026-04-02
+dateOfExpiry,2026-04-03
+otherPassportHeld,No
+yogaInstituteName,
+yogaInstituteAddress,
+yogaInstitutePhone,
+educationalQualification,
+givenNames,Rohit
+livedTwoYears,Yes
+qualificationFrom,USA SCHOOL
+religion,
+surname,Sinha Mahapatra
+visibleMarks,None
+country,
+houseNoStreet,"B1109, Venkatesh Graffiti Glover"
+phoneCountryCode,+1
+phoneNumber,8436005887
+postalCode,411036
+stateProvince,Maharashtra
+villageTownCity,Pune
+fatherCountryOfBirth,
+fatherName,Thomas Lines Ansell
+fatherNationality,
+fatherPlaceOfBirth,Leicester
+fatherPreviousNationality,
+maritalStatus,Single
+motherCountryOfBirth,
+motherName,Kathleen Fortay Drewery
+motherNationality,
+motherPlaceOfBirth,UNITED KINGDOM
+motherPreviousNationality,
+pakistanConnection,No
+spouseCountryOfBirth,
+spouseName,
+spouseNationality,
+spousePlaceOfBirth,
+spousePreviousNationality,
+designation,
+employerAddress,1 JAGANNATHPUR
+employerName,Clear eVisa Services
+employerPhone,
+militaryService,No
+pastOccupation,
+pastOccupationIfAny,
+presentOccupation,Government service
+citiesPreviouslyVisited,
+companyAddress,
+companyName,
+companyPhoneCountryCode,+1
+companyPhoneNumber,
+companyWebsite,
+conferenceAddress,
+conferenceEndDate,
+conferenceName,
+conferenceStartDate,
+countriesVisitedLast10Years,
+hotelBooked,No
+indianFirmAddress,
+indianFirmName,
+indianFirmPhoneCountryCode,+91
+indianFirmPhoneNumber,
+indianFirmWebsite,
+lastIndianVisaNo,
+oldVisaIssueDate,
+oldVisaIssuePlace,
+oldVisaType,
+organizerAddress,
+organizerEmail,
+organizerName,
+organizerPhoneCountryCode,+91
+organizerPhoneNumber,
+placesToVisit, MYSURU  BANDI PURU OOTI  COIMBATORE  KOCHI ALAPPUZHA  MADURAI  PHANJAVUR  PUDUCHERRY
+placesToVisitLine2,
+previousAddress,
+visitedIndiaBefore,No
+visitedSAARCCountries,No
+homeReferenceAddress,"B1109, Venkatesh Graffiti Glover"
+homeReferenceName,Rohit Sinha Mahapatra
+homeReferencePhoneCountryCode,+1
+homeReferencePhoneNumber,8436005887
+indiaReferenceAddress,"B1109, Venkatesh Graffiti Glover"
+indiaReferenceName,Rohit Sinha Mahapatra
+indiaReferencePhoneCountryCode,+91
+indiaReferencePhoneNumber,8436005887
+applicationId,APP20260402212703
+arrestedConvicted,No
+arrestedConvictedReason,
+asylumSought,No
+asylumSoughtReason,
+cyberCrime,Yes
+cyberCrimeReason,A
+humanTrafficking,No
+humanTraffickingReason,
+refusedEntry,No
+refusedEntryReason,
+terroristViews,No
+terroristViewsReason,

@@ -6,6 +6,17 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-02] - Fixed Step 10 fees loaded from DB country_visa_config
+
+### Fixed
+- **Fee breakdown showing hardcoded values** (`frontend/src/components/application-steps/Step10Payment.jsx`)
+  - `govtFee`, `ourFee`, `processing_fee` were falling back to hardcoded `80` / `20` / `2%` because `data.selectedVisaOption` was never populated.
+  - Fix: on mount, fetch `GET /api/countries/{countryCode}/visa-options` using the country code parsed from `data.visaId` (e.g. `gb` from `gb-tourist-30d`), find the matching option by `id`, and use its real fees from the database.
+  - Fee breakdown now shows the visa option name as a subtitle.
+  - Also fixed a variable shadowing bug: inner `const data = await response.json()` in `fetchEnabledGateways` now uses `result` to avoid shadowing the outer `data` prop.
+
+---
+
 ## [2026-04-02] - Implemented real PayPal payment flow with success/failure handling
 
 ### Added

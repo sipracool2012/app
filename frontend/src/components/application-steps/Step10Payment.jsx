@@ -17,30 +17,50 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
   const [processing, setProcessing] = useState(false);
   const [enabledGateways, setEnabledGateways] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Calculate fees (these should come from the visa option selected on Home page)
-  const govtFee = data?.selectedVisaOption?.govt_fee || 80;
-  const ourFee = data?.selectedVisaOption?.payment_fee || 20;
-  const govtProcessingFee = data?.selectedVisaOption?.processing_fee || (govtFee * 0.025);
-  const totalAmount = govtFee + ourFee + govtProcessingFee;
+  const [visaOption, setVisaOption] = useState(null);
 
   useEffect(() => {
-    fetchEnabledGateways();
+    fetchAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const fetchAll = async () => {
+    await Promise.all([fetchEnabledGateways(), fetchVisaOption()]);
+  };
+
+  const fetchVisaOption = async () => {
+    const visaId = data?.visaId;
+    if (!visaId) return;
+    // visaId format: "{countryCode}-{type}-{duration}" e.g. "gb-tourist-30d"
+    const countryCode = visaId.split('-')[0].toUpperCase();
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/countries/${countryCode}/visa-options`);
+      if (!response.ok) return;
+      const result = await response.json();
+      const matched = (result.options || []).find(o => o.id === visaId);
+      if (matched) setVisaOption(matched);
+    } catch (err) {
+      console.error('Failed to fetch visa option fees:', err);
+    }
+  };
+
+  // Fees from DB; fall back to 0 so the user can see something is wrong rather than wrong hardcoded values
+  const govtFee = visaOption?.govt_fee ?? 0;
+  const ourFee = visaOption?.our_fee ?? 0;
+  const govtProcessingFee = visaOption?.processing_fee ?? (govtFee * 0.025);
+  const totalAmount = govtFee + ourFee + govtProcessingFee;
 
   const fetchEnabledGateways = async () => {
     try {
       const response = await fetch(`${BACKEND_URL}/api/payment-gateways/enabled-gateways`);
-      const data = await response.json();
+      const result = await response.json();
       
-      setEnabledGateways(data.gateways || []);
+      setEnabledGateways(result.gateways || []);
       
       // Auto-select first gateway if only one is available
-      if (data.gateways && data.gateways.length === 1) {
-        setPaymentMethod(data.gateways[0].id);
+      if (result.gateways && result.gateways.length === 1) {
+        setPaymentMethod(result.gateways[0].id);
       }
-      
-      setLoading(false);
     } catch (error) {
       console.error('Failed to fetch enabled payment gateways:', error);
       toast({
@@ -48,6 +68,7 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
         description: t('errors.formLoadFailed'),
         variant: 'destructive'
       });
+    } finally {
       setLoading(false);
     }
   };
@@ -133,6 +154,9 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
       <Card>
         <CardContent className="p-6">
           <h4 className="text-lg font-semibold mb-4">{t('forms.step10.feeBreakdown')}</h4>
+          {visaOption && (
+            <p className="text-sm text-gray-500 mb-3">{visaOption.name}</p>
+          )}
           <div className="space-y-3">
             <div className="flex justify-between py-2 border-b">
               <span className="text-gray-600">{t('forms.step10.governmentFee')}</span>
