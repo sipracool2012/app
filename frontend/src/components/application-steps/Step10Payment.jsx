@@ -64,7 +64,7 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
 
     setProcessing(true);
 
-    // Generate the application CSV before processing payment
+    // Generate the application CSV before redirecting to payment
     try {
       await fetch(`${BACKEND_URL}/api/applications/generate-csv`, {
         method: 'POST',
@@ -75,20 +75,50 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
       console.error('Failed to generate application CSV:', err);
     }
 
-    // Here we'll integrate with the selected payment gateway
-    // For now, we'll just pass the data forward
-    const paymentData = {
-      ...data,
-      paymentMethod,
-      paymentStatus: 'pending',
-      amount: totalAmount
-    };
+    if (paymentMethod === 'paypal') {
+      try {
+        const origin = window.location.origin;
+        const applicationId = data?.applicationId || '';
+        const returnUrl = `${origin}/payment-return?application_id=${encodeURIComponent(applicationId)}&amount=${totalAmount.toFixed(2)}`;
+        const cancelUrl = `${origin}/payment-return?application_id=${encodeURIComponent(applicationId)}&amount=${totalAmount.toFixed(2)}&cancelled=1`;
 
-    // Simulate payment processing
-    setTimeout(() => {
-      setProcessing(false);
-      onNext(paymentData);
-    }, 1500);
+        const response = await fetch(`${BACKEND_URL}/api/payment-gateways/paypal/create-order`, {
+          method: 'POST',
+          headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({
+            application_id: applicationId,
+            amount: totalAmount,
+            return_url: returnUrl,
+            cancel_url: cancelUrl
+          })
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.detail || 'Failed to create PayPal order');
+        }
+
+        const { approval_url } = await response.json();
+        window.location.href = approval_url;
+        // page navigates away — no need to setProcessing(false)
+      } catch (err) {
+        toast({
+          title: 'Payment Error',
+          description: err.message || 'Could not initiate PayPal. Please try again.',
+          variant: 'destructive'
+        });
+        setProcessing(false);
+      }
+      return;
+    }
+
+    // Fallback for other gateways (not yet integrated — prevent silent skip-to-success)
+    toast({
+      title: 'Not supported',
+      description: 'This payment method is not yet integrated. Please choose PayPal.',
+      variant: 'destructive'
+    });
+    setProcessing(false);
   };
 
   if (loading) {

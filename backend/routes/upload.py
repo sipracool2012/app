@@ -149,9 +149,14 @@ async def upload_document(
     app_folder = UPLOAD_DIR / application_id
     os.makedirs(app_folder, exist_ok=True)
 
-    # Build filename: {application_id}_{field_name}_{original_filename}
+    # Build filename: {application_id}_{short_field_name}.{ext}
     original_name = file.filename or "document"
-    safe_filename = f"{application_id}_{field_name}_{original_name}"
+    ext = os.path.splitext(original_name)[1].lower()
+    if not ext:
+        ext_map = {'image/jpeg': '.jpg', 'image/jpg': '.jpg', 'image/png': '.png', 'application/pdf': '.pdf'}
+        ext = ext_map.get(file.content_type, '')
+    short_field = field_name.replace('Document', '')
+    safe_filename = f"{application_id}_{short_field}{ext}"
     file_path = app_folder / safe_filename
 
     try:

@@ -6,6 +6,76 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-02] - Implemented real PayPal payment flow with success/failure handling
+
+### Added
+- **`POST /api/payment-gateways/paypal/create-order`** (`backend/routes/payment_gateways.py`)
+  - Authenticates with PayPal, creates a v2 checkout order, persists `paypal_order_id` + `payment_amount` on the application, returns `approval_url`.
+
+- **`POST /api/payment-gateways/paypal/capture-order`** (`backend/routes/payment_gateways.py`)
+  - Captures an approved PayPal order, sets application `status` to `submitted`, stores `paypal_transaction_id`.
+
+- **`/payment-return` route + `PaymentReturn.jsx`** (`frontend/src/pages/PaymentReturn.jsx`)
+  - Handles the PayPal redirect-back URL (both approval and cancellation).
+  - On approval: calls capture-order, shows success page with Application ID + PayPal Transaction ID.
+  - On failure or cancellation: shows error page with **Retry Payment** button (re-creates a new PayPal order for the same application) and **Go to My Applications** fallback.
+
+### Changed
+- **`Step10Payment.jsx`**: replaced fake `setTimeout → onNext()` with real PayPal redirect.
+  - Calls `create-order`, then does `window.location.href = approval_url`.
+  - Non-PayPal gateways now show a "not yet integrated" toast instead of silently skipping to success.
+  - `return_url` / `cancel_url` encode `application_id` and `amount` for stateless retry on the return page.
+
+---
+
+## [2026-04-02] - Simplified uploaded document filenames
+
+### Changed
+- **`/api/upload` filename format** (`backend/routes/upload.py`)
+  - Old format: `APP20260402195124_passportDocument_INIVO260320906204426_PHOTO.png` (original camera filename appended, causing very long strings)
+  - New format: `APP20260402195124_passport.png` — `{applicationId}_{shortFieldName}.{ext}`
+  - "Document" suffix stripped from camelCase field names (`passportDocument` → `passport`, `photoDocument` → `photo`); other field names kept as-is (`businessLetter`, `businessCard`, etc.)
+  - Extension derived from original filename; falls back to content-type map if no extension present
+  - Re-uploading the same field overwrites the previous file (deterministic name)
+
+---
+
+## [2026-04-02] - Fixed close button overflow on uploaded file in Step 9 Document Upload
+
+### Fixed
+- **× (remove file) button unclickable when filename is long** (`Step9DocumentUpload.jsx`)
+  - Long auto-generated filenames (e.g. `APP20260402195124_passportDocument_INIVO260320906204426_PHOTO.png`) overflowed the filename `<span>`, pushing the × Button outside the flex container and making it unreachable.
+  - Fix: added `min-w-0 flex-1` to the inner icon+name div so it shrinks properly, `truncate` on the filename `<span>` to clip overflow with ellipsis, and `shrink-0` on the Button so it always stays at full size and visible.
+  - Rebuilt and deployed.
+
+---
+
+## [2026-04-02] - Fixed SendPulse re-disabled after deploy; git merge doc-upload-folder
+
+### Fixed
+- **`/api/applications/assign-id` returning 404 on document upload step**
+  - A stale nohup uvicorn process (PID 112918, started April 1) was holding port 8000 with old code that predated the `assign-id` endpoint.
+  - The systemd service (`clearevisa.service`) kept failing to bind on every restart because the old process wouldn't release the port.
+  - Fix: killed both stale processes, restarted `clearevisa.service` cleanly. Endpoint now returns `401` (requires auth) instead of `404` — confirming it is registered and reachable.
+  - Document upload on Step 9 now works correctly.
+
+- **SendPulse disabled in active database** (`test_database` `email_provider_config`)
+  - Backend uses `DB_NAME=test_database` but the April 1 SendPulse fix was applied to `visa_app` (a different database).
+  - After `./deploy.sh` the service restarted against `test_database` where `sendpulse_enabled` was still `False`, causing OTPs to fall back to the console log again.
+  - Fixed: enabled SendPulse in `test_database` with `port=587`, `host=smtp-pulse.com`. Verified `Delivered: True` and confirmed OTP now goes by email.
+- **Admin panel super_admin tabs not visible** — root cause was the above; OTP delivery now works, login completes correctly, `/api/auth/me` returns `role: super_admin` and all super_admin tabs render.
+
+### Changed
+- **Merged `doc-upload-folder` into `vps/on-refresh-login-page`** (git)
+  - Resolved 7 conflicts keeping VPS/AuthProvider/i18n architecture as the base.
+  - `Step9DocumentUpload`: kept `useTranslation` + merged Application ID banner from `doc-upload-folder`.
+  - `Step10Payment`: merged both `useTranslation` and `getAuthHeaders` imports.
+  - `AdminPanelNew.jsx`: accepted HEAD deletion (was a duplicate).
+  - `deploy.sh`: kept VPS version with correct `$(dirname "$0")/frontend` path.
+  - Pushed to `origin/vps/on-refresh-login-page` at commit `9789625`.
+
+---
+
 ## [2026-04-01] - Application status progress stepper on My Applications page
 
 ### Added

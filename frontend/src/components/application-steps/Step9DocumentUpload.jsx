@@ -175,15 +175,16 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
           />
         </div>
       ) : (
-        <div className="border border-gray-300 rounded-lg p-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <FileText className="h-5 w-5 text-blue-600" />
-            <span className="text-sm text-gray-700">{fileNames[fieldName]}</span>
+        <div className="border border-gray-300 rounded-lg p-4 flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <FileText className="h-5 w-5 text-blue-600 shrink-0" />
+            <span className="text-sm text-gray-700 truncate">{fileNames[fieldName]}</span>
           </div>
           <Button
             type="button"
             variant="ghost"
             size="sm"
+            className="shrink-0"
             onClick={() => removeFile(fieldName)}
           >
             <X className="h-4 w-4" />

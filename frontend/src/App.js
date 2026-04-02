@@ -12,6 +12,7 @@ import VisaApplication from "./pages/VisaApplication";
 import ApplicationSuccess from "./pages/ApplicationSuccess";
 import AdminPanel from "./pages/AdminPanel";
 import MyApplications from "./pages/MyApplications";
+import PaymentReturn from "./pages/PaymentReturn";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import AboutUs from "./pages/AboutUs";
 import Careers from "./pages/Careers";
@@ -62,6 +63,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <MyApplications />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/payment-return"
+              element={
+                <PrivateRoute>
+                  <PaymentReturn />
                 </PrivateRoute>
               }
             />
