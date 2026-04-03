@@ -259,16 +259,24 @@ async def create_application(
 async def get_applications(
     status: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
+    include_drafts: bool = Query(False),
     user_id: str = Depends(get_current_user)
 ):
     """
-    Get all submitted applications (excludes drafts) for admin view.
+    Get all submitted applications for admin view.
+    Pass status=draft to see draft/ongoing applications.
+    Pass include_drafts=true to include drafts in the results.
+    By default, drafts are excluded.
     """
-    # Build query - exclude drafts from admin view
-    query = {"status": {"$ne": "draft"}}
-    
+    # Build query
     if status and status != "all":
-        query["status"] = status
+        query = {"status": status}
+    elif include_drafts:
+        # No status restriction — return everything including drafts
+        query = {}
+    else:
+        # Exclude drafts by default
+        query = {"status": {"$ne": "draft"}}
     
     if search:
         query["$or"] = [

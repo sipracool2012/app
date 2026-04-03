@@ -6,6 +6,22 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-03] - Admin panel: view draft/ongoing applications
+
+### Added
+- **Draft applications visible in Admin Panel** (`backend/routes/applications.py`, `frontend/src/pages/AdminPanel.jsx`)
+  - Backend `GET /api/applications` now accepts `include_drafts=true` query param to include draft records in the response.
+  - Passing `status=draft` explicitly also works to fetch only drafts.
+  - Admin panel initial load now fetches all applications including drafts so stat cards are accurate.
+  - New **"Draft"** stat card showing count of in-progress applications alongside Pending, Submitted, Paid, Approved, Rejected.
+  - **"Draft / In Progress"** option added to the status filter dropdown.
+  - "All Status" filter continues to exclude drafts (admins must explicitly select Draft to see them).
+  - Table rows for draft applications handle missing data gracefully:
+    - Application ID shows "Not assigned" (italic) when the draft hasn't reached the document upload step yet.
+    - Name, email, nationality, visa type show "—" if not yet filled in.
+    - Submitted date shows "Not submitted" for drafts.
+    - No status-change selector or CSV download button shown for draft rows; they display "In Progress" instead.
+
 ## [2026-04-03] - OTP verification for sign-up; admin toggle for login/signup OTP
 
 ### Added
