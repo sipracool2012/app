@@ -95,6 +95,13 @@ async def delete_draft(
     return {"message": "Draft deleted"}
 
 
+@router.delete("/draft", response_model=dict)
+async def delete_my_draft(user_id: str = Depends(get_current_user)):
+    """Delete the current user's draft application (no ID needed)."""
+    result = await db.applications.delete_one({"userId": user_id, "status": "draft"})
+    return {"message": "Draft deleted" if result.deleted_count else "No draft found"}
+
+
 # ============ MY APPLICATIONS ============
 
 @router.get("/my-applications", response_model=dict)

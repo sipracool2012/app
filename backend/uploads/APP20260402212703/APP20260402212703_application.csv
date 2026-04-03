@@ -3,9 +3,9 @@ visaId,draft
 email,admin@clearevisa.com
 passportType,Ordinary
 portOfArrival,Ahmedabad Airport
-expectedArrivalDate,2026-04-07
-visaService,30 day Indian Tourist eVisa
-visaServiceSubtype,"Tourism, Recreation, Sight-seeing"
+expectedArrivalDate,2026-04-17
+visaService,1 year Indian Business eVisa
+visaServiceSubtype,Sale/Purchase/Trade
 passportNumber,A123123123
 dateOfIssue,2026-04-02
 dateOfExpiry,2026-04-03
@@ -53,22 +53,22 @@ pastOccupation,
 pastOccupationIfAny,
 presentOccupation,Government service
 citiesPreviouslyVisited,
-companyAddress,
-companyName,
+companyAddress,JAGANNATHPUR
+companyName,Sipras fashion
 companyPhoneCountryCode,+1
-companyPhoneNumber,
-companyWebsite,
+companyPhoneNumber,9933698424
+companyWebsite,https://www.Test.com
 conferenceAddress,
 conferenceEndDate,
 conferenceName,
 conferenceStartDate,
-countriesVisitedLast10Years,
+countriesVisitedLast10Years,India
 hotelBooked,No
-indianFirmAddress,
-indianFirmName,
+indianFirmAddress,"D4, Orange Habitat Society"
+indianFirmName,Satpati
 indianFirmPhoneCountryCode,+91
-indianFirmPhoneNumber,
-indianFirmWebsite,
+indianFirmPhoneNumber,8436005887
+indianFirmWebsite,https://www.Test.com
 lastIndianVisaNo,
 oldVisaIssueDate,
 oldVisaIssuePlace,

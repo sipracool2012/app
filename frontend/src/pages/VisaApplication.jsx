@@ -47,6 +47,16 @@ const VisaApplication = () => {
   const [lastSaved, setLastSaved] = useState(null);
   const saveTimeoutRef = useRef(null);
 
+  const fetchVisaOption = async (vId) => {
+    const code = vId.split('-')[0].toUpperCase();
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/countries/${code}/visa-options`);
+      if (!res.ok) return null;
+      const data = await res.json();
+      return (data.options || []).find(o => o.id === vId) || null;
+    } catch { return null; }
+  };
+
   // Get logged-in user's email from localStorage
   const getUserEmail = () => {
     const user = getCurrentUser();
@@ -65,19 +75,28 @@ const VisaApplication = () => {
           if (data.draft) {
             const draft = data.draft;
             const savedStep = draft.currentStep || 1;
-            // Remove internal fields before setting form data
             delete draft.userId;
             delete draft.status;
             delete draft.createdAt;
             delete draft.updatedAt;
             delete draft.currentStep;
 
-            setFormData(prev => ({ ...prev, ...draft, visaId }));
+            // Fetch fees if not already stored in draft
+            let selectedVisaOption = draft.selectedVisaOption || null;
+            if (!selectedVisaOption) {
+              selectedVisaOption = await fetchVisaOption(visaId);
+            }
+
+            setFormData(prev => ({ ...prev, ...draft, visaId, selectedVisaOption }));
             setCurrentStep(savedStep);
             toast({
               title: t('application.draftLoaded'),
               description: t('application.draftLoadedDesc', { step: savedStep }),
             });
+          } else {
+            // No draft — fetch fees for fresh start
+            const selectedVisaOption = await fetchVisaOption(visaId);
+            setFormData(prev => ({ ...prev, visaId, selectedVisaOption }));
           }
         }
       } catch (err) {

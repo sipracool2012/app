@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { Switch } from '../components/ui/switch';
 import { Label } from '../components/ui/label';
 import PaymentGatewaySettings from '../components/admin/PaymentGatewaySettings';
+import { FlagIcon } from '../components/ui/FlagIcon';
 import UserManagement from '../components/admin/UserManagement';
 import EmailProviderSettings from '../components/admin/EmailProviderSettings';
 
@@ -673,7 +674,7 @@ const AdminPanel = () => {
                         )}
                       >
                         <div className="flex items-center gap-3">
-                          <span className="text-2xl">{country.flag_emoji}</span>
+                          <FlagIcon code={country.country_code} width={32} height={24} />
                           <div>
                             <p className="font-medium">{country.country_name}</p>
                             <p className="text-sm text-gray-500">{country.country_code}</p>

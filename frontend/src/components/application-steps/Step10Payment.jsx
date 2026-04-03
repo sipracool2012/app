@@ -17,34 +17,14 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
   const [processing, setProcessing] = useState(false);
   const [enabledGateways, setEnabledGateways] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [visaOption, setVisaOption] = useState(null);
 
   useEffect(() => {
-    fetchAll();
+    fetchEnabledGateways();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchAll = async () => {
-    await Promise.all([fetchEnabledGateways(), fetchVisaOption()]);
-  };
-
-  const fetchVisaOption = async () => {
-    const visaId = data?.visaId;
-    if (!visaId) return;
-    // visaId format: "{countryCode}-{type}-{duration}" e.g. "gb-tourist-30d"
-    const countryCode = visaId.split('-')[0].toUpperCase();
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/countries/${countryCode}/visa-options`);
-      if (!response.ok) return;
-      const result = await response.json();
-      const matched = (result.options || []).find(o => o.id === visaId);
-      if (matched) setVisaOption(matched);
-    } catch (err) {
-      console.error('Failed to fetch visa option fees:', err);
-    }
-  };
-
-  // Fees from DB; fall back to 0 so the user can see something is wrong rather than wrong hardcoded values
+  // Fees come from selectedVisaOption stored in formData/draft (locked at application start)
+  const visaOption = data?.selectedVisaOption || null;
   const govtFee = visaOption?.govt_fee ?? 0;
   const ourFee = visaOption?.our_fee ?? 0;
   const govtProcessingFee = visaOption?.processing_fee ?? (govtFee * 0.025);

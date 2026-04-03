@@ -6,6 +6,56 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-03] - Fixed country flags not displaying in Admin Country Config tab
+
+### Fixed
+- **Country flag showing ISO code text (e.g. "AF") instead of flag image**
+  - Root cause 1: The `/api/countries/all` endpoint returned `flag_emoji` by spreading `{**config}` from MongoDB. Records that were created before the `flag_emoji` field was added to the schema had no such field (or empty string), causing the emoji to render as blank or absent.
+  - Root cause 2: On Linux servers, Unicode flag emoji (e.g. 🇦🇫) render as the two-letter ISO code ("AF") because the OS lacks a colour emoji font — so even correctly-stored emoji would not show as flags.
+  - Fix 1 (`backend/routes/countries.py`): In `get_all_countries()`, explicitly override `flag_emoji` with `config.get('flag_emoji') or country['flag']` so DB records with missing/empty `flag_emoji` always fall back to the in-memory `ALL_COUNTRIES` value.
+  - Fix 2 (`frontend/src/pages/AdminPanel.jsx`): Replaced `<span className="text-2xl">{country.flag_emoji}</span>` with `<FlagIcon code={country.country_code} width={32} height={24} />` — uses the existing `FlagIcon` component (flagcdn.com CDN) for reliable cross-platform flag images.
+
+---
+
+## [2026-04-02] - Reverted application switching UI; deferred to todo
+
+### Reverted
+- **Conflict resolution screen in `VisaApplication.jsx`** — the implementation had issues (state propagation to child steps, category detection fragility, `handleContinueExisting` redirect timing). Removed from the codebase.
+- Unused icon imports (`AlertTriangle`, `RefreshCw`, `PlusCircle`, `ArrowRight`) also removed.
+
+### Kept
+- `DELETE /api/applications/draft` (no-ID) endpoint — safe to leave, used later
+- `selectedVisaOption` locked in draft on mount — fees still work correctly
+- `fetchVisaOption()` helper in `VisaApplication` for re-use when the feature is properly built
+
+### Deferred
+- Full spec saved to `/memories/repo/todo-application-switching.md` with:
+  - Exact required behaviour for same-category and different-category conflicts
+  - Root causes of previous failure
+  - Design notes (correct visaId parsing, category detection via `split('-')[1]`)
+
+---
+
+## [2026-04-02] - Fees locked at application start; conflict resolution for duplicate drafts
+
+### Fixed
+- **Fees resetting to zero when admin changes rates mid-application** (`frontend/src/pages/VisaApplication.jsx`, `Step10Payment.jsx`)
+  - Root cause: Step10 was fetching live rates from the API on every open. If admin disabled/changed a visa type, fees dropped to 0.
+  - Fix: `VisaApplication` now fetches `selectedVisaOption` (with all fee fields) once on mount and stores it in `formData`, which auto-saves to the draft. Step10 reads fees directly from `data.selectedVisaOption` — rates are locked to the prices shown when the user started the application.
+
+### Added
+- **Conflict resolution screen** (`frontend/src/pages/VisaApplication.jsx`)
+  - Triggered when the user navigates to `/apply/:visaId` while they already have a draft saved under a **different** `visaId`.
+  - Presents three clearly-labelled options:
+    1. **Continue existing application** — redirects to `/apply/{draftVisaId}` so the user picks up where they left off.
+    2. **Switch to this visa type (keep my data)** *(only shown when both visas share the same category, e.g. tourist 30d → tourist 1yr)* — copies all filled personal/travel data into the new visa type, resets document uploads and `applicationId`, saves immediately, and starts from step 1 so every page is reviewed.
+    3. **Start a new application** — calls `DELETE /api/applications/draft` to wipe the old draft, then starts fresh.
+
+- **`DELETE /api/applications/draft`** (`backend/routes/applications.py`)
+  - No-ID variant of the delete endpoint. Finds and deletes the current user's draft by `userId` — used by the "Start fresh" option above.
+
+---
+
 ## [2026-04-02] - Fixed Step 10 fees loaded from DB country_visa_config
 
 ### Fixed
