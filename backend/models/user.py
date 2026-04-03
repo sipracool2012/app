@@ -38,9 +38,15 @@ class OTPVerifyRequest(BaseModel):
 
 
 class LoginInitiateResponse(BaseModel):
-    """Returned by /api/auth/login when OTP has been dispatched."""
+    """Returned by /api/auth/login or /api/auth/register when OTP has been dispatched."""
     otp_required: bool = True
     message: str
+
+
+class SignupOTPVerifyRequest(BaseModel):
+    """Request body for /api/auth/verify-signup-otp."""
+    email: EmailStr
+    otp: str
 
 class User(BaseModel):
     id: Optional[str] = Field(alias="_id", default=None)

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-from models.user import UserCreate, UserLogin, UserResponse, TokenResponse, User, UserRoleUpdate, OTPVerifyRequest, LoginInitiateResponse
+from models.user import UserCreate, UserLogin, UserResponse, TokenResponse, User, UserRoleUpdate, OTPVerifyRequest, LoginInitiateResponse, SignupOTPVerifyRequest
 from utils.auth import get_password_hash, verify_password, create_access_token, get_current_user
 from datetime import datetime, timedelta
 from typing import List
@@ -31,11 +31,14 @@ def get_db():
 
 db = get_db()
 
-@router.post("/register", response_model=TokenResponse)
+@router.post("/register")
 async def register(user_data: UserCreate):
     """
-    Register a new user
-    First user becomes super_admin, rest are regular users
+    Register a new user.
+    If otp_signup_enabled is True in the email provider config, the user is NOT created
+    immediately. Instead a 6-digit OTP is dispatched and the client must call
+    /verify-signup-otp to complete account creation.
+    If disabled (default), the account is created immediately and a token is returned.
     """
     # Check if user already exists
     existing_user = await db.users.find_one({"email": user_data.email})
@@ -44,15 +47,59 @@ async def register(user_data: UserCreate):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
         )
-    
-    # Check if this is the first user
+
+    # Check if this is the first user (will become super_admin — always skip OTP to avoid bootstrap deadlock)
     user_count = await db.users.count_documents({})
     role = "super_admin" if user_count == 0 else "user"
-    
-    # Hash password
+
     hashed_password = get_password_hash(user_data.password)
-    
-    # Create user document
+
+    # Check OTP config
+    config = await db.email_provider_config.find_one({}) or {}
+    otp_signup_enabled = config.get("otp_signup_enabled", False) and user_count > 0
+
+    if otp_signup_enabled:
+        # Store pending registration + dispatch OTP
+        otp = str(secrets.randbelow(900000) + 100000)
+        expires_at = datetime.utcnow() + timedelta(minutes=OTP_EXPIRY_MINUTES)
+
+        await db.pending_registrations.update_one(
+            {"email": user_data.email},
+            {
+                "$set": {
+                    "email": user_data.email,
+                    "fullName": user_data.fullName,
+                    "hashed_password": hashed_password,
+                    "role": role,
+                    "otp": otp,
+                    "expires_at": expires_at,
+                    "created_at": datetime.utcnow(),
+                }
+            },
+            upsert=True,
+        )
+
+        from utils.email import send_otp_email
+        sent = await send_otp_email(
+            to_email=user_data.email,
+            otp=otp,
+            full_name=user_data.fullName,
+        )
+
+        if not sent:
+            logger.warning(
+                f"[OTP FALLBACK] Signup OTP for {user_data.email}: {otp}  (expires in {OTP_EXPIRY_MINUTES} min)"
+            )
+
+        delivery_message = (
+            "A verification code has been sent to your email. It expires in 5 minutes."
+            if sent
+            else "Email delivery is not configured. Ask your administrator for the one-time code from the server log."
+        )
+        logger.info(f"Signup OTP {'dispatched via email' if sent else 'logged to console'} for {user_data.email}")
+        return LoginInitiateResponse(otp_required=True, message=delivery_message)
+
+    # OTP disabled — create account immediately
     user_doc = {
         "fullName": user_data.fullName,
         "email": user_data.email,
@@ -61,42 +108,53 @@ async def register(user_data: UserCreate):
         "createdAt": datetime.utcnow(),
         "updatedAt": datetime.utcnow()
     }
-    
-    # Insert into database
+
     result = await db.users.insert_one(user_doc)
     user_id = str(result.inserted_id)
-    
-    # Create access token
     access_token = create_access_token(data={"sub": user_id})
-    
-    # Return token and user info
-    user_response = UserResponse(
-        id=user_id,
-        fullName=user_data.fullName,
-        email=user_data.email,
-        role=role
-    )
-    
-    return TokenResponse(token=access_token, user=user_response)
 
-@router.post("/login", response_model=LoginInitiateResponse)
+    return TokenResponse(
+        token=access_token,
+        user=UserResponse(id=user_id, fullName=user_data.fullName, email=user_data.email, role=role)
+    )
+
+@router.post("/login")
 async def login(credentials: UserLogin):
     """
-    Step 1 of 2-factor sign-in.
-    Validates credentials, then dispatches a 6-digit OTP to the user's email.
-    Returns otp_required=True; the client must call /verify-otp to obtain a token.
+    Sign-in endpoint.
+    If otp_login_enabled (default True): validates credentials, dispatches OTP, returns otp_required=True.
+      Client must call /verify-otp to obtain a token.
+    If otp_login_enabled is False: validates credentials and returns a JWT token directly.
     # CHANGELOG REMINDER: Update CHANGELOG.md when modifying the auth flow.
     """
     # Find user by email
     user = await db.users.find_one({"email": credentials.email})
     if not user or not verify_password(credentials.password, user["password"]):
-        # Use a generic message to avoid user enumeration
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
         )
 
-    # Generate a cryptographically secure 6-digit OTP
+    # Check OTP config
+    config = await db.email_provider_config.find_one({}) or {}
+    otp_login_enabled = config.get("otp_login_enabled", True)
+
+    if not otp_login_enabled:
+        # Skip OTP — return token directly
+        user_id = str(user["_id"])
+        access_token = create_access_token(data={"sub": user_id})
+        logger.info(f"Direct login (OTP disabled) for {credentials.email}")
+        return TokenResponse(
+            token=access_token,
+            user=UserResponse(
+                id=user_id,
+                fullName=user["fullName"],
+                email=user["email"],
+                role=user.get("role", "user"),
+            ),
+        )
+
+    # OTP enabled — generate and dispatch
     otp = str(secrets.randbelow(900000) + 100000)
     expires_at = datetime.utcnow() + timedelta(minutes=OTP_EXPIRY_MINUTES)
 
@@ -192,6 +250,63 @@ async def verify_otp(payload: OTPVerifyRequest):
             role=user.get("role", "user"),
         ),
     )
+
+
+@router.post("/verify-signup-otp", response_model=TokenResponse)
+async def verify_signup_otp(payload: SignupOTPVerifyRequest):
+    """
+    Completes OTP-gated account creation.
+    Validates the OTP sent during /register, then creates the user and returns a JWT token.
+    """
+    record = await db.pending_registrations.find_one({"email": payload.email})
+
+    invalid_exc = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid or expired verification code.",
+    )
+
+    if not record:
+        raise invalid_exc
+    if datetime.utcnow() > record["expires_at"]:
+        # Clean up expired record
+        await db.pending_registrations.delete_one({"email": payload.email})
+        raise invalid_exc
+    if record["otp"] != payload.otp:
+        raise invalid_exc
+
+    # Guard against race condition (email registered between /register and here)
+    existing = await db.users.find_one({"email": payload.email})
+    if existing:
+        await db.pending_registrations.delete_one({"email": payload.email})
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+
+    # Create the user
+    user_doc = {
+        "fullName": record["fullName"],
+        "email": record["email"],
+        "password": record["hashed_password"],
+        "role": record["role"],
+        "createdAt": datetime.utcnow(),
+        "updatedAt": datetime.utcnow(),
+    }
+    result = await db.users.insert_one(user_doc)
+    user_id = str(result.inserted_id)
+
+    # Clean up pending record
+    await db.pending_registrations.delete_one({"email": payload.email})
+
+    access_token = create_access_token(data={"sub": user_id})
+    logger.info(f"Signup OTP verified, account created for {payload.email}")
+    return TokenResponse(
+        token=access_token,
+        user=UserResponse(
+            id=user_id,
+            fullName=record["fullName"],
+            email=record["email"],
+            role=record["role"],
+        ),
+    )
+
 
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_info(user_id: str = Depends(get_current_user)):

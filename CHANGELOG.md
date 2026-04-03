@@ -6,6 +6,33 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-03] - OTP verification for sign-up; admin toggle for login/signup OTP
+
+### Added
+- **OTP-gated sign-up flow** (`backend/routes/auth.py`, `frontend/src/pages/SignUp.jsx`)
+  - When `otp_signup_enabled` is `True` in the email provider config, `/api/auth/register` no longer creates the account immediately. Instead it stores a pending registration (hashed password + role) in a `pending_registrations` collection, dispatches a 6-digit OTP, and returns `otp_required: true`.
+  - New endpoint `POST /api/auth/verify-signup-otp` validates the OTP, creates the user, cleans up the pending record, and returns a JWT token — identical flow to login OTP.
+  - Bootstrap guard: the very first user (who becomes `super_admin`) always bypasses signup OTP regardless of config, preventing a chicken-and-egg lockout.
+  - `SignUp.jsx` handles both response shapes: if `otp_required` is present it switches to an OTP entry step (same design as `SignIn` OTP step); otherwise it logs the user in directly.
+
+- **Conditional OTP for login** (`backend/routes/auth.py`, `frontend/src/pages/SignIn.jsx`)
+  - `/api/auth/login` now checks `otp_login_enabled` from the DB config (default `True` to preserve existing behaviour).
+  - If `False`, credentials are validated and a JWT token is returned directly — no OTP dispatch.
+  - `SignIn.jsx` `handleCredentialsSubmit` now reads the response: if `data.token` is present it completes the login immediately; otherwise it falls through to the OTP step.
+
+- **OTP Verification settings card in Admin Panel Email Providers tab** (`frontend/src/components/admin/EmailProviderSettings.jsx`)
+  - New card at the top of the Email Providers panel (before Mandrill) with two toggles:
+    - **Require OTP on Login** — maps to `otp_login_enabled` (default `True`).
+    - **Require OTP on Sign Up** — maps to `otp_signup_enabled` (default `False`).
+  - Saved alongside other provider settings via `PUT /api/email-providers/config`.
+
+### Changed
+- **`backend/models/email_provider_config.py`**: Added `otp_login_enabled: bool = True` and `otp_signup_enabled: bool = False` to `EmailProviderConfig`, `EmailProviderConfigUpdate`, and `EmailProviderConfigResponse`.
+- **`backend/routes/email_providers.py`**: Both OTP fields included in GET `/config`, GET `/config/admin`, and handled by PUT `/config`.
+- **`backend/models/user.py`**: Added `SignupOTPVerifyRequest` model (email + otp).
+
+---
+
 ## [2026-04-03] - Fixed country flags not displaying in Admin Country Config tab
 
 ### Fixed
