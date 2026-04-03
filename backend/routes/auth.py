@@ -1,8 +1,15 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-from models.user import UserCreate, UserLogin, UserResponse, TokenResponse, User, UserRoleUpdate
+from models.user import UserCreate, UserLogin, UserResponse, TokenResponse, User, UserRoleUpdate, OTPVerifyRequest, LoginInitiateResponse
 from utils.auth import get_password_hash, verify_password, create_access_token, get_current_user
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
+import secrets
+import logging
+
+logger = logging.getLogger(__name__)
+
+# OTP validity window (minutes)
+OTP_EXPIRY_MINUTES = 5
 
 router = APIRouter(prefix="/api/auth", tags=["authentication"])
 
@@ -72,42 +79,119 @@ async def register(user_data: UserCreate):
     
     return TokenResponse(token=access_token, user=user_response)
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login", response_model=LoginInitiateResponse)
 async def login(credentials: UserLogin):
     """
-    Login user
+    Step 1 of 2-factor sign-in.
+    Validates credentials, then dispatches a 6-digit OTP to the user's email.
+    Returns otp_required=True; the client must call /verify-otp to obtain a token.
+    # CHANGELOG REMINDER: Update CHANGELOG.md when modifying the auth flow.
     """
     # Find user by email
     user = await db.users.find_one({"email": credentials.email})
+    if not user or not verify_password(credentials.password, user["password"]):
+        # Use a generic message to avoid user enumeration
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
+        )
+
+    # Generate a cryptographically secure 6-digit OTP
+    otp = str(secrets.randbelow(900000) + 100000)
+    expires_at = datetime.utcnow() + timedelta(minutes=OTP_EXPIRY_MINUTES)
+
+    # Upsert OTP record (one active OTP per email at a time)
+    await db.otp_store.update_one(
+        {"email": credentials.email},
+        {
+            "$set": {
+                "email": credentials.email,
+                "otp": otp,
+                "expires_at": expires_at,
+                "used": False,
+                "created_at": datetime.utcnow(),
+            }
+        },
+        upsert=True,
+    )
+
+    # Dispatch OTP via the active email provider chain
+    from utils.email import send_otp_email
+    sent = await send_otp_email(
+        to_email=credentials.email,
+        otp=otp,
+        full_name=user.get("fullName", "User"),
+    )
+
+    if not sent:
+        # No email provider is configured or all providers failed.
+        # Bootstrap fallback: print OTP to server console so a super admin with
+        # server access can complete first-time login and configure providers.
+        # SECURITY NOTE: this log line is intentional for bootstrapping only.
+        # Once email providers are configured this path will not be reached.
+        # CHANGELOG REMINDER: Update CHANGELOG.md when modifying the auth flow.
+        logger.warning(
+            f"[OTP FALLBACK] No email provider available. "
+            f"OTP for {credentials.email}: {otp}  (expires in {OTP_EXPIRY_MINUTES} min)"
+        )
+
+    delivery_message = (
+        "A verification code has been sent to your email address. It expires in 5 minutes."
+        if sent
+        else "Email delivery is not configured. Your one-time code has been printed to the server log. "
+             "Please ask your server administrator for the code."
+    )
+
+    logger.info(f"OTP {'dispatched via email' if sent else 'logged to console'} for {credentials.email}")
+    return LoginInitiateResponse(
+        otp_required=True,
+        message=delivery_message,
+    )
+
+
+@router.post("/verify-otp", response_model=TokenResponse)
+async def verify_otp(payload: OTPVerifyRequest):
+    """
+    Step 2 of 2-factor sign-in.
+    Validates the OTP and returns a JWT access token on success.
+    # CHANGELOG REMINDER: Update CHANGELOG.md when modifying the auth flow.
+    """
+    record = await db.otp_store.find_one({"email": payload.email})
+
+    invalid_exc = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid or expired verification code.",
+    )
+
+    if not record:
+        raise invalid_exc
+    if record.get("used"):
+        raise invalid_exc
+    if datetime.utcnow() > record["expires_at"]:
+        raise invalid_exc
+    if record["otp"] != payload.otp:
+        raise invalid_exc
+
+    # Mark OTP as used to prevent replay attacks
+    await db.otp_store.update_one({"email": payload.email}, {"$set": {"used": True}})
+
+    # Fetch user and create token
+    user = await db.users.find_one({"email": payload.email})
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password"
-        )
-    
-    # Verify password
-    if not verify_password(credentials.password, user["password"]):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password"
-        )
-    
-    # Create access token
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
     user_id = str(user["_id"])
     access_token = create_access_token(data={"sub": user_id})
-    
-    # Get role (default to 'user' for existing users without role)
-    role = user.get("role", "user")
-    
-    # Return token and user info
-    user_response = UserResponse(
-        id=user_id,
-        fullName=user["fullName"],
-        email=user["email"],
-        role=role
+
+    return TokenResponse(
+        token=access_token,
+        user=UserResponse(
+            id=user_id,
+            fullName=user["fullName"],
+            email=user["email"],
+            role=user.get("role", "user"),
+        ),
     )
-    
-    return TokenResponse(token=access_token, user=user_response)
 
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_info(user_id: str = Depends(get_current_user)):

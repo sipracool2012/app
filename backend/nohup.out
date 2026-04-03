@@ -1,0 +1,11 @@
+INFO:     Started server process [77800]
+INFO:     Waiting for application startup.
+2026-03-31 18:46:20,189 - server - INFO - Starting Clear eVisa Visa Application API
+2026-03-31 18:46:20,189 - server - INFO - Connected to MongoDB: test_database
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-03-31 18:47:03,757 - server - INFO - Shutting down API
+INFO:     Application shutdown complete.
+INFO:     Finished server process [77800]

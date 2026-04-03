@@ -2,6 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
+        <meta name="msvalidate.01" content="9F23141C54743ECA16896027661E1D29" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#000000" />
     <!--<meta name="description" content="A product of emergent.sh" />-->
@@ -21,8 +22,25 @@
         work correctly both with client-side routing and a non-root public URL.
         Learn how to configure a non-root public URL by running `npm run build`.
         -->
-        <title>Clear eVisa | Fullstack App</title>
-        <script>window.addEventListener("error",function(e){if(e.error instanceof DOMException&&e.error.name==="DataCloneError"&&e.message&&e.message.includes("PerformanceServerTiming")){e.stopImmediatePropagation();e.preventDefault()}},true);</script>
+        <title>Clear eVisa Services</title>
+        <script>
+          // Polyfill performance.clearMarks for browsers that lack it (fixes PostHog mgt clearMarks error)
+          if(window.performance && !window.performance.clearMarks){
+            window.performance.clearMarks = function(){};
+            window.performance.clearMeasures = function(){};
+            window.performance.clearResourceTimings = function(){};
+          }
+          // Suppress known third-party performance-API errors (PostHog session recorder, DataCloneError)
+          window.addEventListener("error",function(e){
+            var msg = e.message || '';
+            if(e.error instanceof DOMException && e.error.name==="DataCloneError" && msg.includes("PerformanceServerTiming")){
+              e.stopImmediatePropagation(); e.preventDefault(); return;
+            }
+            if(msg.includes("clearMarks") || msg.includes("clearMeasures") || msg.includes("is not a function") && e.filename && e.filename.includes("posthog")){
+              e.stopImmediatePropagation(); e.preventDefault();
+            }
+          },true);
+        </script>
     <!--<script src="https://assets.emergent.sh/scripts/emergent-main.js"></script>-->        </head>
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function FAQ() {
+  const { t } = useTranslation();
   const [expandedId, setExpandedId] = useState(null);
 
   const faqs = [
@@ -125,8 +127,8 @@ export default function FAQ() {
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-4">Frequently Asked Questions</h1>
-          <p className="text-xl text-blue-100">Find answers to common questions about our visa application service</p>
+          <h1 className="text-5xl font-bold mb-4">{t('pages.faq.title')}</h1>
+          <p className="text-xl text-blue-100">{t('pages.faq.subtitle')}</p>
         </div>
       </div>
 
@@ -171,16 +173,16 @@ export default function FAQ() {
 
         {/* Still Need Help */}
         <section className="mt-16 bg-blue-50 rounded-lg p-8 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Still have questions?</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('pages.faq.stillHaveQuestions')}</h2>
           <p className="text-gray-700 mb-6">
             Can't find the answer you're looking for? Our customer support team is here to help.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="/help" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
-              Visit Help Center
+              {t('pages.faq.visitHelpCenter')}
             </a>
             <a href="/contact" className="bg-white text-blue-600 px-6 py-2 rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors font-semibold">
-              Contact Us
+              {t('pages.faq.contactUs')}
             </a>
           </div>
         </section>

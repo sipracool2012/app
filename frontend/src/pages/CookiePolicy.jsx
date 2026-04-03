@@ -1,11 +1,13 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function CookiePolicy() {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Cookie Policy</h1>
-        <p className="text-gray-600 mb-8">Last updated: March 20, 2026</p>
+        <h1 className="text-4xl font-bold text-gray-900 mb-2">{t('pages.cookies.title')}</h1>
+        <p className="text-gray-600 mb-8">{t('pages.cookies.lastUpdated', { date: 'March 20, 2026' })}</p>
 
         <div className="space-y-8 text-gray-700">
           {/* Introduction */}
@@ -279,9 +281,9 @@ export default function CookiePolicy() {
             </p>
             <div className="bg-gray-100 p-4 rounded">
               <p><strong>Visa Application Platform</strong></p>
-              <p>Email: privacy@visaapp.com</p>
-              <p>Address: [Your Company Address]</p>
-              <p>Phone: [Your Phone Number]</p>
+              <p>Email: privacy@clearevisa.com</p>
+              <p>Address: B1109 - Graffiti Glover Commercial, Pune, Maharashtra, 411036, India</p>
+              {/* <p>Phone: [Your Phone Number]</p> */}
             </div>
           </section>
         </div>

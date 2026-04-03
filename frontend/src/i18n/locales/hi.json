@@ -13,7 +13,7 @@
     "travelingTo": "यात्रा गंतव्य",
     "purposeOfTravel": "यात्रा का उद्देश्य",
     "searchVisa": "वीज़ा खोजें",
-    "visaNeeded": "यदि आपके पास {{passport}} पासपोर्ट है तो आपको {{destination}} के लिए वीज़ा की आवश्यकता है",
+    "visaNeeded": "यदि आपके पास {{passportCountry}} पासपोर्ट है तो आपको {{destination}} के लिए वीज़ा की आवश्यकता है",
     "visaOptions": "{{destination}} के लिए वीज़ा विकल्प",
     "electronicVisa": "इलेक्ट्रॉनिक वीज़ा (ई-वीज़ा)",
     "applyOnline": "ऑनलाइन आवेदन करें",

@@ -6,11 +6,13 @@ import { SearchableSelect } from '../ui/searchable-select';
 import { PhoneInput } from '../ui/phone-input';
 import { ChevronLeft } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const Step3AddressDetails = ({ data, onNext, onBack }) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [countries, setCountries] = useState([]);
   const [phoneCodes, setPhoneCodes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,8 +41,8 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
     } catch (error) {
       console.error('Failed to fetch constants:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to load form data',
+        title: t('common.error'),
+        description: t('errors.formLoadFailed'),
         variant: 'destructive'
       });
       setLoading(false);
@@ -53,18 +55,18 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
   };
 
   if (loading) {
-    return <div className="flex justify-center p-8">Loading...</div>;
+    return <div className="flex justify-center p-8">{t('common.loading')}</div>;
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <h3 className="text-xl font-semibold text-gray-900 mb-4">Address Details</h3>
+      <h3 className="text-xl font-semibold text-gray-900 mb-4">{t('forms.step3.title')}</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* House No./Street */}
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="houseNoStreet">
-            House No./Street <span className="text-red-500">*</span>
+            {t('forms.step3.houseNoStreet')} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="houseNoStreet"
@@ -77,7 +79,7 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
         {/* Village/Town/City */}
         <div className="space-y-2">
           <Label htmlFor="villageTownCity">
-            Village/Town/City <span className="text-red-500">*</span>
+            {t('forms.step3.villageTownCity')} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="villageTownCity"
@@ -89,19 +91,19 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
 
         {/* Country */}
         <SearchableSelect
-          label="Country"
+          label={t('forms.step3.country')}
           value={formData.country}
           onValueChange={(value) => setFormData({ ...formData, country: value })}
           options={countries}
-          placeholder="Select country"
-          searchPlaceholder="Search countries..."
+          placeholder={t('forms.step3.selectCountry')}
+          searchPlaceholder={t('forms.step3.searchCountries')}
           required
         />
 
         {/* State/Province/District */}
         <div className="space-y-2">
           <Label htmlFor="stateProvince">
-            State/Province/District <span className="text-red-500">*</span>
+            {t('forms.step3.stateProvince')} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="stateProvince"
@@ -114,7 +116,7 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
         {/* Postal/Zip Code */}
         <div className="space-y-2">
           <Label htmlFor="postalCode">
-            Postal/Zip Code <span className="text-red-500">*</span>
+            {t('forms.step3.postalCode')} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="postalCode"
@@ -127,7 +129,7 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
         {/* Phone Number with Country Code */}
         <div className="md:col-span-2">
           <PhoneInput
-            label="Phone No."
+            label={t('forms.step3.phoneNo')}
             countryCode={formData.phoneCountryCode}
             phoneNumber={formData.phoneNumber}
             onCountryCodeChange={(value) => setFormData({ ...formData, phoneCountryCode: value })}
@@ -141,10 +143,10 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
       <div className="flex justify-between">
         <Button type="button" variant="outline" onClick={onBack}>
           <ChevronLeft className="w-4 h-4 mr-2" />
-          Back
+          {t('application.back')}
         </Button>
         <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-          Continue
+          {t('application.continue')}
         </Button>
       </div>
     </form>

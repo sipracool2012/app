@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download, Filter, Search, Eye, Settings, Globe, Save, ChevronDown, ChevronUp, CreditCard, Users, AlertTriangle } from 'lucide-react';
+import { Download, Filter, Search, Eye, Settings, Globe, Save, ChevronDown, ChevronUp, CreditCard, Users, AlertTriangle, Mail } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
@@ -12,8 +12,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { Switch } from '../components/ui/switch';
 import { Label } from '../components/ui/label';
 import PaymentGatewaySettings from '../components/admin/PaymentGatewaySettings';
+import { FlagIcon } from '../components/ui/FlagIcon';
 import UserManagement from '../components/admin/UserManagement';
-import { getToken, getAuthHeaders } from '../utils/auth';
+import EmailProviderSettings from '../components/admin/EmailProviderSettings';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -41,14 +42,16 @@ const AdminPanel = () => {
     // Fetch current user info
     const fetchCurrentUser = async () => {
       try {
-        const token = getToken();
+        const token = localStorage.getItem('token');
         if (!token) {
           navigate('/signin');
           return;
         }
 
         const response = await fetch(`${BACKEND_URL}/api/auth/me`, {
-          headers: getAuthHeaders()
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         });
 
         if (!response.ok) {
@@ -83,7 +86,9 @@ const AdminPanel = () => {
     const fetchApplications = async () => {
       try {
         const response = await fetch(`${BACKEND_URL}/api/applications`, {
-          headers: getAuthHeaders()
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
         });
         const data = await response.json();
         setApplications(data.applications || []);
@@ -165,7 +170,10 @@ const AdminPanel = () => {
     try {
       const response = await fetch(`${BACKEND_URL}/api/applications/${appId}/status`, {
         method: 'PATCH',
-        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
         body: JSON.stringify({ status: newStatus })
       });
 
@@ -196,7 +204,9 @@ const AdminPanel = () => {
       const url = `${BACKEND_URL}/api/applications/export?ids=${application.applicationId}`;
       
       const response = await fetch(url, {
-        headers: getAuthHeaders()
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       });
 
       if (!response.ok) {
@@ -227,7 +237,9 @@ const AdminPanel = () => {
       const url = `${BACKEND_URL}/api/applications/export${ids ? `?ids=${ids}` : ''}`;
       
       const response = await fetch(url, {
-        headers: getAuthHeaders()
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       });
 
       if (!response.ok) {
@@ -322,14 +334,33 @@ const AdminPanel = () => {
     }
   };
 
+  // Status workflow
+  // pending   → (system only, set when app is started)
+  // submitted → set when user clicks Pay
+  // paid      → set when payment is confirmed
+  // processed → admin marks as processed
+  // approved  → admin final approval
+  // rejected  → admin final rejection
+  const ALLOWED_TRANSITIONS = {
+    pending:   ['submitted'],           // admin can manually advance if needed
+    submitted: ['paid', 'rejected'],
+    paid:      ['processed', 'rejected'],
+    processed: ['approved', 'rejected'],
+    approved:  [],                      // terminal
+    rejected:  [],                      // terminal
+  };
+
   const getStatusBadge = (status) => {
     const colors = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      approved: 'bg-green-100 text-green-800',
-      rejected: 'bg-red-100 text-red-800'
+      pending:   'bg-yellow-100 text-yellow-800',
+      submitted: 'bg-blue-100 text-blue-800',
+      paid:      'bg-indigo-100 text-indigo-800',
+      processed: 'bg-purple-100 text-purple-800',
+      approved:  'bg-green-100 text-green-800',
+      rejected:  'bg-red-100 text-red-800',
     };
     return (
-      <Badge className={colors[status] || ''}>
+      <Badge className={colors[status] || 'bg-gray-100 text-gray-800'}>
         {status?.toUpperCase()}
       </Badge>
     );
@@ -368,21 +399,34 @@ const AdminPanel = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className={`grid w-full ${currentUser?.role === 'super_admin' ? 'max-w-4xl grid-cols-4' : 'max-w-md grid-cols-2'}`}>
+          {/* Super Admin sees 5 tabs; regular Admin sees 1 tab (Applications only) */}
+          <TabsList className={`grid w-full ${currentUser?.role === 'super_admin' ? 'max-w-5xl grid-cols-5' : 'max-w-xs grid-cols-1'}`}>
             <TabsTrigger value="applications" className="flex items-center gap-2">
               <Eye className="w-4 h-4" />
               Applications
             </TabsTrigger>
-            <TabsTrigger value="countries" className="flex items-center gap-2">
-              <Globe className="w-4 h-4" />
-              Country Config
-            </TabsTrigger>
+            {/* Country Config — Super Admin only */}
+            {currentUser?.role === 'super_admin' && (
+              <TabsTrigger value="countries" className="flex items-center gap-2">
+                <Globe className="w-4 h-4" />
+                Country Config
+              </TabsTrigger>
+            )}
+            {/* Payment Gateways — Super Admin only */}
             {currentUser?.role === 'super_admin' && (
               <TabsTrigger value="payment-gateways" className="flex items-center gap-2">
                 <CreditCard className="w-4 h-4" />
                 Payment Gateways
               </TabsTrigger>
             )}
+            {/* Email Providers — Super Admin only */}
+            {currentUser?.role === 'super_admin' && (
+              <TabsTrigger value="email-providers" className="flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                Email Providers
+              </TabsTrigger>
+            )}
+            {/* User Management — Super Admin only */}
             {currentUser?.role === 'super_admin' && (
               <TabsTrigger value="users" className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
@@ -394,41 +438,61 @@ const AdminPanel = () => {
           {/* Applications Tab */}
           <TabsContent value="applications" className="space-y-6">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">Total Applications</CardTitle>
+                  <CardTitle className="text-xs font-medium text-gray-600">Total</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-3xl font-bold">{applications.length}</p>
+                  <p className="text-2xl font-bold">{applications.length}</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">Pending</CardTitle>
+                  <CardTitle className="text-xs font-medium text-gray-600">Pending</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-3xl font-bold text-yellow-600">
+                  <p className="text-2xl font-bold text-yellow-600">
                     {applications.filter(a => a.status === 'pending').length}
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">Approved</CardTitle>
+                  <CardTitle className="text-xs font-medium text-gray-600">Submitted</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-3xl font-bold text-green-600">
+                  <p className="text-2xl font-bold text-blue-600">
+                    {applications.filter(a => a.status === 'submitted').length}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-xs font-medium text-gray-600">Paid</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold text-indigo-600">
+                    {applications.filter(a => a.status === 'paid').length}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-xs font-medium text-gray-600">Approved</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold text-green-600">
                     {applications.filter(a => a.status === 'approved').length}
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">Rejected</CardTitle>
+                  <CardTitle className="text-xs font-medium text-gray-600">Rejected</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-3xl font-bold text-red-600">
+                  <p className="text-2xl font-bold text-red-600">
                     {applications.filter(a => a.status === 'rejected').length}
                   </p>
                 </CardContent>
@@ -458,6 +522,9 @@ const AdminPanel = () => {
                     <SelectContent>
                       <SelectItem value="all">All Status</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="submitted">Submitted</SelectItem>
+                      <SelectItem value="paid">Paid</SelectItem>
+                      <SelectItem value="processed">Processed</SelectItem>
                       <SelectItem value="approved">Approved</SelectItem>
                       <SelectItem value="rejected">Rejected</SelectItem>
                     </SelectContent>
@@ -512,19 +579,44 @@ const AdminPanel = () => {
                             </TableCell>
                             <TableCell>
                               <div className="flex space-x-2">
-                                <Select
-                                  value={app.status}
-                                  onValueChange={(value) => updateStatus(app.applicationId, value)}
-                                >
-                                  <SelectTrigger className="w-32">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="approved">Approved</SelectItem>
-                                    <SelectItem value="rejected">Rejected</SelectItem>
-                                  </SelectContent>
-                                </Select>
+                                {/* Super admin can move to any status freely.
+                                    Regular admin is restricted to ALLOWED_TRANSITIONS only.
+                                    Terminal statuses (approved/rejected) show a read-only badge for non-super-admins. */}
+                                {currentUser?.role === 'super_admin' || (ALLOWED_TRANSITIONS[app.status] || []).length > 0 ? (
+                                  <Select
+                                    value={app.status}
+                                    onValueChange={(value) => updateStatus(app.applicationId, value)}
+                                  >
+                                    <SelectTrigger className="w-36">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {currentUser?.role === 'super_admin' ? (
+                                        // Super admin sees every status
+                                        ['pending', 'submitted', 'paid', 'processed', 'approved', 'rejected'].map(s => (
+                                          <SelectItem key={s} value={s}>
+                                            {s.charAt(0).toUpperCase() + s.slice(1)}
+                                            {s === app.status ? ' (current)' : ''}
+                                          </SelectItem>
+                                        ))
+                                      ) : (
+                                        // Regular admin: current status as disabled reference + allowed next states only
+                                        <>
+                                          <SelectItem value={app.status} disabled>
+                                            {app.status.charAt(0).toUpperCase() + app.status.slice(1)} (current)
+                                          </SelectItem>
+                                          {(ALLOWED_TRANSITIONS[app.status] || []).map(next => (
+                                            <SelectItem key={next} value={next}>
+                                              {next.charAt(0).toUpperCase() + next.slice(1)}
+                                            </SelectItem>
+                                          ))}
+                                        </>
+                                      )}
+                                    </SelectContent>
+                                  </Select>
+                                ) : (
+                                  getStatusBadge(app.status)
+                                )}
                                 <Button
                                   size="sm"
                                   variant="outline"
@@ -544,8 +636,8 @@ const AdminPanel = () => {
             </Card>
           </TabsContent>
 
-          {/* Country Configuration Tab */}
-          <TabsContent value="countries" className="space-y-6">
+          {/* Country Configuration Tab — Super Admin only */}
+          {currentUser?.role === 'super_admin' && <TabsContent value="countries" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -582,7 +674,7 @@ const AdminPanel = () => {
                         )}
                       >
                         <div className="flex items-center gap-3">
-                          <span className="text-2xl">{country.flag_emoji}</span>
+                          <FlagIcon code={country.country_code} width={32} height={24} />
                           <div>
                             <p className="font-medium">{country.country_name}</p>
                             <p className="text-sm text-gray-500">{country.country_code}</p>
@@ -980,11 +1072,19 @@ const AdminPanel = () => {
               </CardContent>
             </Card>
           </TabsContent>
+          }
 
-          {/* Payment Gateway Settings Tab */}
+          {/* Payment Gateway Settings Tab — Super Admin only */}
           {currentUser?.role === 'super_admin' && (
             <TabsContent value="payment-gateways" className="space-y-6">
               <PaymentGatewaySettings />
+            </TabsContent>
+          )}
+
+          {/* Email Providers Tab — Super Admin only */}
+          {currentUser?.role === 'super_admin' && (
+            <TabsContent value="email-providers" className="space-y-6">
+              <EmailProviderSettings />
             </TabsContent>
           )}
 

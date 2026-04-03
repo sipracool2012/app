@@ -1,58 +1,66 @@
-import os
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from typing import Optional
+"""
+Email utility helpers
+======================
+All transactional email delivery is delegated to the unified email provider
+dispatcher (utils.email_providers), which supports Mandrill, SendPulse, and
+Postmark with automatic fallback.
+
+# CHANGELOG REMINDER: Update CHANGELOG.md when adding or changing email templates.
+"""
+
 import logging
 
 logger = logging.getLogger(__name__)
 
-# Email Configuration
-SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
-SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
-SMTP_USER = os.environ.get("SMTP_USER", "")
-SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
-FROM_EMAIL = os.environ.get("FROM_EMAIL", SMTP_USER)
 
-def send_email(to_email: str, subject: str, html_content: str) -> bool:
+async def send_email(to_email: str, subject: str, html_content: str) -> bool:
     """
-    Send email using SMTP
-    Args:
-        to_email: Recipient email address
-        subject: Email subject
-        html_content: HTML email body
-    Returns:
-        True if sent successfully, False otherwise
+    Send a transactional email via the active provider chain.
+    Delegates to the unified dispatcher in utils.email_providers.
     """
-    if not SMTP_USER or not SMTP_PASSWORD:
-        logger.warning("SMTP credentials not configured, skipping email")
-        return False
-    
-    try:
-        # Create message
-        message = MIMEMultipart('alternative')
-        message['Subject'] = subject
-        message['From'] = FROM_EMAIL
-        message['To'] = to_email
-        
-        # Attach HTML content
-        html_part = MIMEText(html_content, 'html')
-        message.attach(html_part)
-        
-        # Send email
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-            server.starttls()
-            server.login(SMTP_USER, SMTP_PASSWORD)
-            server.send_message(message)
-        
-        logger.info(f"Email sent successfully to {to_email}")
-        return True
-    
-    except Exception as e:
-        logger.error(f"Failed to send email: {e}")
-        return False
+    from utils.email_providers import send_email_via_providers
+    return await send_email_via_providers(to_email, subject, html_content)
 
-def send_application_confirmation(to_email: str, application_id: str, applicant_name: str) -> bool:
+
+async def send_otp_email(to_email: str, otp: str, full_name: str) -> bool:
+    """
+    Send an OTP (one-time password) email for sign-in verification.
+    The OTP is valid for 5 minutes.
+    """
+    subject = "Your Clear eVisa Sign-In Verification Code"
+    html_content = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background-color: #2563eb; padding: 20px; text-align: center;">
+                <h1 style="color: white; margin: 0;">Clear eVisa&deg;</h1>
+            </div>
+            <div style="padding: 30px; background-color: #f9fafb;">
+                <h2 style="color: #1f2937;">Sign-In Verification</h2>
+                <p style="color: #4b5563; font-size: 16px;">Dear {full_name},</p>
+                <p style="color: #4b5563; font-size: 16px;">
+                    Use the following one-time verification code to complete your sign-in.
+                    This code expires in <strong>5 minutes</strong>.
+                </p>
+                <div style="background-color: #dbeafe; border-left: 4px solid #2563eb; padding: 20px; margin: 20px 0; text-align: center;">
+                    <p style="margin: 0; color: #1e40af; font-weight: bold; font-size: 14px;">Your Verification Code</p>
+                    <p style="margin: 10px 0 0 0; color: #1e40af; font-size: 36px; font-weight: bold; letter-spacing: 8px;">{otp}</p>
+                </div>
+                <p style="color: #6b7280; font-size: 14px;">
+                    If you did not attempt to sign in, please ignore this email and ensure your account is secure.
+                </p>
+            </div>
+            <div style="background-color: #1f2937; padding: 20px; text-align: center;">
+                <p style="color: #9ca3af; margin: 0; font-size: 12px;">
+                    &copy; 2026 Clear eVisa. All rights reserved.
+                </p>
+            </div>
+        </body>
+    </html>
+    """
+    return await send_email(to_email, subject, html_content)
+
+
+async def send_application_confirmation(to_email: str, application_id: str, applicant_name: str) -> bool:
     """
     Send application confirmation email
     """
@@ -91,9 +99,9 @@ def send_application_confirmation(to_email: str, application_id: str, applicant_
         </body>
     </html>
     """
-    return send_email(to_email, subject, html_content)
+    return await send_email(to_email, subject, html_content)
 
-def send_application_status_update(to_email: str, application_id: str, applicant_name: str, status: str) -> bool:
+async def send_application_status_update(to_email: str, application_id: str, applicant_name: str, status: str) -> bool:
     """
     Send application status update email
     """
@@ -142,4 +150,4 @@ def send_application_status_update(to_email: str, application_id: str, applicant
         </body>
     </html>
     """
-    return send_email(to_email, subject, html_content)
+    return await send_email(to_email, subject, html_content)

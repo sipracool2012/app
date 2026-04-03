@@ -4,6 +4,7 @@ import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useToast } from '../../hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 import { Users, Shield, UserCog } from 'lucide-react';
 import { getAuthHeaders } from '../../utils/auth';
 
@@ -11,6 +12,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const UserManagement = () => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingUser, setUpdatingUser] = useState(null);
@@ -35,8 +37,8 @@ const UserManagement = () => {
     } catch (error) {
       console.error('Failed to fetch users:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to load users',
+        title: t('common.error'),
+        description: t('admin.failedToLoadUsers'),
         variant: 'destructive'
       });
       setLoading(false);
@@ -57,8 +59,8 @@ const UserManagement = () => {
       }
 
       toast({
-        title: 'Success',
-        description: 'User role updated successfully'
+        title: t('common.success'),
+        description: t('admin.roleUpdatedDesc')
       });
 
       // Refresh users list
@@ -66,8 +68,8 @@ const UserManagement = () => {
     } catch (error) {
       console.error('Failed to update user role:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to update user role',
+        title: t('common.error'),
+        description: t('admin.roleUpdateError'),
         variant: 'destructive'
       });
     } finally {
@@ -104,18 +106,18 @@ const UserManagement = () => {
   };
 
   if (loading) {
-    return <div className="flex justify-center p-8">Loading users...</div>;
+    return <div className="flex justify-center p-8">{t('admin.loadingUsers')}</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">User Management</h2>
+          <h2 className="text-2xl font-bold text-gray-900">{t('admin.userManagement')}</h2>
           <p className="text-sm text-gray-500 mt-1">Manage user roles and permissions</p>
         </div>
         <Badge className="bg-green-100 text-green-800">
-          {users.length} Total Users
+          {t('admin.totalUsers', { count: users.length })}
         </Badge>
       </div>
 
@@ -141,7 +143,7 @@ const UserManagement = () => {
                 </div>
 
                 <div className="ml-6 w-64">
-                  <label className="text-sm font-medium block mb-2">Change Role</label>
+                  <label className="text-sm font-medium block mb-2">{t('admin.changeRole')}</label>
                   <Select
                     value={user.role}
                     onValueChange={(newRole) => updateUserRole(user.id, newRole)}

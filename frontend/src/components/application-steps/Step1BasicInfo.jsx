@@ -5,11 +5,13 @@ import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { SearchableSelect } from '../ui/searchable-select';
 import { useToast } from '../../hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [ports, setPorts] = useState([]);
   const [visaSubtypes, setVisaSubtypes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -78,8 +80,8 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
     } catch (error) {
       console.error('Failed to fetch constants:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to load form data',
+        title: t('common.error'),
+        description: t('errors.formLoadFailed'),
         variant: 'destructive'
       });
       setLoading(false);
@@ -130,8 +132,8 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
     // Validate Ordinary passport type
     if (formData.passportType !== 'Ordinary') {
       toast({
-        title: 'Invalid Passport Type',
-        description: 'Only Ordinary passport type is allowed for this service. Please select Ordinary passport.',
+        title: t('errors.invalidPassportType'),
+        description: t('errors.invalidPassportTypeDesc'),
         variant: 'destructive'
       });
       return;
@@ -145,8 +147,8 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
     //alert(minDate);
     if (selectedDate < minDate) {
       toast({
-        title: 'Invalid Arrival Date',
-        description: 'Expected arrival date must be at least 5 days from today.',
+        title: t('errors.invalidArrivalDate'),
+        description: t('errors.invalidArrivalDateDesc'),
         variant: 'destructive'
       });
       return;
@@ -156,18 +158,18 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
   };
 
   if (loading) {
-    return <div className="flex justify-center p-8">Loading...</div>;
+    return <div className="flex justify-center p-8">{t('common.loading')}</div>;
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <h3 className="text-xl font-semibold text-gray-900 mb-4">Basic Information</h3>
+      <h3 className="text-xl font-semibold text-gray-900 mb-4">{t('forms.step1.title')}</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Passport Type */}
         <div className="space-y-2">
           <Label htmlFor="passportType">
-            Passport Type <span className="text-red-500">*</span>
+            {t('forms.step1.passportType')} <span className="text-red-500">*</span>
           </Label>
           <Select 
             value={formData.passportType} 
@@ -177,33 +179,33 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Ordinary">Ordinary</SelectItem>
-              <SelectItem value="Diplomatic">Diplomatic</SelectItem>
-              <SelectItem value="Official">Official</SelectItem>
+              <SelectItem value="Ordinary">{t('forms.step1.ordinary')}</SelectItem>
+              <SelectItem value="Diplomatic">{t('forms.step1.diplomatic')}</SelectItem>
+              <SelectItem value="Official">{t('forms.step1.official')}</SelectItem>
             </SelectContent>
           </Select>
           {formData.passportType !== 'Ordinary' && (
             <p className="text-sm text-red-600">
-              ⚠️ Only Ordinary passport type is allowed for this service
+              {t('forms.step1.passportTypeWarning')}
             </p>
           )}
         </div>
 
         {/* Port of Arrival */}
         <SearchableSelect
-          label="Port of Arrival"
+          label={t('forms.step1.portOfArrival')}
           value={formData.portOfArrival}
           onValueChange={(value) => setFormData({ ...formData, portOfArrival: value })}
           options={ports}
-          placeholder="Select port of arrival"
-          searchPlaceholder="Search ports..."
+          placeholder={t('forms.step1.selectPort')}
+          searchPlaceholder={t('forms.step1.searchPorts')}
           required
         />
 
         {/* Expected Date of Arrival */}
         <div className="space-y-2">
           <Label htmlFor="expectedArrivalDate">
-            Expected Date of Arrival <span className="text-red-500">*</span>
+            {t('forms.step1.expectedArrivalDate')} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="expectedArrivalDate"
@@ -213,13 +215,13 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
             min={getMinArrivalDate()}
             required
           />
-          <p className="text-xs text-gray-500">Must be at least 5 days from today</p>
+          <p className="text-xs text-gray-500">{t('forms.step1.arrivalDateHint')}</p>
         </div>
 
         {/* Visa Service */}
         <div className="space-y-2">
           <Label htmlFor="visaService">
-            Visa Service <span className="text-red-500">*</span>
+            {t('forms.step1.visaService')} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="visaService"
@@ -227,20 +229,20 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
             readOnly
             className="bg-gray-50"
           />
-          <p className="text-xs text-gray-500">Auto-populated from your selection</p>
+          <p className="text-xs text-gray-500">{t('forms.step1.visaServiceHint')}</p>
         </div>
 
         {/* Visa Service Subtype */}
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="visaServiceSubtype">
-            Visa Service Subtype <span className="text-red-500">*</span>
+            {t('forms.step1.visaServiceSubtype')} <span className="text-red-500">*</span>
           </Label>
           <Select 
             value={formData.visaServiceSubtype} 
             onValueChange={(value) => setFormData({ ...formData, visaServiceSubtype: value })}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select visa service subtype" />
+              <SelectValue placeholder={t('forms.step1.selectVisaSubtype')} />
             </SelectTrigger>
             <SelectContent>
               {visaSubtypes.map((subtype) => (
@@ -254,13 +256,13 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
 
         {/* Passport Details Section */}
         <div className="md:col-span-2 border-t pt-4 mt-4">
-          <h4 className="text-lg font-semibold text-gray-900 mb-4">Passport Details</h4>
+          <h4 className="text-lg font-semibold text-gray-900 mb-4">{t('forms.step1.passportDetails')}</h4>
         </div>
 
         {/* Passport Number */}
         <div className="space-y-2">
           <Label htmlFor="passportNumber">
-            Passport Number <span className="text-red-500">*</span>
+            {t('forms.step1.passportNumber')} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="passportNumber"
@@ -273,7 +275,7 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
         {/* Date of Issue */}
         <div className="space-y-2">
           <Label htmlFor="dateOfIssue">
-            Date of Issue <span className="text-red-500">*</span>
+            {t('forms.step1.dateOfIssue')} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="dateOfIssue"
@@ -288,7 +290,7 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
         {/* Date of Expiry */}
         <div className="space-y-2">
           <Label htmlFor="dateOfExpiry">
-            Date of Expiry <span className="text-red-500">*</span>
+            {t('forms.step1.dateOfExpiry')} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="dateOfExpiry"
@@ -303,7 +305,7 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
         {/* Other Passport Held */}
         <div className="space-y-2">
           <Label htmlFor="otherPassportHeld">
-            Any other valid Passport/Identity Certificate(IC) held? <span className="text-red-500">*</span>
+            {t('forms.step1.otherPassportHeld')} <span className="text-red-500">*</span>
           </Label>
           <Select 
             value={formData.otherPassportHeld} 
@@ -313,8 +315,8 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="No">No</SelectItem>
-              <SelectItem value="Yes">Yes</SelectItem>
+              <SelectItem value="No">{t('forms.no')}</SelectItem>
+              <SelectItem value="Yes">{t('forms.yes')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -370,7 +372,7 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
 
       <div className="flex justify-end">
         <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-          Continue
+          {t('application.continue')}
         </Button>
       </div>
     </form>

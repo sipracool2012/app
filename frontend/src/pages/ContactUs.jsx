@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function ContactUs() {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -34,8 +36,8 @@ export default function ContactUs() {
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-4">Contact Us</h1>
-          <p className="text-xl text-blue-100">We'd love to hear from you. Get in touch with our team.</p>
+          <h1 className="text-5xl font-bold mb-4">{t('pages.contact.title')}</h1>
+          <p className="text-xl text-blue-100">{t('pages.contact.subtitle')}</p>
         </div>
       </div>
 
@@ -48,29 +50,29 @@ export default function ContactUs() {
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-2">📧 Email</h3>
               <p className="text-gray-600 mb-1">General Inquiries</p>
-              <p className="text-blue-600 font-semibold">hello@visaapp.com</p>
-              <p className="text-gray-600 mb-1 mt-3">Support</p>
-              <p className="text-blue-600 font-semibold">support@visaapp.com</p>
+              <p className="text-blue-600 font-semibold">hello@clearevisa.com</p>
+              <p className="text-gray-600 mb-1 mt-3">Customer Support</p>
+              <p className="text-blue-600 font-semibold">support@clearevisa.com</p>
               <p className="text-gray-600 mb-1 mt-3">Press</p>
-              <p className="text-blue-600 font-semibold">press@visaapp.com</p>
+              <p className="text-blue-600 font-semibold">press@clearevisa.com</p>
             </div>
 
-            {/* Phone */}
+            {/* Phone 
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-3">📱 Phone</h3>
               <p className="text-gray-700">
                 <strong>+1 (555) 123-4567</strong>
               </p>
               <p className="text-gray-600 text-sm mt-2">Available 24/7</p>
-            </div>
+            </div>*/}
 
             {/* Address */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-3">📍 Address</h3>
               <p className="text-gray-700">
-                123 Visa Avenue<br />
-                San Francisco, CA 94105<br />
-                United States
+                B1109 - Graffiti Glover Commercial<br />
+                Pune, Maharashtra, 411036<br />
+                India
               </p>
             </div>
 
@@ -91,19 +93,19 @@ export default function ContactUs() {
           {/* Contact Form */}
           <div className="md:col-span-2">
             <div className="bg-white rounded-lg shadow-md p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Send us a Message</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('pages.contact.sendUsMessage')}</h2>
 
               {submitted && (
                 <div className="mb-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700">
-                  <p className="font-semibold">Thank you for your message!</p>
-                  <p>We'll get back to you as soon as possible.</p>
+                  <p className="font-semibold">{t('pages.contact.messageSentTitle')}</p>
+                  <p>{t('pages.contact.messageSentDesc')}</p>
                 </div>
               )}
 
               <form onSubmit={handleSubmit}>
                 {/* Name */}
                 <div className="mb-6">
-                  <label className="block text-gray-700 font-semibold mb-2">Full Name *</label>
+                  <label className="block text-gray-700 font-semibold mb-2">{t('pages.contact.fullName')} *</label>
                   <input
                     type="text"
                     name="name"
@@ -111,13 +113,13 @@ export default function ContactUs() {
                     onChange={handleChange}
                     required
                     className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-600"
-                    placeholder="Your name"
+                    placeholder={t('pages.contact.yourName')}
                   />
                 </div>
 
                 {/* Email */}
                 <div className="mb-6">
-                  <label className="block text-gray-700 font-semibold mb-2">Email Address *</label>
+                  <label className="block text-gray-700 font-semibold mb-2">{t('pages.contact.emailAddress')} *</label>
                   <input
                     type="email"
                     name="email"
@@ -131,7 +133,7 @@ export default function ContactUs() {
 
                 {/* Category */}
                 <div className="mb-6">
-                  <label className="block text-gray-700 font-semibold mb-2">Category *</label>
+                  <label className="block text-gray-700 font-semibold mb-2">{t('pages.contact.category')} *</label>
                   <select
                     name="category"
                     value={formData.category}
@@ -139,7 +141,7 @@ export default function ContactUs() {
                     required
                     className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-600"
                   >
-                    <option value="">Select a category</option>
+                    <option value="">{t('pages.contact.selectCategory')}</option>
                     <option value="support">Customer Support</option>
                     <option value="sales">Sales Inquiry</option>
                     <option value="partnership">Partnership</option>
@@ -150,7 +152,7 @@ export default function ContactUs() {
 
                 {/* Subject */}
                 <div className="mb-6">
-                  <label className="block text-gray-700 font-semibold mb-2">Subject *</label>
+                  <label className="block text-gray-700 font-semibold mb-2">{t('pages.contact.subject')} *</label>
                   <input
                     type="text"
                     name="subject"
@@ -158,13 +160,13 @@ export default function ContactUs() {
                     onChange={handleChange}
                     required
                     className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-600"
-                    placeholder="How can we help?"
+                    placeholder={t('pages.contact.howCanWeHelp')}
                   />
                 </div>
 
                 {/* Message */}
                 <div className="mb-6">
-                  <label className="block text-gray-700 font-semibold mb-2">Message *</label>
+                  <label className="block text-gray-700 font-semibold mb-2">{t('pages.contact.message')} *</label>
                   <textarea
                     name="message"
                     value={formData.message}
@@ -172,7 +174,7 @@ export default function ContactUs() {
                     required
                     rows="5"
                     className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-600"
-                    placeholder="Your message here..."
+                    placeholder={t('pages.contact.yourMessage')}
                   ></textarea>
                 </div>
 
@@ -181,7 +183,7 @@ export default function ContactUs() {
                   type="submit"
                   className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  Send Message
+                  {t('pages.contact.send')}
                 </button>
               </form>
 
@@ -194,14 +196,14 @@ export default function ContactUs() {
 
         {/* Additional Ways to Connect */}
         <section className="bg-blue-50 rounded-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Other Ways to Reach Us</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('pages.contact.otherWays')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <h3 className="font-bold text-gray-900 mb-2">💬 Live Chat</h3>
+              <h3 className="font-bold text-gray-900 mb-2">💬 Live Chat(Coming Soon)</h3>
               <p className="text-gray-700">Chat with our support team in real-time for immediate assistance.</p>
             </div>
             <div>
-              <h3 className="font-bold text-gray-900 mb-2">📱 Mobile App</h3>
+              <h3 className="font-bold text-gray-900 mb-2">📱 Mobile App(Coming Soon)</h3>
               <p className="text-gray-700">Contact support directly through our mobile application.</p>
             </div>
             <div>

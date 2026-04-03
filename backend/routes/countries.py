@@ -233,7 +233,8 @@ async def get_all_countries():
             config = config_dict[country['code']]
             result.append({
                 **config,
-                '_id': str(config.get('_id', ''))
+                '_id': str(config.get('_id', '')),
+                'flag_emoji': config.get('flag_emoji') or country['flag']
             })
         else:
             # Return default config for this country

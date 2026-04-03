@@ -7,6 +7,24 @@ from models.payment_gateway_config import (
 from utils.auth import get_current_user
 from datetime import datetime
 from bson import ObjectId
+from pydantic import BaseModel
+import httpx
+import logging
+
+logger = logging.getLogger(__name__)
+
+PAYPAL_SANDBOX_BASE = "https://api-m.sandbox.paypal.com"
+PAYPAL_LIVE_BASE = "https://api-m.paypal.com"
+
+class PayPalCreateOrderRequest(BaseModel):
+    application_id: str
+    amount: float
+    return_url: str
+    cancel_url: str
+
+class PayPalCaptureOrderRequest(BaseModel):
+    order_id: str
+    application_id: str
 
 router = APIRouter()
 
@@ -222,3 +240,129 @@ async def get_enabled_gateways():
         })
     
     return {"gateways": enabled_gateways}
+
+
+async def _paypal_access_token(client_id: str, secret: str, mode: str) -> str:
+    base_url = PAYPAL_SANDBOX_BASE if mode == "sandbox" else PAYPAL_LIVE_BASE
+    async with httpx.AsyncClient() as http:
+        resp = await http.post(
+            f"{base_url}/v1/oauth2/token",
+            data={"grant_type": "client_credentials"},
+            auth=(client_id, secret),
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            timeout=20,
+        )
+        resp.raise_for_status()
+        return resp.json()["access_token"]
+
+
+@router.post("/paypal/create-order")
+async def paypal_create_order(
+    req: PayPalCreateOrderRequest,
+    current_user_id: str = Depends(get_current_user),
+):
+    """Create a PayPal order and return the approval URL for redirect."""
+    config = await db.payment_gateway_config.find_one({})
+    if not config or not config.get("paypal_enabled") or not config.get("paypal_client_id"):
+        raise HTTPException(status_code=400, detail="PayPal is not configured or enabled")
+
+    client_id = config["paypal_client_id"]
+    secret = config["paypal_secret"]
+    mode = config.get("paypal_mode", "sandbox")
+    base_url = PAYPAL_SANDBOX_BASE if mode == "sandbox" else PAYPAL_LIVE_BASE
+
+    try:
+        access_token = await _paypal_access_token(client_id, secret, mode)
+        async with httpx.AsyncClient() as http:
+            resp = await http.post(
+                f"{base_url}/v2/checkout/orders",
+                json={
+                    "intent": "CAPTURE",
+                    "purchase_units": [{
+                        "reference_id": req.application_id,
+                        "description": f"Visa application {req.application_id}",
+                        "amount": {
+                            "currency_code": "USD",
+                            "value": f"{req.amount:.2f}"
+                        }
+                    }],
+                    "application_context": {
+                        "return_url": req.return_url,
+                        "cancel_url": req.cancel_url,
+                        "brand_name": "Clear eVisa",
+                        "user_action": "PAY_NOW"
+                    }
+                },
+                headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"},
+                timeout=20,
+            )
+            resp.raise_for_status()
+            order = resp.json()
+
+        # Persist order_id and amount on the application for retry
+        await db.applications.update_one(
+            {"applicationId": req.application_id},
+            {"$set": {"paypal_order_id": order["id"], "payment_amount": req.amount, "updatedAt": datetime.utcnow()}}
+        )
+
+        approval_url = next(l["href"] for l in order["links"] if l["rel"] == "approve")
+        return {"order_id": order["id"], "approval_url": approval_url}
+
+    except httpx.HTTPStatusError as e:
+        logger.exception("PayPal create-order failed")
+        raise HTTPException(status_code=502, detail=f"PayPal error: {e.response.text}")
+    except Exception as e:
+        logger.exception("PayPal create-order unexpected error")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/paypal/capture-order")
+async def paypal_capture_order(
+    req: PayPalCaptureOrderRequest,
+    current_user_id: str = Depends(get_current_user),
+):
+    """Capture an approved PayPal order and mark the application as submitted."""
+    config = await db.payment_gateway_config.find_one({})
+    if not config or not config.get("paypal_client_id"):
+        raise HTTPException(status_code=400, detail="PayPal is not configured")
+
+    client_id = config["paypal_client_id"]
+    secret = config["paypal_secret"]
+    mode = config.get("paypal_mode", "sandbox")
+    base_url = PAYPAL_SANDBOX_BASE if mode == "sandbox" else PAYPAL_LIVE_BASE
+
+    try:
+        access_token = await _paypal_access_token(client_id, secret, mode)
+        async with httpx.AsyncClient() as http:
+            resp = await http.post(
+                f"{base_url}/v2/checkout/orders/{req.order_id}/capture",
+                headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"},
+                timeout=30,
+            )
+            resp.raise_for_status()
+            capture = resp.json()
+
+        if capture.get("status") != "COMPLETED":
+            raise HTTPException(status_code=400, detail=f"PayPal capture status: {capture.get('status')}")
+
+        transaction_id = capture["purchase_units"][0]["payments"]["captures"][0]["id"]
+
+        # Mark application as submitted + record transaction
+        await db.applications.update_one(
+            {"applicationId": req.application_id},
+            {"$set": {
+                "status": "submitted",
+                "paypal_transaction_id": transaction_id,
+                "paypal_capture": capture,
+                "updatedAt": datetime.utcnow()
+            }}
+        )
+
+        return {"success": True, "transaction_id": transaction_id, "status": "COMPLETED"}
+
+    except httpx.HTTPStatusError as e:
+        logger.exception("PayPal capture failed")
+        raise HTTPException(status_code=502, detail=f"PayPal error: {e.response.text}")
+    except Exception as e:
+        logger.exception("PayPal capture unexpected error")
+        raise HTTPException(status_code=500, detail=str(e))

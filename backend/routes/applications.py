@@ -95,6 +95,13 @@ async def delete_draft(
     return {"message": "Draft deleted"}
 
 
+@router.delete("/draft", response_model=dict)
+async def delete_my_draft(user_id: str = Depends(get_current_user)):
+    """Delete the current user's draft application (no ID needed)."""
+    result = await db.applications.delete_one({"userId": user_id, "status": "draft"})
+    return {"message": "Draft deleted" if result.deleted_count else "No draft found"}
+
+
 # ============ MY APPLICATIONS ============
 
 @router.get("/my-applications", response_model=dict)
@@ -234,7 +241,7 @@ async def create_application(
     # Send confirmation email
     try:
         applicant_name = f"{application_data.givenNames} {application_data.surname}"
-        send_application_confirmation(
+        await send_application_confirmation(
             to_email=application_data.email,
             application_id=application_id,
             applicant_name=applicant_name
@@ -315,16 +322,26 @@ async def update_application_status(
     
     # Send status update email
     if status_update.status in ["approved", "rejected"]:
+        import logging as _logging
+        _logger = _logging.getLogger(__name__)
         try:
-            applicant_name = f"{application['givenNames']} {application['surname']}"
-            send_application_status_update(
+            applicant_name = f"{application.get('givenNames', '')} {application.get('surname', '')}".strip()
+            email_sent = await send_application_status_update(
                 to_email=application["email"],
                 application_id=application_id,
                 applicant_name=applicant_name,
                 status=status_update.status
             )
+            if not email_sent:
+                _logger.error(
+                    f"Email delivery failed for {status_update.status} notification "
+                    f"to {application['email']} (app {application_id}) – all providers failed"
+                )
         except Exception as e:
-            print(f"Failed to send status update email: {e}")
+            _logger.exception(
+                f"Exception sending {status_update.status} email to {application.get('email')} "
+                f"(app {application_id}): {e}"
+            )
     
     return {
         "id": application_id,

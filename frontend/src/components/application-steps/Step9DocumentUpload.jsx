@@ -4,12 +4,14 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { ChevronLeft, Upload, FileText, X } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 import { getAuthHeaders } from '../../utils/auth';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const Step9DocumentUpload = ({ data, onNext, onBack }) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [uploading, setUploading] = useState(false);
   const applicationId = data?.applicationId || '';
 
@@ -68,8 +70,8 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast({
-        title: 'File too large',
-        description: 'File size must be less than 5MB',
+        title: t('forms.step9.fileTooLarge'),
+        description: t('forms.step9.fileTooLargeDesc'),
         variant: 'destructive'
       });
       return;
@@ -79,8 +81,8 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
     if (!allowedTypes.includes(file.type)) {
       toast({
-        title: 'Invalid file type',
-        description: 'Only JPG, PNG, and PDF files are allowed',
+        title: t('forms.step9.invalidFileType'),
+        description: t('forms.step9.invalidFileTypeDesc'),
         variant: 'destructive'
       });
       return;
@@ -116,13 +118,13 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
       });
 
       toast({
-        title: 'Success',
-        description: 'File uploaded successfully'
+        title: t('common.success'),
+        description: t('forms.step9.uploadSuccess')
       });
     } catch (error) {
       toast({
-        title: 'Upload failed',
-        description: 'Failed to upload file. Please try again.',
+        title: t('forms.step9.uploadFailed'),
+        description: t('forms.step9.uploadError'),
         variant: 'destructive'
       });
     } finally {
@@ -173,15 +175,16 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
           />
         </div>
       ) : (
-        <div className="border border-gray-300 rounded-lg p-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <FileText className="h-5 w-5 text-blue-600" />
-            <span className="text-sm text-gray-700">{fileNames[fieldName]}</span>
+        <div className="border border-gray-300 rounded-lg p-4 flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <FileText className="h-5 w-5 text-blue-600 shrink-0" />
+            <span className="text-sm text-gray-700 truncate">{fileNames[fieldName]}</span>
           </div>
           <Button
             type="button"
             variant="ghost"
             size="sm"
+            className="shrink-0"
             onClick={() => removeFile(fieldName)}
           >
             <X className="h-4 w-4" />
@@ -193,7 +196,7 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <h3 className="text-xl font-semibold text-gray-900 mb-4">Document Upload</h3>
+      <h3 className="text-xl font-semibold text-gray-900 mb-4">{t('forms.step9.title')}</h3>
 
       {applicationId && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center gap-3">
@@ -201,42 +204,41 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
           <span className="text-sm font-bold text-blue-900 tracking-wide">{applicationId}</span>
         </div>
       )}
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Required Documents for All */}
         <div className="md:col-span-2 border-b pb-2 mb-2">
-          <h4 className="text-lg font-semibold text-gray-800">Required Documents (All Applicants)</h4>
+          <h4 className="text-lg font-semibold text-gray-800">{t('forms.step9.requiredDocs')}</h4>
         </div>
 
         <DocumentUploadField
           fieldName="passportDocument"
-          label="Passport Copy"
-          description="First and last page of passport"
+          label={t('forms.step9.passportCopyLabel')}
+          description={t('forms.step9.passportCopyHint')}
         />
 
         <DocumentUploadField
           fieldName="photoDocument"
-          label="Recent Photograph"
-          description="Passport size photo with white background"
+          label={t('forms.step9.recentPhotoLabel')}
+          description={t('forms.step9.recentPhotoHint')}
         />
 
         {/* Business Visa Specific Documents */}
         {isBusinessVisa && (
           <>
             <div className="md:col-span-2 border-t border-b py-2 my-2">
-              <h4 className="text-lg font-semibold text-gray-800">Business Visa Documents</h4>
+              <h4 className="text-lg font-semibold text-gray-800">{t('forms.step9.businessDocs')}</h4>
             </div>
 
             <DocumentUploadField
               fieldName="businessLetter"
-              label="Invitation Letter from Indian Firm"
-              description="Official invitation letter"
+              label={t('forms.step9.indianFirmInvitationLabel')}
+              description={t('forms.step9.indianFirmInvitationHint')}
             />
 
             <DocumentUploadField
               fieldName="businessCard"
-              label="Business Card"
-              description="Your business card"
+              label={t('forms.step9.businessCardLabel')}
+              description={t('forms.step9.businessCardHint')}
             />
           </>
         )}
@@ -245,25 +247,25 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
         {isConferenceVisa && (
           <>
             <div className="md:col-span-2 border-t border-b py-2 my-2">
-              <h4 className="text-lg font-semibold text-gray-800">Conference Visa Documents</h4>
+              <h4 className="text-lg font-semibold text-gray-800">{t('forms.step9.conferenceDocs')}</h4>
             </div>
 
             <DocumentUploadField
               fieldName="organizerInvitation"
-              label="Invitation from Organizer"
-              description="Official invitation letter"
+              label={t('forms.step9.organizerInvitationLabel')}
+              description={t('forms.step9.organizerInvitationHint')}
             />
 
             <DocumentUploadField
               fieldName="meaPoliticalClearance"
-              label="Political Clearance from MEA"
-              description="Ministry of External Affairs clearance"
+              label={t('forms.step9.meaClearanceLabel')}
+              description={t('forms.step9.meaClearanceHint')}
             />
 
             <DocumentUploadField
               fieldName="mhaEventClearance"
-              label="Event Clearance from MHA"
-              description="Ministry of Home Affairs clearance"
+              label={t('forms.step9.mhaClearanceLabel')}
+              description={t('forms.step9.mhaClearanceHint')}
             />
           </>
         )}
@@ -272,19 +274,19 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
         {isMedicalVisa && (
           <>
             <div className="md:col-span-2 border-t border-b py-2 my-2">
-              <h4 className="text-lg font-semibold text-gray-800">Medical Visa Documents</h4>
+              <h4 className="text-lg font-semibold text-gray-800">{t('forms.step9.medicalDocs')}</h4>
             </div>
 
             <DocumentUploadField
               fieldName="medicalInvitationLetter"
-              label="System Generated Medical Invitation Letter"
-              description="Medical invitation in defined format"
+              label={t('forms.step9.medicalInvitationLabel')}
+              description={t('forms.step9.medicalInvitationHint')}
             />
 
             <DocumentUploadField
               fieldName="medicalDocument4"
-              label="Additional Document (Optional)"
-              description="Any additional medical document"
+              label={t('forms.step9.additionalDocLabel')}
+              description={t('forms.step9.additionalDocHint')}
               required={false}
             />
           </>
@@ -294,19 +296,19 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
         {isTransitVisa && (
           <>
             <div className="md:col-span-2 border-t border-b py-2 my-2">
-              <h4 className="text-lg font-semibold text-gray-800">Transit Visa Documents</h4>
+              <h4 className="text-lg font-semibold text-gray-800">{t('forms.step9.transitDocs')}</h4>
             </div>
 
             <DocumentUploadField
               fieldName="confirmedTravelTicket"
-              label="Confirmed Travel Ticket"
-              description="Ticket to India and onward journey"
+              label={t('forms.step9.travelTicketLabel')}
+              description={t('forms.step9.travelTicketHint')}
             />
 
             <DocumentUploadField
               fieldName="destinationVisaOrPassport"
-              label="Destination Visa or Passport"
-              description="Visa/entry permit for destination or passport of destination country"
+              label={t('forms.step9.destVisaLabel')}
+              description={t('forms.step9.destVisaHint')}
             />
           </>
         )}
@@ -315,10 +317,10 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
       <div className="flex justify-between mt-6">
         <Button type="button" variant="outline" onClick={onBack} disabled={uploading}>
           <ChevronLeft className="w-4 h-4 mr-2" />
-          Back
+          {t('application.back')}
         </Button>
         <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white" disabled={uploading}>
-          {uploading ? 'Uploading...' : 'Continue'}
+          {uploading ? t('forms.step9.uploading') : t('application.continue')}
         </Button>
       </div>
     </form>

@@ -4,8 +4,10 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { ChevronLeft } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Step5ProfessionalDetails = ({ data, onNext, onBack }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     presentOccupation: data?.presentOccupation || '',
     employerName: data?.employerName || '',
@@ -24,29 +26,29 @@ const Step5ProfessionalDetails = ({ data, onNext, onBack }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <h3 className="text-xl font-semibold text-gray-900 mb-4">Professional/Occupation Details</h3>
+      <h3 className="text-xl font-semibold text-gray-900 mb-4">{t('forms.step5.title')}</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="presentOccupation">Present Occupation *</Label>
+          <Label htmlFor="presentOccupation">{t('forms.step5.presentOccupation')} *</Label>
           <Select value={formData.presentOccupation} onValueChange={(value) => setFormData({ ...formData, presentOccupation: value })} required>
             <SelectTrigger>
-              <SelectValue placeholder="Select occupation" />
+              <SelectValue placeholder={t('forms.step5.selectOccupation')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Private service">Private Service</SelectItem>
-              <SelectItem value="Government service">Government Service</SelectItem>
-              <SelectItem value="Self employed">Self Employed</SelectItem>
-              <SelectItem value="Student">Student</SelectItem>
-              <SelectItem value="Retired">Retired</SelectItem>
-              <SelectItem value="Housewife">Housewife</SelectItem>
-              <SelectItem value="Others">Others</SelectItem>
+              <SelectItem value="Private service">{t('forms.step5.privateService')}</SelectItem>
+              <SelectItem value="Government service">{t('forms.step5.governmentService')}</SelectItem>
+              <SelectItem value="Self employed">{t('forms.step5.selfEmployed')}</SelectItem>
+              <SelectItem value="Student">{t('forms.step5.studentOcc')}</SelectItem>
+              <SelectItem value="Retired">{t('forms.step5.retired')}</SelectItem>
+              <SelectItem value="Housewife">{t('forms.step5.housewife')}</SelectItem>
+              <SelectItem value="Others">{t('forms.step5.others')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="employerName">Employer Name/Business *</Label>
+          <Label htmlFor="employerName">{t('forms.step5.employerName')} *</Label>
           <Input
             id="employerName"
             value={formData.employerName}
@@ -56,17 +58,17 @@ const Step5ProfessionalDetails = ({ data, onNext, onBack }) => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="designation">Designation</Label>
+          <Label htmlFor="designation">{t('forms.step5.designation')}</Label>
           <Input
             id="designation"
             value={formData.designation}
             onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
-            placeholder="Use from Business Card if available"
+            placeholder={t('forms.step5.designationPlaceholder')}
           />
         </div>
 
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="employerAddress">Address *</Label>
+          <Label htmlFor="employerAddress">{t('forms.step5.employerAddress')} *</Label>
           <Input
             id="employerAddress"
             value={formData.employerAddress}
@@ -76,7 +78,7 @@ const Step5ProfessionalDetails = ({ data, onNext, onBack }) => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="employerPhone">Phone</Label>
+          <Label htmlFor="employerPhone">{t('forms.step5.employerPhone')}</Label>
           <Input
             id="employerPhone"
             value={formData.employerPhone}
@@ -85,7 +87,7 @@ const Step5ProfessionalDetails = ({ data, onNext, onBack }) => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="pastOccupation">Past Occupation if any</Label>
+          <Label htmlFor="pastOccupation">{t('forms.step5.pastOccupation')}</Label>
           <Input
             id="pastOccupation"
             value={formData.pastOccupation}
@@ -94,20 +96,20 @@ const Step5ProfessionalDetails = ({ data, onNext, onBack }) => {
         </div>
 
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="militaryService">Are/were you in a Military/Semi-Military/Police/Security Organization? *</Label>
+          <Label htmlFor="militaryService">{t('forms.step5.militaryService')} *</Label>
           <Select value={formData.militaryService} onValueChange={(value) => setFormData({ ...formData, militaryService: value })} required>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="No">No</SelectItem>
-              <SelectItem value="Yes">Yes</SelectItem>
+              <SelectItem value="No">{t('forms.no')}</SelectItem>
+              <SelectItem value="Yes">{t('forms.yes')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="pastOccupationIfAny">Past occupation if any</Label>
+          <Label htmlFor="pastOccupationIfAny">{t('forms.step5.pastOccupationIfAny')}</Label>
           <Input
             id="pastOccupationIfAny"
             value={formData.pastOccupationIfAny}
@@ -119,10 +121,10 @@ const Step5ProfessionalDetails = ({ data, onNext, onBack }) => {
       <div className="flex justify-between">
         <Button type="button" variant="outline" onClick={onBack}>
           <ChevronLeft className="w-4 h-4 mr-2" />
-          Back
+          {t('application.back')}
         </Button>
         <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-          Continue
+          {t('application.continue')}
         </Button>
       </div>
     </form>
