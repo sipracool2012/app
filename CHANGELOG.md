@@ -6,6 +6,26 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-04] - Multi-draft application support; Continue button fix
+
+### Added
+- **Multi-draft applications** (`backend/routes/applications.py`, `frontend/src/pages/VisaApplication.jsx`)
+  - Users can now have multiple concurrent draft applications, one per visa type.
+  - `PATCH /api/applications/draft` upsert is now scoped by `userId + visaId`, so drafts for different visa options are stored independently.
+  - New `GET /api/applications/drafts` endpoint returns all drafts for the logged-in user (up to 100).
+  - `VisaApplication.jsx` loads all drafts on mount, matches the current `visaId` to resume the correct draft at its saved step.
+  - If the user navigates to a visa option while having existing draft(s) for *other* visa options, a conflict modal is shown with clickable cards for each existing draft (resume from step 1) and a "No, Start New Application" button that dismisses without deleting any drafts.
+
+- **My Applications — Continue button fix** (`backend/routes/applications.py`, `frontend/src/pages/MyApplications.jsx`)
+  - `GET /api/applications/my-applications` now returns `visaId` for each application (with fallback to `selectedVisaOption.id` for older records).
+  - `handleContinueDraft` navigates to `/apply/{visaId}` so each draft's Continue button routes to the correct visa application form at the saved step.
+
+### Changed
+- `backend/routes/applications.py`: `my-applications` response includes `visaId` field.
+- `frontend/src/pages/MyApplications.jsx`: guard added to show an error toast if `visaId` is missing (legacy records).
+
+---
+
 ## [2026-04-04] - Razorpay & Tazapay payment integration
 
 ### Added

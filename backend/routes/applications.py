@@ -52,7 +52,11 @@ async def save_draft(
         "updatedAt": now
     })
     
-    existing = await db.applications.find_one({"userId": user_id, "status": "draft"})
+    visa_id = draft_data.get("visaId")
+    draft_query = {"userId": user_id, "status": "draft"}
+    if visa_id:
+        draft_query["visaId"] = visa_id
+    existing = await db.applications.find_one(draft_query)
     
     if existing:
         await db.applications.update_one(
@@ -76,6 +80,17 @@ async def get_draft(user_id: str = Depends(get_current_user)):
     if not draft:
         return {"draft": None}
     return {"draft": draft}
+
+
+@router.get("/drafts", response_model=dict)
+async def get_all_drafts(user_id: str = Depends(get_current_user)):
+    """Get all draft applications for the logged-in user."""
+    cursor = db.applications.find(
+        {"userId": user_id, "status": "draft"},
+        {"_id": 0}
+    )
+    drafts = await cursor.to_list(length=100)
+    return {"drafts": drafts}
 
 
 @router.delete("/draft/{draft_id}", response_model=dict)
@@ -112,10 +127,13 @@ async def get_my_applications(user_id: str = Depends(get_current_user)):
     
     result = []
     for app in applications:
+        # Resolve visaId: stored directly, or fall back to selectedVisaOption.id for older records
+        visa_id = app.get("visaId") or (app.get("selectedVisaOption") or {}).get("id", "")
         result.append({
             "id": str(app["_id"]),
             "applicationId": app.get("applicationId", ""),
             "status": app.get("status", "draft"),
+            "visaId": visa_id,
             "visaService": app.get("visaService", ""),
             "visaServiceSubtype": app.get("visaServiceSubtype", ""),
             "surname": app.get("surname", ""),

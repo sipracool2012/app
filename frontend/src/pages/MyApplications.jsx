@@ -145,9 +145,11 @@ const MyApplications = () => {
   };
 
   const handleContinueDraft = (app) => {
-    // Navigate to application form - it will pick up the draft automatically
-    const visaId = app.visaService ? 'draft' : 'new';
-    navigate(`/apply/${visaId}`);
+    if (!app.visaId) {
+      toast({ title: 'Cannot resume', description: 'Visa info missing. Please start a new application.', variant: 'destructive' });
+      return;
+    }
+    navigate(`/apply/${app.visaId}`);
   };
 
   const formatDate = (dateStr) => {
