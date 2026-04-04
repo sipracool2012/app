@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download, Filter, Search, Eye, Settings, Globe, Save, ChevronDown, ChevronUp, CreditCard, Users, AlertTriangle, Mail } from 'lucide-react';
+import { Download, Filter, Search, Eye, Settings, Globe, Save, ChevronDown, ChevronUp, CreditCard, Users, AlertTriangle, Mail, Wrench } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
@@ -15,6 +15,7 @@ import PaymentGatewaySettings from '../components/admin/PaymentGatewaySettings';
 import { FlagIcon } from '../components/ui/FlagIcon';
 import UserManagement from '../components/admin/UserManagement';
 import EmailProviderSettings from '../components/admin/EmailProviderSettings';
+import UtilitySettings from '../components/admin/UtilitySettings';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -404,7 +405,7 @@ const AdminPanel = () => {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* Super Admin sees 5 tabs; regular Admin sees 1 tab (Applications only) */}
-          <TabsList className={`grid w-full ${currentUser?.role === 'super_admin' ? 'max-w-5xl grid-cols-5' : 'max-w-xs grid-cols-1'}`}>
+          <TabsList className={`grid w-full ${currentUser?.role === 'super_admin' ? 'max-w-5xl grid-cols-6' : 'max-w-xs grid-cols-1'}`}>
             <TabsTrigger value="applications" className="flex items-center gap-2">
               <Eye className="w-4 h-4" />
               Applications
@@ -435,6 +436,13 @@ const AdminPanel = () => {
               <TabsTrigger value="users" className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
                 User Management
+              </TabsTrigger>
+            )}
+            {/* Utility — Super Admin only */}
+            {currentUser?.role === 'super_admin' && (
+              <TabsTrigger value="utility" className="flex items-center gap-2">
+                <Wrench className="w-4 h-4" />
+                Utility
               </TabsTrigger>
             )}
           </TabsList>
@@ -1115,6 +1123,13 @@ const AdminPanel = () => {
           {currentUser?.role === 'super_admin' && (
             <TabsContent value="users" className="space-y-6">
               <UserManagement />
+            </TabsContent>
+          )}
+
+          {/* Utility Tab */}
+          {currentUser?.role === 'super_admin' && (
+            <TabsContent value="utility" className="space-y-6">
+              <UtilitySettings />
             </TabsContent>
           )}
         </Tabs>

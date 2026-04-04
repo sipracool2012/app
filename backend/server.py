@@ -7,7 +7,7 @@ import logging
 from pathlib import Path
 
 # Import routes
-from routes import auth, applications, upload, countries, constants, payment_gateways, email_providers
+from routes import auth, applications, upload, countries, constants, payment_gateways, email_providers, utility
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -40,6 +40,7 @@ app.include_router(countries.router)
 app.include_router(constants.router)
 app.include_router(payment_gateways.router, prefix="/api/payment-gateways", tags=["payment-gateways"])
 app.include_router(email_providers.router, prefix="/api/email-providers", tags=["email-providers"])
+app.include_router(utility.router, prefix="/api/utility", tags=["utility"])
 app.include_router(api_router)
 
 # CORS middleware

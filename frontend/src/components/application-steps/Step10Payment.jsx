@@ -17,11 +17,24 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
   const [processing, setProcessing] = useState(false);
   const [enabledGateways, setEnabledGateways] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showFeeBreakdown, setShowFeeBreakdown] = useState(true);
 
   useEffect(() => {
     fetchEnabledGateways();
+    fetchUtilitySettings();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const fetchUtilitySettings = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/utility/settings`);
+      if (!response.ok) return;
+      const data = await response.json();
+      setShowFeeBreakdown(data.show_fee_breakdown ?? true);
+    } catch {
+      // silently fall back to showing the breakdown
+    }
+  };
 
   // Fees come from selectedVisaOption stored in formData/draft (locked at application start)
   const visaOption = data?.selectedVisaOption || null;
@@ -130,30 +143,34 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
     <div className="space-y-6">
       <h3 className="text-xl font-semibold text-gray-900 mb-4">{t('forms.step10.title')}</h3>
       
-      {/* Fee Breakdown */}
+      {/* Fee Breakdown — visible only when admin has it enabled */}
       <Card>
         <CardContent className="p-6">
           <h4 className="text-lg font-semibold mb-4">{t('forms.step10.feeBreakdown')}</h4>
           {visaOption && (
             <p className="text-sm text-gray-500 mb-3">{visaOption.name}</p>
           )}
-          <div className="space-y-3">
-            <div className="flex justify-between py-2 border-b">
-              <span className="text-gray-600">{t('forms.step10.governmentFee')}</span>
-              <span className="font-semibold">${govtFee.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between py-2 border-b">
-              <span className="text-gray-600">{t('forms.step10.processingFee')}</span>
-              <span className="font-semibold">${govtProcessingFee.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between py-2 border-b">
-              <span className="text-gray-600">{t('forms.step10.ourFee')}</span>
-              <span className="font-semibold">${ourFee.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between py-3 text-lg border-t-2">
-              <span className="font-bold">{t('forms.step10.totalAmount')}</span>
-              <span className="font-bold text-blue-600">${totalAmount.toFixed(2)}</span>
-            </div>
+          {showFeeBreakdown && (
+            <>
+              <div className="space-y-3">
+                <div className="flex justify-between py-2 border-b">
+                  <span className="text-gray-600">{t('forms.step10.governmentFee')}</span>
+                  <span className="font-semibold">${govtFee.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b">
+                  <span className="text-gray-600">{t('forms.step10.processingFee')}</span>
+                  <span className="font-semibold">${govtProcessingFee.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b">
+                  <span className="text-gray-600">{t('forms.step10.ourFee')}</span>
+                  <span className="font-semibold">${ourFee.toFixed(2)}</span>
+                </div>
+              </div>
+            </>
+          )}
+          <div className="flex justify-between py-3 text-lg border-t-2">
+            <span className="font-bold">{t('forms.step10.totalAmount')}</span>
+            <span className="font-bold text-blue-600">${totalAmount.toFixed(2)}</span>
           </div>
         </CardContent>
       </Card>

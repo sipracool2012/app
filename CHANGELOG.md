@@ -6,6 +6,21 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-04] - Admin-controlled fee breakdown visibility; new Utility tab in Admin Panel
+
+### Added
+- **Utility Settings — admin toggle for fee breakdown visibility** (`backend/models/utility_settings.py`, `backend/routes/utility.py`, `backend/server.py`, `frontend/src/components/admin/UtilitySettings.jsx`, `frontend/src/pages/AdminPanel.jsx`, `frontend/src/components/application-steps/Step10Payment.jsx`)
+  - New `utility_settings` MongoDB collection with a `show_fee_breakdown` boolean field (default `true`).
+  - New backend model `UtilitySettings` / `UtilitySettingsUpdate` (`backend/models/utility_settings.py`).
+  - New routes registered at `/api/utility`:
+    - `GET /api/utility/settings` — public, returns current settings.
+    - `PATCH /api/utility/settings` — admin/super_admin only, updates settings.
+  - New **Utility** tab added to Admin Panel (super_admin only), with a **"Show Fee Breakdown to Customers"** toggle and Save button (`frontend/src/components/admin/UtilitySettings.jsx`).
+  - Admin Panel tab grid updated from `grid-cols-5` → `grid-cols-6` to accommodate the new tab.
+  - Payment step (`Step10Payment`) now fetches `/api/utility/settings` on load and conditionally renders the itemised fee rows (Government Fee, Processing Fee, Our Fee). The **Fee Breakdown heading**, **visa option name**, and **Total Amount** are always shown regardless of the toggle.
+
+---
+
 ## [2026-04-03] - Configurable PayPal currency; fix "seller doesn't accept payments in your currency"
 
 ### Fixed
@@ -14,6 +29,8 @@ Format: `## [Date] - Description`
   - Added `paypal_currency` field (default `"USD"`) to `PaymentGatewayConfig` and `PaymentGatewayConfigUpdate` models.
   - `create-order` endpoint now reads `config.paypal_currency` instead of hardcoding `"USD"`.
   - Admin Panel → Payment Gateways → PayPal now has a **Currency** dropdown (USD, GBP, EUR, AUD, CAD, SGD, HKD, JPY, MYR, THB, PHP) with a note that the value must match the primary currency of the PayPal account and that INR is not supported by PayPal.
+
+## [2026-04-03] - *Draft applications visible in Admin Panel"
 
 
 
