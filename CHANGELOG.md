@@ -6,7 +6,16 @@ Format: `## [Date] - Description`
 
 ---
 
-## [2026-04-03] - Admin panel: view draft/ongoing applications
+## [2026-04-03] - Configurable PayPal currency; fix "seller doesn't accept payments in your currency"
+
+### Fixed
+- **PayPal sandbox error: "This seller doesn't accept payments in your currency"** (`backend/routes/payment_gateways.py`, `backend/models/payment_gateway_config.py`, `frontend/src/components/admin/PaymentGatewaySettings.jsx`)
+  - Root cause: currency was hardcoded to `USD` in the PayPal `create-order` call, but the sandbox merchant account's primary currency was different.
+  - Added `paypal_currency` field (default `"USD"`) to `PaymentGatewayConfig` and `PaymentGatewayConfigUpdate` models.
+  - `create-order` endpoint now reads `config.paypal_currency` instead of hardcoding `"USD"`.
+  - Admin Panel → Payment Gateways → PayPal now has a **Currency** dropdown (USD, GBP, EUR, AUD, CAD, SGD, HKD, JPY, MYR, THB, PHP) with a note that the value must match the primary currency of the PayPal account and that INR is not supported by PayPal.
+
+
 
 ### Added
 - **Draft applications visible in Admin Panel** (`backend/routes/applications.py`, `frontend/src/pages/AdminPanel.jsx`)

@@ -104,4 +104,6 @@ refusedEntry,No
 refusedEntryReason,
 terroristViews,No
 terroristViewsReason,
+payment_amount,190.5
+paypal_order_id,30386119SW208711W
 selectedVisaOption,"{'id': 'us-business', 'name': '1 year Indian Business eVisa', 'visa_type': 'business', 'duration': '1yr', 'price': 190.5, 'govt_fee': 140, 'our_fee': 47, 'processing_fee': 3.5, 'entries': 'Multiple', 'stay_duration': '180 days per visit', 'validity': '1 year', 'purpose': 'Business', 'approved_by': 'April 08', 'approval_days': 5}"

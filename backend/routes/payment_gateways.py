@@ -269,6 +269,7 @@ async def paypal_create_order(
     client_id = config["paypal_client_id"]
     secret = config["paypal_secret"]
     mode = config.get("paypal_mode", "sandbox")
+    currency = config.get("paypal_currency", "USD")
     base_url = PAYPAL_SANDBOX_BASE if mode == "sandbox" else PAYPAL_LIVE_BASE
 
     try:
@@ -282,7 +283,7 @@ async def paypal_create_order(
                         "reference_id": req.application_id,
                         "description": f"Visa application {req.application_id}",
                         "amount": {
-                            "currency_code": "USD",
+                            "currency_code": currency,
                             "value": f"{req.amount:.2f}"
                         }
                     }],
