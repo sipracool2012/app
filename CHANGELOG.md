@@ -6,6 +6,33 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-04] - Razorpay & Tazapay payment integration
+
+### Added
+- **Razorpay integration** (`backend/routes/payment_gateways.py`, `frontend/src/components/application-steps/Step10Payment.jsx`)
+  - `POST /api/payment-gateways/razorpay/create-order` — authenticates with Razorpay REST API, creates an order (amount converted to smallest currency unit), persists `razorpay_order_id` on the application, returns `{order_id, amount, currency, key_id}`.
+  - `POST /api/payment-gateways/razorpay/verify-payment` — validates the Razorpay HMAC-SHA256 payment signature; on success marks application `status = submitted` and stores `razorpay_payment_id`.
+  - Frontend: dynamically loads Razorpay Checkout SDK (`checkout.razorpay.com/v1/checkout.js`) on demand, opens the inline payment modal, and on handler success calls verify then redirects to `/payment-return?gateway=razorpay&transaction_id=...`.
+  - Payment cancellation (modal dismissed) is handled gracefully — processing state is reset without an error toast.
+
+- **Tazapay integration** (`backend/routes/payment_gateways.py`, `frontend/src/components/application-steps/Step10Payment.jsx`)
+  - `POST /api/payment-gateways/tazapay/create-checkout` — calls Tazapay `/v2/checkout`, persists `tazapay_session_id` on the application, returns `{redirect_url, session_id}`.
+  - `GET /api/payment-gateways/tazapay/verify/{session_id}?application_id=...` — fetches session status from Tazapay; accepted statuses `success`/`completed`/`paid` mark application `submitted`.
+  - Sandbox base URL `api.sandbox.tazapay.com` / live `api.tazapay.com` selected from config `tazapay_mode`.
+  - Frontend redirects to Tazapay hosted page; on return, `PaymentReturn` detects `gateway=tazapay` and calls the verify endpoint.
+
+- **`PaymentReturn.jsx` — multi-gateway support**
+  - Detects `gateway` query param (`paypal` / `razorpay` / `tazapay`) and branches accordingly:
+    - `razorpay` — verification already done inline; reads `transaction_id` from URL and shows success.
+    - `tazapay` — calls backend verify endpoint, then shows success or failure.
+    - `paypal` (default) — existing capture flow unchanged.
+  - "Transaction ID" label made gateway-agnostic (removed PayPal-specific label text).
+
+### Changed
+- `backend/routes/payment_gateways.py`: added `import hmac`, `import hashlib`; new request models `RazorpayCreateOrderRequest`, `RazorpayVerifyRequest`, `TazapayCheckoutRequest`; defined `RAZORPAY_BASE`, `TAZAPAY_SANDBOX_BASE`, `TAZAPAY_LIVE_BASE` constants.
+
+---
+
 ## [2026-04-04] - Admin-controlled fee breakdown visibility; new Utility tab; progress stepper; payment gateway radio cards; declaration
 
 ### Added

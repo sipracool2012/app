@@ -152,10 +152,126 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
       return;
     }
 
-    // Fallback for other gateways (not yet integrated)
+    if (paymentMethod === 'razorpay') {
+      try {
+        const applicationId = data?.applicationId || '';
+        const response = await fetch(`${BACKEND_URL}/api/payment-gateways/razorpay/create-order`, {
+          method: 'POST',
+          headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ application_id: applicationId, amount: totalAmount })
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.detail || 'Failed to create Razorpay order');
+        }
+
+        const { order_id, amount: rzpAmount, currency, key_id } = await response.json();
+
+        // Dynamically load Razorpay checkout script
+        await new Promise((resolve, reject) => {
+          if (window.Razorpay) { resolve(); return; }
+          const script = document.createElement('script');
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          script.onload = resolve;
+          script.onerror = () => reject(new Error('Failed to load Razorpay SDK'));
+          document.body.appendChild(script);
+        });
+
+        await new Promise((resolve, reject) => {
+          const options = {
+            key: key_id,
+            amount: rzpAmount,
+            currency,
+            name: 'Clear eVisa',
+            description: `Visa application ${applicationId}`,
+            order_id,
+            prefill: { email: data?.email || '' },
+            theme: { color: '#2563eb' },
+            handler: async (rzpResponse) => {
+              try {
+                const verifyRes = await fetch(`${BACKEND_URL}/api/payment-gateways/razorpay/verify-payment`, {
+                  method: 'POST',
+                  headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+                  body: JSON.stringify({
+                    application_id: applicationId,
+                    order_id: rzpResponse.razorpay_order_id,
+                    payment_id: rzpResponse.razorpay_payment_id,
+                    signature: rzpResponse.razorpay_signature,
+                  })
+                });
+                if (!verifyRes.ok) {
+                  const err = await verifyRes.json();
+                  throw new Error(err.detail || 'Payment verification failed');
+                }
+                const origin = window.location.origin;
+                window.location.href = `${origin}/payment-return?application_id=${encodeURIComponent(applicationId)}&amount=${totalAmount.toFixed(2)}&gateway=razorpay&transaction_id=${rzpResponse.razorpay_payment_id}`;
+                resolve();
+              } catch (err) {
+                reject(err);
+              }
+            },
+            modal: {
+              ondismiss: () => reject(new Error('Payment cancelled')),
+            },
+          };
+          const rzp = new window.Razorpay(options);
+          rzp.open();
+        });
+
+      } catch (err) {
+        if (err.message !== 'Payment cancelled') {
+          toast({
+            title: 'Payment Error',
+            description: err.message || 'Razorpay payment failed. Please try again.',
+            variant: 'destructive'
+          });
+        }
+        setProcessing(false);
+      }
+      return;
+    }
+
+    if (paymentMethod === 'tazapay') {
+      try {
+        const applicationId = data?.applicationId || '';
+        const origin = window.location.origin;
+        const successUrl = `${origin}/payment-return?application_id=${encodeURIComponent(applicationId)}&amount=${totalAmount.toFixed(2)}&gateway=tazapay`;
+        const failureUrl = `${origin}/payment-return?application_id=${encodeURIComponent(applicationId)}&amount=${totalAmount.toFixed(2)}&gateway=tazapay&cancelled=1`;
+
+        const response = await fetch(`${BACKEND_URL}/api/payment-gateways/tazapay/create-checkout`, {
+          method: 'POST',
+          headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({
+            application_id: applicationId,
+            amount: totalAmount,
+            email: data?.email || '',
+            success_url: successUrl,
+            failure_url: failureUrl,
+          })
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.detail || 'Failed to create Tazapay checkout');
+        }
+
+        const { redirect_url } = await response.json();
+        window.location.href = redirect_url;
+      } catch (err) {
+        toast({
+          title: 'Payment Error',
+          description: err.message || 'Could not initiate Tazapay. Please try again.',
+          variant: 'destructive'
+        });
+        setProcessing(false);
+      }
+      return;
+    }
+
     toast({
       title: 'Not supported',
-      description: 'This payment method is not yet integrated. Please choose PayPal.',
+      description: 'This payment method is not yet integrated.',
       variant: 'destructive'
     });
     setProcessing(false);
