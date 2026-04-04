@@ -6,7 +6,7 @@ Format: `## [Date] - Description`
 
 ---
 
-## [2026-04-04] - Admin-controlled fee breakdown visibility; new Utility tab in Admin Panel
+## [2026-04-04] - Admin-controlled fee breakdown visibility; new Utility tab in Admin Panel; progress stepper
 
 ### Added
 - **Utility Settings — admin toggle for fee breakdown visibility** (`backend/models/utility_settings.py`, `backend/routes/utility.py`, `backend/server.py`, `frontend/src/components/admin/UtilitySettings.jsx`, `frontend/src/pages/AdminPanel.jsx`, `frontend/src/components/application-steps/Step10Payment.jsx`)
@@ -18,6 +18,13 @@ Format: `## [Date] - Description`
   - New **Utility** tab added to Admin Panel (super_admin only), with a **"Show Fee Breakdown to Customers"** toggle and Save button (`frontend/src/components/admin/UtilitySettings.jsx`).
   - Admin Panel tab grid updated from `grid-cols-5` → `grid-cols-6` to accommodate the new tab.
   - Payment step (`Step10Payment`) now fetches `/api/utility/settings` on load and conditionally renders the itemised fee rows (Government Fee, Processing Fee, Our Fee). The **Fee Breakdown heading**, **visa option name**, and **Total Amount** are always shown regardless of the toggle.
+
+- **Application form progress stepper** (`frontend/src/pages/VisaApplication.jsx`)
+  - Replaced the flat black linear progress bar with a connected stepper.
+  - Each completed step shows a green circle with a white tick; the active step shows a blue circle with the step number; future steps are grey.
+  - Connector lines between dots fill green as each step is completed.
+  - Step labels remain visible on large screens (`lg:block`); dots are always shown on all screen sizes.
+  - Removed the now-unused `Progress` component import.
 
 ---
 

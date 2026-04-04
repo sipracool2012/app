@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, Check, Save } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
-import { Progress } from '../components/ui/progress';
 import { useToast } from '../hooks/use-toast';
 import { getAuthHeaders, getCurrentUser } from '../utils/auth';
 
@@ -242,10 +241,10 @@ const VisaApplication = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Progress Bar */}
+        {/* Progress Stepper */}
         <Card className="mb-6" data-testid="progress-card">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-semibold text-gray-900">
                 {t('application.step', { current: currentStep, total: steps.length })}: {t(steps[currentStep - 1].nameKey)}
               </h2>
@@ -263,26 +262,50 @@ const VisaApplication = () => {
                 <span className="text-sm text-gray-600">{t('application.complete', { percent: Math.round(progress) })}</span>
               </div>
             </div>
-            <Progress value={progress} className="h-2" />
 
-            {/* Steps indicator */}
-            <div className="mt-6 hidden md:flex justify-between">
-              {steps.map((step) => (
-                <div key={step.id} className="flex flex-col items-center">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                      step.id < currentStep
-                        ? 'bg-green-500 text-white'
-                        : step.id === currentStep
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-200 text-gray-600'
-                    }`}
-                  >
-                    {step.id < currentStep ? <Check className="w-4 h-4" /> : step.id}
-                  </div>
-                  <span className="text-xs mt-1 text-gray-600 hidden lg:block">{t(step.nameKey)}</span>
-                </div>
-              ))}
+            {/* Stepper */}
+            <div className="flex items-start w-full">
+              {steps.map((step, index) => {
+                const isCompleted = step.id < currentStep;
+                const isActive = step.id === currentStep;
+                const isVisited = step.id <= currentStep;
+                return (
+                  <React.Fragment key={step.id}>
+                    {/* Connector line */}
+                    {index > 0 && (
+                      <div className="flex-1 flex items-center" style={{ paddingTop: '14px' }}>
+                        <div className={`h-0.5 w-full ${step.id <= currentStep ? 'bg-green-500' : 'bg-gray-200'}`} />
+                      </div>
+                    )}
+                    {/* Step dot + label */}
+                    <div
+                      className={`flex flex-col items-center ${isVisited ? 'cursor-pointer' : 'cursor-default'}`}
+                      style={{ width: '10%' }}
+                      onClick={() => {
+                        if (isVisited && !isActive) {
+                          setCurrentStep(step.id);
+                          triggerAutoSave(formData, step.id);
+                        }
+                      }}
+                    >
+                      <div
+                        className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors shrink-0 ${
+                          isCompleted
+                            ? 'bg-green-500 text-white hover:bg-green-600'
+                            : isActive
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-200 text-gray-500'
+                        }`}
+                      >
+                        {isCompleted ? <Check className="w-3.5 h-3.5" /> : step.id}
+                      </div>
+                      <span className={`text-xs mt-1 text-center leading-tight w-full px-0.5 hidden sm:block ${isVisited ? 'text-gray-700' : 'text-gray-400'}`}>
+                        {t(step.nameKey)}
+                      </span>
+                    </div>
+                  </React.Fragment>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
