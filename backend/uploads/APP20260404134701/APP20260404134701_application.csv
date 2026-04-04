@@ -1,0 +1,109 @@
+Field,Value
+visaId,af-tourist-30d
+selectedVisaOption,"{'id': 'us-tourist-30d', 'name': '30 day Indian Tourist eVisa', 'visa_type': 'tourist', 'duration': '30d', 'price': 72.62, 'govt_fee': 25, 'our_fee': 47, 'processing_fee': 0.62, 'entries': 'Double', 'stay_duration': '30 days', 'validity': '120 days', 'purpose': 'Tourism', 'approved_by': 'April 09', 'approval_days': 5}"
+email,admin@clearevisa.com
+passportType,Ordinary
+portOfArrival,
+expectedArrivalDate,2026-04-09
+visaService,30 day Indian Tourist eVisa
+visaServiceSubtype,"Tourism, Recreation, Sight-seeing"
+passportNumber,A123123123
+dateOfIssue,2026-04-04
+dateOfExpiry,2026-04-04
+otherPassportHeld,No
+yogaInstituteName,
+yogaInstituteAddress,
+yogaInstitutePhone,
+educationalQualification,
+givenNames,Rohit
+livedTwoYears,Yes
+qualificationFrom,USA SCHOOL
+religion,
+surname,Sinha Mahapatra
+visibleMarks,None
+country,
+houseNoStreet,"B1109, Venkatesh Graffiti Glover"
+phoneCountryCode,+1
+phoneNumber,8436005887
+postalCode,411036
+stateProvince,Maharashtra
+villageTownCity,Pune
+fatherCountryOfBirth,
+fatherName,Thomas Lines Ansell
+fatherNationality,
+fatherPlaceOfBirth,india
+fatherPreviousNationality,
+maritalStatus,Single
+motherCountryOfBirth,
+motherName,Kathleen Fortay Drewery
+motherNationality,
+motherPlaceOfBirth,A
+motherPreviousNationality,
+pakistanConnection,No
+spouseCountryOfBirth,
+spouseName,
+spouseNationality,
+spousePlaceOfBirth,
+spousePreviousNationality,
+designation,
+employerAddress,JAGANNATHPUR
+employerName,Sipras fashion
+employerPhone,09933698424
+militaryService,No
+pastOccupation,
+pastOccupationIfAny,
+presentOccupation,
+citiesPreviouslyVisited,
+companyAddress,
+companyName,
+companyPhoneCountryCode,+1
+companyPhoneNumber,
+companyWebsite,
+conferenceAddress,
+conferenceEndDate,
+conferenceName,
+conferenceStartDate,
+countriesVisitedLast10Years,
+hotelBooked,No
+indianFirmAddress,
+indianFirmName,
+indianFirmPhoneCountryCode,+91
+indianFirmPhoneNumber,
+indianFirmWebsite,
+lastIndianVisaNo,
+oldVisaIssueDate,
+oldVisaIssuePlace,
+oldVisaType,
+organizerAddress,
+organizerEmail,
+organizerName,
+organizerPhoneCountryCode,+91
+organizerPhoneNumber,
+placesToVisit, MYSURU  BANDI PURU OOTI  COIMBATORE  KOCHI ALAPPUZHA  MADURAI  PHANJAVUR  PUDUCHERRY
+placesToVisitLine2,
+previousAddress,
+visitedIndiaBefore,No
+visitedSAARCCountries,No
+homeReferenceAddress,"B1109, Venkatesh Graffiti Glover"
+homeReferenceName,Rohit Sinha Mahapatra
+homeReferencePhoneCountryCode,+1
+homeReferencePhoneNumber,8436005887
+indiaReferenceAddress,"B1109, Venkatesh Graffiti Glover"
+indiaReferenceName,Rohit Sinha Mahapatra
+indiaReferencePhoneCountryCode,+91
+indiaReferencePhoneNumber,8436005887
+applicationId,APP20260404134701
+arrestedConvicted,No
+arrestedConvictedReason,
+asylumSought,No
+asylumSoughtReason,
+cyberCrime,No
+cyberCrimeReason,
+humanTrafficking,No
+humanTraffickingReason,
+refusedEntry,No
+refusedEntryReason,
+terroristViews,No
+terroristViewsReason,
+payment_amount,72.62
+paypal_order_id,13080948A92476154

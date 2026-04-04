@@ -6,7 +6,7 @@ Format: `## [Date] - Description`
 
 ---
 
-## [2026-04-04] - Admin-controlled fee breakdown visibility; new Utility tab in Admin Panel; progress stepper
+## [2026-04-04] - Admin-controlled fee breakdown visibility; new Utility tab; progress stepper; payment gateway radio cards; declaration
 
 ### Added
 - **Utility Settings — admin toggle for fee breakdown visibility** (`backend/models/utility_settings.py`, `backend/routes/utility.py`, `backend/server.py`, `frontend/src/components/admin/UtilitySettings.jsx`, `frontend/src/pages/AdminPanel.jsx`, `frontend/src/components/application-steps/Step10Payment.jsx`)
@@ -25,6 +25,16 @@ Format: `## [Date] - Description`
   - Connector lines between dots fill green as each step is completed.
   - Step labels remain visible on large screens (`lg:block`); dots are always shown on all screen sizes.
   - Removed the now-unused `Progress` component import.
+
+- **Payment step — gateway radio cards, logos, and declaration** (`frontend/src/components/application-steps/Step10Payment.jsx`)
+  - Replaced the dropdown gateway selector with clickable radio cards — one card per enabled gateway, with a radio indicator, logo image, description text, and a Test Mode badge.
+  - Logo images loaded from CDN (PayPal, Razorpay SVGs) with automatic fallback to a `CreditCard` icon + name if the image fails to load.
+  - Added a **Declaration of Applicant** section (blue header matching theme) with two mandatory checkboxes:
+    1. I declare the information is truthful, complete and correct.
+    2. I have read and understood the terms and conditions, refund policy, and privacy policy.
+  - The **Pay Now** button is disabled until a gateway is selected and both declaration checkboxes are ticked.
+  - Fixed duplicate-declaration colour: Declaration header changed from custom `#1a85b8` to `bg-blue-600` to match the site theme.
+  - Fixed compile error caused by duplicate component declaration (old code left appended after rewrite); removed the stale block.
 
 ---
 

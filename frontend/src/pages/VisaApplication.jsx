@@ -264,23 +264,31 @@ const VisaApplication = () => {
             </div>
 
             {/* Stepper */}
-            <div className="flex items-start w-full">
-              {steps.map((step, index) => {
-                const isCompleted = step.id < currentStep;
-                const isActive = step.id === currentStep;
-                const isVisited = step.id <= currentStep;
-                return (
-                  <React.Fragment key={step.id}>
-                    {/* Connector line */}
-                    {index > 0 && (
-                      <div className="flex-1 flex items-center" style={{ paddingTop: '14px' }}>
-                        <div className={`h-0.5 w-full ${step.id <= currentStep ? 'bg-green-500' : 'bg-gray-200'}`} />
-                      </div>
-                    )}
-                    {/* Step dot + label */}
+            <div className="relative mt-2">
+              {/* Full background line */}
+              <div
+                className="absolute h-0.5 bg-gray-200"
+                style={{ top: '14px', left: '14px', right: '14px' }}
+              />
+              {/* Green progress line */}
+              <div
+                className="absolute h-0.5 bg-green-500 transition-all duration-300"
+                style={{
+                  top: '14px',
+                  left: '14px',
+                  width: `calc((100% - 28px) * ${(currentStep - 1) / (steps.length - 1)})`
+                }}
+              />
+              {/* Dots + labels */}
+              <div className="flex justify-between relative">
+                {steps.map((step) => {
+                  const isCompleted = step.id < currentStep;
+                  const isActive = step.id === currentStep;
+                  const isVisited = step.id <= currentStep;
+                  return (
                     <div
-                      className={`flex flex-col items-center ${isVisited ? 'cursor-pointer' : 'cursor-default'}`}
-                      style={{ width: '10%' }}
+                      key={step.id}
+                      className={`flex flex-col items-center ${isVisited && !isActive ? 'cursor-pointer' : 'cursor-default'}`}
                       onClick={() => {
                         if (isVisited && !isActive) {
                           setCurrentStep(step.id);
@@ -289,7 +297,7 @@ const VisaApplication = () => {
                       }}
                     >
                       <div
-                        className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors shrink-0 ${
+                        className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold relative z-10 transition-colors ${
                           isCompleted
                             ? 'bg-green-500 text-white hover:bg-green-600'
                             : isActive
@@ -299,13 +307,18 @@ const VisaApplication = () => {
                       >
                         {isCompleted ? <Check className="w-3.5 h-3.5" /> : step.id}
                       </div>
-                      <span className={`text-xs mt-1 text-center leading-tight w-full px-0.5 hidden sm:block ${isVisited ? 'text-gray-700' : 'text-gray-400'}`}>
+                      <span
+                        className={`text-xs mt-1 text-center leading-tight hidden sm:block ${
+                          isVisited ? 'text-gray-700' : 'text-gray-400'
+                        }`}
+                        style={{ maxWidth: '52px' }}
+                      >
                         {t(step.nameKey)}
                       </span>
                     </div>
-                  </React.Fragment>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </CardContent>
         </Card>
