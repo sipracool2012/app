@@ -39,6 +39,52 @@ const AdminPanel = () => {
   const [expandedCountry, setExpandedCountry] = useState(null);
   const [savingCountry, setSavingCountry] = useState(null);
 
+  // Bulk tourist fee defaults state
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkSaving, setBulkSaving] = useState(false);
+  const [bulkFees, setBulkFees] = useState({
+    tourist_30d_govt_fee_apr_jun: '',
+    tourist_30d_govt_fee_jul_mar: '',
+    tourist_30d_our_fee: '',
+    tourist_1yr_govt_fee: '',
+    tourist_1yr_our_fee: '',
+    tourist_5yr_govt_fee: '',
+    tourist_5yr_our_fee: '',
+  });
+
+  const handleBulkSave = async () => {
+    const payload = {};
+    Object.entries(bulkFees).forEach(([k, v]) => {
+      const num = parseFloat(v);
+      if (!isNaN(num) && v !== '') payload[k] = num;
+    });
+    if (Object.keys(payload).length === 0) {
+      toast({ title: 'Nothing to save', description: 'Enter at least one fee value.', variant: 'destructive' });
+      return;
+    }
+    setBulkSaving(true);
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/countries/bulk-tourist-fees`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error('Failed');
+      const data = await res.json();
+      toast({
+        title: 'Bulk update complete',
+        description: `Updated ${data.updated} countries, created ${data.created} new entries.`,
+      });
+      // Refresh countries list so changes reflect immediately
+      const refreshed = await fetch(`${BACKEND_URL}/api/countries/all`);
+      if (refreshed.ok) setCountries(await refreshed.json());
+    } catch (e) {
+      toast({ title: 'Error', description: 'Bulk update failed.', variant: 'destructive' });
+    } finally {
+      setBulkSaving(false);
+    }
+  };
+
   useEffect(() => {
     // Fetch current user info
     const fetchCurrentUser = async () => {
@@ -670,6 +716,111 @@ const AdminPanel = () => {
 
           {/* Country Configuration Tab — Super Admin only */}
           {currentUser?.role === 'super_admin' && <TabsContent value="countries" className="space-y-6">
+
+            {/* ── Bulk Tourist Fee Defaults ── */}
+            <Card className="border-2 border-dashed border-blue-200 bg-blue-50">
+              <CardHeader
+                className="cursor-pointer select-none"
+                onClick={() => setBulkOpen(o => !o)}
+              >
+                <CardTitle className="flex items-center justify-between text-blue-700 text-base">
+                  <span className="flex items-center gap-2">
+                    <Settings className="w-4 h-4" />
+                    Bulk Set Tourist Fee Defaults
+                    <span className="text-xs font-normal text-blue-500 ml-1">
+                      — apply fee values to all countries at once (does not enable any country)
+                    </span>
+                  </span>
+                  {bulkOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </CardTitle>
+              </CardHeader>
+              {bulkOpen && (
+                <CardContent className="pt-0 space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* 30 Day */}
+                    <div className="space-y-2 border rounded p-3 bg-white">
+                      <p className="text-sm font-semibold text-gray-700">30 Day Tourist</p>
+                      <Input
+                        type="number" step="0.01" placeholder="Govt Fee (Apr–Jun)"
+                        value={bulkFees.tourist_30d_govt_fee_apr_jun}
+                        onChange={e => setBulkFees(f => ({ ...f, tourist_30d_govt_fee_apr_jun: e.target.value }))}
+                      />
+                      <Input
+                        type="number" step="0.01" placeholder="Govt Fee (Jul–Mar)"
+                        value={bulkFees.tourist_30d_govt_fee_jul_mar}
+                        onChange={e => setBulkFees(f => ({ ...f, tourist_30d_govt_fee_jul_mar: e.target.value }))}
+                      />
+                      <Input
+                        type="number" step="0.01" placeholder="Our Fee"
+                        value={bulkFees.tourist_30d_our_fee}
+                        onChange={e => setBulkFees(f => ({ ...f, tourist_30d_our_fee: e.target.value }))}
+                      />
+                      {(bulkFees.tourist_30d_govt_fee_apr_jun || bulkFees.tourist_30d_govt_fee_jul_mar) && (
+                        <div className="text-xs text-gray-500 space-y-0.5">
+                          {bulkFees.tourist_30d_govt_fee_apr_jun > 0 && (
+                            <div>Apr–Jun total: ${((parseFloat(bulkFees.tourist_30d_govt_fee_apr_jun)||0)+(parseFloat(bulkFees.tourist_30d_our_fee)||0)+(parseFloat(bulkFees.tourist_30d_govt_fee_apr_jun)||0)*0.025).toFixed(2)}</div>
+                          )}
+                          {bulkFees.tourist_30d_govt_fee_jul_mar > 0 && (
+                            <div>Jul–Mar total: ${((parseFloat(bulkFees.tourist_30d_govt_fee_jul_mar)||0)+(parseFloat(bulkFees.tourist_30d_our_fee)||0)+(parseFloat(bulkFees.tourist_30d_govt_fee_jul_mar)||0)*0.025).toFixed(2)}</div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    {/* 1 Year */}
+                    <div className="space-y-2 border rounded p-3 bg-white">
+                      <p className="text-sm font-semibold text-gray-700">1 Year Tourist</p>
+                      <Input
+                        type="number" step="0.01" placeholder="Govt Fee"
+                        value={bulkFees.tourist_1yr_govt_fee}
+                        onChange={e => setBulkFees(f => ({ ...f, tourist_1yr_govt_fee: e.target.value }))}
+                      />
+                      <Input
+                        type="number" step="0.01" placeholder="Our Fee"
+                        value={bulkFees.tourist_1yr_our_fee}
+                        onChange={e => setBulkFees(f => ({ ...f, tourist_1yr_our_fee: e.target.value }))}
+                      />
+                      {bulkFees.tourist_1yr_govt_fee > 0 && (
+                        <div className="text-xs text-gray-500">
+                          Total: ${((parseFloat(bulkFees.tourist_1yr_govt_fee)||0)+(parseFloat(bulkFees.tourist_1yr_our_fee)||0)+(parseFloat(bulkFees.tourist_1yr_govt_fee)||0)*0.025).toFixed(2)}
+                        </div>
+                      )}
+                    </div>
+                    {/* 5 Year */}
+                    <div className="space-y-2 border rounded p-3 bg-white">
+                      <p className="text-sm font-semibold text-gray-700">5 Year Tourist</p>
+                      <Input
+                        type="number" step="0.01" placeholder="Govt Fee"
+                        value={bulkFees.tourist_5yr_govt_fee}
+                        onChange={e => setBulkFees(f => ({ ...f, tourist_5yr_govt_fee: e.target.value }))}
+                      />
+                      <Input
+                        type="number" step="0.01" placeholder="Our Fee"
+                        value={bulkFees.tourist_5yr_our_fee}
+                        onChange={e => setBulkFees(f => ({ ...f, tourist_5yr_our_fee: e.target.value }))}
+                      />
+                      {bulkFees.tourist_5yr_govt_fee > 0 && (
+                        <div className="text-xs text-gray-500">
+                          Total: ${((parseFloat(bulkFees.tourist_5yr_govt_fee)||0)+(parseFloat(bulkFees.tourist_5yr_our_fee)||0)+(parseFloat(bulkFees.tourist_5yr_govt_fee)||0)*0.025).toFixed(2)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Button
+                      onClick={handleBulkSave}
+                      disabled={bulkSaving}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      {bulkSaving ? 'Applying...' : 'Apply to All Countries'}
+                    </Button>
+                    <p className="text-xs text-gray-500">
+                      Only filled fields are updated. Country and tourist toggles are never changed.
+                    </p>
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">

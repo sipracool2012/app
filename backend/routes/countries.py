@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 from motor.motor_asyncio import AsyncIOMotorClient
 from typing import List, Optional
 import os
@@ -549,6 +550,89 @@ async def get_enabled_purposes(country_code: str):
         purposes.append({'value': 'transit', 'label': 'Transit'})
     
     return {'purposes': purposes}
+
+
+class BulkTouristFeesRequest(BaseModel):
+    tourist_30d_govt_fee_apr_jun: Optional[float] = None
+    tourist_30d_govt_fee_jul_mar: Optional[float] = None
+    tourist_30d_our_fee: Optional[float] = None
+    tourist_1yr_govt_fee: Optional[float] = None
+    tourist_1yr_our_fee: Optional[float] = None
+    tourist_5yr_govt_fee: Optional[float] = None
+    tourist_5yr_our_fee: Optional[float] = None
+
+@router.post("/bulk-tourist-fees")
+async def bulk_set_tourist_fees(payload: BulkTouristFeesRequest):
+    """
+    Upsert tourist visa fee defaults for every country in ALL_COUNTRIES.
+    Only updates the supplied fee fields — never touches country_enabled or
+    tourist_enabled, so no country gets accidentally turned on.
+    Returns counts of created vs updated documents.
+    """
+    fee_fields = {k: v for k, v in payload.dict().items() if v is not None}
+    if not fee_fields:
+        raise HTTPException(status_code=400, detail="No fee values provided")
+
+    fee_fields['updated_at'] = datetime.utcnow()
+
+    created = 0
+    updated = 0
+
+    for country_info in ALL_COUNTRIES:
+        code = country_info['code']
+        existing = await db.country_visa_configs.find_one({'country_code': code})
+        if existing:
+            await db.country_visa_configs.update_one(
+                {'country_code': code},
+                {'$set': fee_fields}
+            )
+            updated += 1
+        else:
+            new_doc = {
+                'id': str(uuid.uuid4()),
+                'country_code': code,
+                'country_name': country_info['name'],
+                'flag_emoji': country_info.get('flag', ''),
+                'country_enabled': False,
+                'tourist_enabled': False,
+                'tourist_30d_enabled': False,
+                'tourist_30d_govt_fee': 0.0,
+                'tourist_30d_govt_fee_apr_jun': 0.0,
+                'tourist_30d_govt_fee_jul_mar': 0.0,
+                'tourist_30d_our_fee': 0.0,
+                'tourist_1yr_enabled': False,
+                'tourist_1yr_govt_fee': 0.0,
+                'tourist_1yr_our_fee': 0.0,
+                'tourist_5yr_enabled': False,
+                'tourist_5yr_govt_fee': 0.0,
+                'tourist_5yr_our_fee': 0.0,
+                'business_enabled': False,
+                'business_govt_fee': 0.0,
+                'business_our_fee': 0.0,
+                'conference_enabled': False,
+                'conference_govt_fee': 0.0,
+                'conference_our_fee': 0.0,
+                'medical_enabled': False,
+                'medical_govt_fee': 0.0,
+                'medical_our_fee': 0.0,
+                'medical_attendant_enabled': False,
+                'medical_attendant_govt_fee': 0.0,
+                'medical_attendant_our_fee': 0.0,
+                'transit_enabled': False,
+                'transit_govt_fee': 0.0,
+                'transit_our_fee': 0.0,
+                'created_at': datetime.utcnow(),
+                **fee_fields,
+            }
+            await db.country_visa_configs.insert_one(new_doc)
+            created += 1
+
+    return {
+        'status': 'success',
+        'created': created,
+        'updated': updated,
+        'total': created + updated,
+    }
 
 
 @router.put("/{country_code}")

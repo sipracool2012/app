@@ -6,6 +6,24 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-05] - Bulk tourist fee defaults in Admin panel
+
+### Added
+- **`POST /api/countries/bulk-tourist-fees`** (`backend/routes/countries.py`)
+  - New endpoint that upserts tourist fee values across every country in the system at once.
+  - Accepts any combination of: `tourist_30d_govt_fee_apr_jun`, `tourist_30d_govt_fee_jul_mar`, `tourist_30d_our_fee`, `tourist_1yr_govt_fee`, `tourist_1yr_our_fee`, `tourist_5yr_govt_fee`, `tourist_5yr_our_fee`.
+  - For existing country configs it performs a `$set` update (only the supplied fields). For countries with no config yet it creates a new record with all toggles set to `false` — no country or visa type is enabled automatically.
+  - Returns `{ created, updated, total }` counts.
+
+- **Bulk Set Tourist Fee Defaults panel** (`frontend/src/pages/AdminPanel.jsx`)
+  - Collapsible card at the top of the Country Config tab (super_admin only).
+  - Three column layout: 30 Day (with Apr–Jun and Jul–Mar seasonal govt fees + our fee), 1 Year, 5 Year.
+  - Live total preview per sub-type using the 2.5% processing fee formula.
+  - "Apply to All Countries" button calls the new endpoint; only non-empty fields are sent so partially-filled forms don't accidentally zero out existing values.
+  - Country list refreshes automatically after a successful bulk save.
+
+---
+
 ## [2026-04-05] - Seasonal 30-day tourist govt fee; VisaDetail improvements
 
 ### Added
