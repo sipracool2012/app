@@ -293,7 +293,8 @@ const AdminPanel = () => {
           country_enabled: country.country_enabled,
           tourist_enabled: country.tourist_enabled,
           tourist_30d_enabled: country.tourist_30d_enabled,
-          tourist_30d_govt_fee: parseFloat(country.tourist_30d_govt_fee) || 0,
+          tourist_30d_govt_fee_apr_jun: parseFloat(country.tourist_30d_govt_fee_apr_jun) || 0,
+          tourist_30d_govt_fee_jul_mar: parseFloat(country.tourist_30d_govt_fee_jul_mar) || 0,
           tourist_30d_our_fee: parseFloat(country.tourist_30d_our_fee) || 0,
           tourist_1yr_enabled: country.tourist_1yr_enabled,
           tourist_1yr_govt_fee: parseFloat(country.tourist_1yr_govt_fee) || 0,
@@ -765,9 +766,17 @@ const AdminPanel = () => {
                                   <Input
                                     type="number"
                                     step="0.01"
-                                    placeholder="Govt Fee"
-                                    value={country.tourist_30d_govt_fee || ''}
-                                    onChange={(e) => updateCountryConfig(country.country_code, 'tourist_30d_govt_fee', e.target.value)}
+                                    placeholder="Govt Fee (Apr–Jun)"
+                                    value={country.tourist_30d_govt_fee_apr_jun || ''}
+                                    onChange={(e) => updateCountryConfig(country.country_code, 'tourist_30d_govt_fee_apr_jun', e.target.value)}
+                                    disabled={!country.tourist_30d_enabled}
+                                  />
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="Govt Fee (Jul–Mar)"
+                                    value={country.tourist_30d_govt_fee_jul_mar || ''}
+                                    onChange={(e) => updateCountryConfig(country.country_code, 'tourist_30d_govt_fee_jul_mar', e.target.value)}
                                     disabled={!country.tourist_30d_enabled}
                                   />
                                   <Input
@@ -778,10 +787,14 @@ const AdminPanel = () => {
                                     onChange={(e) => updateCountryConfig(country.country_code, 'tourist_30d_our_fee', e.target.value)}
                                     disabled={!country.tourist_30d_enabled}
                                   />
-                                  {country.tourist_30d_enabled && country.tourist_30d_govt_fee && (
-                                    <div className="text-xs text-gray-600 mt-1">
-                                      <div>Processing: ${((country.tourist_30d_govt_fee || 0) * 0.025).toFixed(2)}</div>
-                                      <div className="font-semibold">Total: ${((parseFloat(country.tourist_30d_govt_fee) || 0) + (parseFloat(country.tourist_30d_our_fee) || 0) + ((country.tourist_30d_govt_fee || 0) * 0.025)).toFixed(2)}</div>
+                                  {country.tourist_30d_enabled && (country.tourist_30d_govt_fee_apr_jun || country.tourist_30d_govt_fee_jul_mar) && (
+                                    <div className="text-xs text-gray-600 mt-1 space-y-0.5">
+                                      {country.tourist_30d_govt_fee_apr_jun > 0 && (
+                                        <div>Apr–Jun total: ${((parseFloat(country.tourist_30d_govt_fee_apr_jun) || 0) + (parseFloat(country.tourist_30d_our_fee) || 0) + (parseFloat(country.tourist_30d_govt_fee_apr_jun) || 0) * 0.025).toFixed(2)}</div>
+                                      )}
+                                      {country.tourist_30d_govt_fee_jul_mar > 0 && (
+                                        <div>Jul–Mar total: ${((parseFloat(country.tourist_30d_govt_fee_jul_mar) || 0) + (parseFloat(country.tourist_30d_our_fee) || 0) + (parseFloat(country.tourist_30d_govt_fee_jul_mar) || 0) * 0.025).toFixed(2)}</div>
+                                      )}
                                     </div>
                                   )}
                                 </div>

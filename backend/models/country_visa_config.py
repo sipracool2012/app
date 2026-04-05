@@ -13,7 +13,9 @@ class CountryVisaConfig(BaseModel):
     # Tourist Visa Configuration
     tourist_enabled: bool = False
     tourist_30d_enabled: bool = False
-    tourist_30d_govt_fee: float = 0.0
+    tourist_30d_govt_fee: float = 0.0          # fallback / legacy
+    tourist_30d_govt_fee_apr_jun: float = 0.0  # April–June season
+    tourist_30d_govt_fee_jul_mar: float = 0.0  # July–March season
     tourist_30d_our_fee: float = 0.0
     tourist_1yr_enabled: bool = False
     tourist_1yr_govt_fee: float = 0.0
@@ -59,6 +61,8 @@ class CountryVisaConfigCreate(BaseModel):
     tourist_enabled: bool = False
     tourist_30d_enabled: bool = False
     tourist_30d_govt_fee: float = 0.0
+    tourist_30d_govt_fee_apr_jun: float = 0.0
+    tourist_30d_govt_fee_jul_mar: float = 0.0
     tourist_30d_our_fee: float = 0.0
     tourist_1yr_enabled: bool = False
     tourist_1yr_govt_fee: float = 0.0
@@ -93,6 +97,8 @@ class CountryVisaConfigUpdate(BaseModel):
     tourist_enabled: Optional[bool] = None
     tourist_30d_enabled: Optional[bool] = None
     tourist_30d_govt_fee: Optional[float] = None
+    tourist_30d_govt_fee_apr_jun: Optional[float] = None
+    tourist_30d_govt_fee_jul_mar: Optional[float] = None
     tourist_30d_our_fee: Optional[float] = None
     tourist_1yr_enabled: Optional[bool] = None
     tourist_1yr_govt_fee: Optional[float] = None

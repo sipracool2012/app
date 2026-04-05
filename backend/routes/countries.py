@@ -315,7 +315,12 @@ async def get_visa_options(country_code: str, purpose: str = None):
     if purpose is None or purpose.lower() == 'tourist':
         if config.get('tourist_enabled', False):
             if config.get('tourist_30d_enabled', False):
-                govt_fee = config.get('tourist_30d_govt_fee', 0)
+                # Season-based govt fee: April–June vs July–March
+                current_month = datetime.utcnow().month
+                if current_month in (4, 5, 6):
+                    govt_fee = config.get('tourist_30d_govt_fee_apr_jun') or config.get('tourist_30d_govt_fee', 0)
+                else:
+                    govt_fee = config.get('tourist_30d_govt_fee_jul_mar') or config.get('tourist_30d_govt_fee', 0)
                 our_fee = config.get('tourist_30d_our_fee', 0)
                 total_price, processing_fee = calculate_total(govt_fee, our_fee)
                 options.append({
@@ -574,6 +579,8 @@ async def update_country_config(country_code: str, config_update: CountryVisaCon
             'tourist_enabled': False,
             'tourist_30d_enabled': False,
             'tourist_30d_govt_fee': 0.0,
+            'tourist_30d_govt_fee_apr_jun': 0.0,
+            'tourist_30d_govt_fee_jul_mar': 0.0,
             'tourist_30d_our_fee': 0.0,
             'tourist_1yr_enabled': False,
             'tourist_1yr_govt_fee': 0.0,

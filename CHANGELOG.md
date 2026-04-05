@@ -6,6 +6,21 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-05] - Seasonal 30-day tourist govt fee; VisaDetail improvements
+
+### Added
+- **Seasonal government fee for 30-day tourist eVisa** (`backend/models/country_visa_config.py`, `backend/routes/countries.py`, `frontend/src/pages/AdminPanel.jsx`)
+  - Two new fee fields per country: `tourist_30d_govt_fee_apr_jun` (April–June) and `tourist_30d_govt_fee_jul_mar` (July–March).
+  - The `/api/countries/{code}/visa-options` endpoint automatically selects the correct seasonal fee based on the current month; falls back to legacy `tourist_30d_govt_fee` if seasonal fields are zero.
+  - Admin panel 30 Days section now shows two labelled govt fee inputs ("Govt Fee (Apr–Jun)" and "Govt Fee (Jul–Mar)") with live per-season total previews.
+
+### Changed
+- **`VisaDetail.jsx`** — Fee breakdown section (government fee, processing fee, service fee rows) is now controlled by the **Utility → Pricing Display** toggle; fetches `GET /api/utility/settings` on mount and hides the breakdown when `show_fee_breakdown` is `false`.
+- **`VisaDetail.jsx`** — Info tooltips now drop **below** the icon (`top-full + mt-1`) instead of above, preventing clipping at the top of the page.
+- **`VisaDetail.jsx`** — Removed `overflow-hidden` from the sticky pricing sidebar card so tooltips inside the sidebar are no longer clipped.
+
+---
+
 ## [2026-04-05] - Visa detail intermediate page before application
 
 ### Added
