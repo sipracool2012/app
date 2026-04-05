@@ -6,6 +6,19 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-05] - Favicon installation
+
+### Added
+- **Favicon & web manifest** (`frontend/public/`)
+  - Added `apple-touch-icon.png`, `favicon-16x16.png`, `favicon-32x32.png`, `favicon.ico`, `android-chrome-192x192.png`, `android-chrome-512x512.png`, and `site.webmanifest` to the public root.
+  - Added corresponding `<link>` tags to `frontend/public/index.html`:
+    - `<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">`
+    - `<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">`
+    - `<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">`
+    - `<link rel="manifest" href="/site.webmanifest">`
+
+---
+
 ## [2026-04-04] - Multi-draft application support; Continue button fix
 
 ### Added
