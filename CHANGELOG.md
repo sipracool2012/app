@@ -6,7 +6,58 @@ Format: `## [Date] - Description`
 
 ---
 
-## [2026-04-06] - Bulk visa fee defaults expanded + discount_amount field
+## [2026-04-05] - Fix: with_discount mode shows only total, no line items
+
+### Fixed
+- **`with_discount` display mode** (`frontend/src/pages/VisaDetail.jsx`, `frontend/src/components/application-steps/Step10Payment.jsx`)
+  - Previously showed all three fee rows (Government, Processing, Service) plus a Discount row.
+  - Now shows **only** the discounted total. A single green "Discount applied: -$X" line is shown below the total as confirmation — no individual fee rows are exposed.
+
+---
+
+## [2026-04-06] - Pricing Display Mode (4-way enum replacing toggle)
+
+### Changed
+- **`show_fee_breakdown: bool`** → **`fee_display_mode: str`** across backend and frontend.
+  - Old boolean removed from `UtilitySettings` and `UtilitySettingsUpdate` models (`backend/models/utility_settings.py`).
+  - Backward-compat migration in GET/PATCH handlers (`backend/routes/utility.py`): existing `show_fee_breakdown=True` records are automatically read as `full_breakdown`; `False` → `total_only`.
+  - Validation added: PATCH rejects unknown mode strings.
+  - `fee_display_mode` is exposed on `GET /api/utility/settings` (public).
+
+- **Four pricing display modes:**
+  | Value | Behaviour |
+  |---|---|
+  | `full_breakdown` | Shows Government Fee + Processing Fee + Service Fee + Total |
+  | `total_only` | Shows only the final Total (no line items) |
+  | `our_fee_only` | Shows only the Service (our) Fee |
+  | `with_discount` | Shows full breakdown + Discount row, final total is price minus `discount_amount` |
+
+### Added
+- **`discount_amount` included in every visa option** (`backend/routes/countries.py`)
+  - The per-country `discount_amount` from `country_visa_configs` is now included in each entry of `GET /api/countries/{code}/visa-options` as `discount_amount`.
+  - Required by the `with_discount` display mode on the frontend.
+
+- **Pricing Display radio cards in Admin Utility Settings** (`frontend/src/components/admin/UtilitySettings.jsx`)
+  - Replaced the single toggle with a 2×2 radio card grid, one card per mode.
+  - Each card shows an icon, label, and description. Selected card is highlighted blue.
+  - `Switch` import removed; added `DollarSign`, `Tag`, `AlignLeft`, `Percent` icons.
+
+- **Home.jsx visa cards** now respect `fee_display_mode`:
+  - `our_fee_only` → shows only the service fee with label "Service fee".
+  - `with_discount` → shows discounted price; original price struck through above it.
+  - `full_breakdown` / `total_only` → shows `visa.price` (no change from before).
+
+- **VisaDetail intermediate page** (`frontend/src/pages/VisaDetail.jsx`):
+  - `full_breakdown` → shows all three fee rows.
+  - `total_only` → shows only the total (no fee rows).
+  - `our_fee_only` → shows only the Service Fee row.
+  - `with_discount` → shows all three fee rows + a green Discount row; displayed unit price and total use `price - discount_amount`.
+
+- **Step 10 Payment page** (`frontend/src/components/application-steps/Step10Payment.jsx`):
+  - Same four-mode logic as VisaDetail.
+  - `with_discount`: discount row shown in green; Total row shows struck-through full price above the discounted amount.
+
+
 
 ### Added
 - **`discount_amount: float`** field (`backend/models/country_visa_config.py`)

@@ -307,6 +307,9 @@ async def get_visa_options(country_code: str, purpose: str = None):
     # Calculate approval date (today + 5 days)
     approval_date = (datetime.utcnow() + timedelta(days=5)).strftime('%B %d')
     
+    # Per-country discount amount (used by with_discount display mode on frontend)
+    country_discount = config.get('discount_amount', 0) or 0
+
     # Helper function to calculate fees
     def calculate_total(govt_fee, our_fee):
         processing_fee = govt_fee * 0.025  # 2.5% of govt fee
@@ -492,34 +495,11 @@ async def get_visa_options(country_code: str, purpose: str = None):
                 'approved_by': approval_date,
                 'approval_days': 5
             })
-    
-    return {
-        'has_evisa_options': len(options) > 0,
-        'country_name': config.get('country_name', ''),
-        'options': options
-    }
-    
-    if purpose is None or purpose.lower() == 'medical_attendant':
-        if config.get('medical_attendant_enabled', False):
-            govt_fee = config.get('medical_attendant_govt_fee', 0)
-            total_price = govt_fee + payment_fee + processing_fee
-            options.append({
-                'id': f"{country_code.lower()}-medical-attendant",
-                'name': 'Indian Medical Attendant eVisa',
-                'visa_type': 'medical_attendant',
-                'duration': '60d',
-                'price': round(total_price, 2),
-                'govt_fee': govt_fee,
-                'payment_fee': payment_fee,
-                'processing_fee': processing_fee,
-                'entries': 'Triple',
-                'stay_duration': '60 days',
-                'validity': '60 days',
-                'purpose': 'Medical Attendant',
-                'approved_by': approval_date,
-                'approval_days': 5
-            })
-    
+
+    # Attach country-level discount to every option (used by "with_discount" display mode)
+    for opt in options:
+        opt['discount_amount'] = round(country_discount, 2)
+
     return {
         'has_evisa_options': len(options) > 0,
         'country_name': config.get('country_name', ''),

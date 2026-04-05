@@ -22,6 +22,15 @@ const Home = () => {
   const [countryName, setCountryName] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadingOptions, setLoadingOptions] = useState(false);
+  const [feeDisplayMode, setFeeDisplayMode] = useState('full_breakdown');
+
+  // Fetch utility settings on mount
+  useEffect(() => {
+    fetch(`${BACKEND_URL}/api/utility/settings`)
+      .then(r => r.json())
+      .then(d => setFeeDisplayMode(d.fee_display_mode ?? 'full_breakdown'))
+      .catch(() => {});
+  }, []);
 
   // Fetch enabled countries on mount
   useEffect(() => {
@@ -215,7 +224,21 @@ const Home = () => {
                       </div>
                       
                       {/* Visa Option Cards */}
-                      {visaOptions.map((visa) => (
+                      {visaOptions.map((visa) => {
+                        const discount = parseFloat(visa.discount_amount) || 0;
+                        const displayedPrice =
+                          feeDisplayMode === 'our_fee_only'
+                            ? parseFloat(visa.our_fee) || 0
+                            : feeDisplayMode === 'with_discount'
+                            ? Math.max(0, visa.price - discount)
+                            : visa.price;
+                        const priceLabel =
+                          feeDisplayMode === 'our_fee_only'
+                            ? 'Service fee'
+                            : feeDisplayMode === 'with_discount' && discount > 0
+                            ? 'After discount'
+                            : null;
+                        return (
                         <Card key={visa.id} className="border-2 hover:border-blue-500 transition-all cursor-pointer">
                           <CardContent className="p-6">
                             <div className="flex justify-between items-start mb-4">
@@ -229,7 +252,13 @@ const Home = () => {
                                 </div>
                               </div>
                               <div className="text-right">
-                                <p className="text-2xl font-bold text-gray-900">USD ${visa.price.toFixed(2)}</p>
+                                {feeDisplayMode === 'with_discount' && discount > 0 && (
+                                  <p className="text-sm line-through text-gray-400">USD ${visa.price.toFixed(2)}</p>
+                                )}
+                                <p className="text-2xl font-bold text-gray-900">USD ${displayedPrice.toFixed(2)}</p>
+                                {priceLabel && (
+                                  <p className="text-xs text-gray-500">{priceLabel}</p>
+                                )}
                               </div>
                             </div>
                             <div className="flex items-center text-sm text-blue-600 mb-4">
@@ -244,7 +273,8 @@ const Home = () => {
                             </Button>
                           </CardContent>
                         </Card>
-                      ))}
+                        );
+                      })}
                     </>
                   ) : selectedCountry && !hasEvisaOptions ? (
                     <>

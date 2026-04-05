@@ -43,6 +43,7 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
   const [enabledGateways, setEnabledGateways] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showFeeBreakdown, setShowFeeBreakdown] = useState(true);
+  const [feeDisplayMode, setFeeDisplayMode] = useState('full_breakdown');
   const [declareTruth, setDeclareTruth] = useState(false);
   const [declareTerms, setDeclareTerms] = useState(false);
 
@@ -58,6 +59,7 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
       if (!response.ok) return;
       const data = await response.json();
       setShowFeeBreakdown(data.show_fee_breakdown ?? true);
+      setFeeDisplayMode(data.fee_display_mode ?? 'full_breakdown');
     } catch {
       // silently fall back to showing the breakdown
     }
@@ -68,7 +70,15 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
   const govtFee = visaOption?.govt_fee ?? 0;
   const ourFee = visaOption?.our_fee ?? 0;
   const govtProcessingFee = visaOption?.processing_fee ?? (govtFee * 0.025);
-  const totalAmount = govtFee + ourFee + govtProcessingFee;
+  const discount = parseFloat(visaOption?.discount_amount) || 0;
+  const fullTotal = govtFee + ourFee + govtProcessingFee;
+  const displayedTotal =
+    feeDisplayMode === 'our_fee_only'
+      ? ourFee
+      : feeDisplayMode === 'with_discount'
+      ? Math.max(0, fullTotal - discount)
+      : fullTotal;
+  const totalAmount = displayedTotal;
 
   const fetchEnabledGateways = async () => {
     try {
@@ -294,7 +304,7 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
           {visaOption && (
             <p className="text-sm text-gray-500 mb-3">{visaOption.name}</p>
           )}
-          {showFeeBreakdown && (
+          {feeDisplayMode === 'full_breakdown' && (
             <div className="space-y-3">
               <div className="flex justify-between py-2 border-b">
                 <span className="text-gray-600">{t('forms.step10.governmentFee')}</span>
@@ -310,9 +320,28 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
               </div>
             </div>
           )}
+          {feeDisplayMode === 'our_fee_only' && (
+            <div className="space-y-3">
+              <div className="flex justify-between py-2 border-b">
+                <span className="text-gray-600">{t('forms.step10.ourFee')}</span>
+                <span className="font-semibold">${ourFee.toFixed(2)}</span>
+              </div>
+            </div>
+          )}
+          {feeDisplayMode === 'with_discount' && discount > 0 && (
+            <div className="flex justify-between py-2 border-b text-green-600">
+              <span className="font-medium">Discount applied</span>
+              <span className="font-semibold">-${discount.toFixed(2)}</span>
+            </div>
+          )}
           <div className="flex justify-between py-3 text-lg border-t-2">
             <span className="font-bold">{t('forms.step10.totalAmount')}</span>
-            <span className="font-bold text-blue-600">${totalAmount.toFixed(2)}</span>
+            <div className="text-right">
+              {feeDisplayMode === 'with_discount' && discount > 0 && (
+                <span className="text-sm line-through text-gray-400 block">${fullTotal.toFixed(2)}</span>
+              )}
+              <span className="font-bold text-blue-600">${totalAmount.toFixed(2)}</span>
+            </div>
           </div>
         </CardContent>
       </Card>
