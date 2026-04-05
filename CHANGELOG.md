@@ -6,6 +6,23 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-05] - Visa detail intermediate page before application
+
+### Added
+- **`VisaDetail` page** (`frontend/src/pages/VisaDetail.jsx`)
+  - New intermediate page at `/visa/:visaId` shown when a user clicks "Apply Online" on a visa card in the Home page.
+  - Displays visa metadata (entries, maximum stay, validity, travel purpose) with icons and tooltip info popovers.
+  - Dynamic description per visa type (tourist / business / medical / medical_attendant / conference / transit).
+  - "What you need" section listing required documents per visa type.
+  - Collapsible FAQ accordion (7 standard India eVisa questions).
+  - Sticky right-hand pricing sidebar with travellers counter (±), per-traveller price, running total, and full fee breakdown (government fee, processing fee, service fee).
+  - "Start Application" button navigates to `/apply/:visaId`.
+  - Page-level top bar shows back arrow, India flag, and dynamic title: **"India {visa name} for {Passport Country} Citizens"**.
+
+### Changed
+- **`Home.jsx`** — "Apply Online" button now navigates to `/visa/:visaId?passport=XX&passportName=...` instead of directly to `/apply/:visaId`, routing users through the new detail page first.
+- **`App.js`** — Added `/visa/:visaId` route (public, no auth required).
+
 ## [2026-04-05] - Draft application expiry, TEMP ID, admin expiry config
 
 ### Added

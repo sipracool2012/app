@@ -100,7 +100,11 @@ const Home = () => {
   }, [selectedCountry, selectedPurpose]);
 
   const handleApply = (visaId) => {
-    navigate(`/apply/${visaId}`);
+    const passportCountry = enabledCountries.find(c => c.code === selectedCountry);
+    const params = new URLSearchParams();
+    if (selectedCountry) params.set('passport', selectedCountry);
+    if (passportCountry?.name) params.set('passportName', passportCountry.name);
+    navigate(`/visa/${visaId}?${params.toString()}`);
   };
 
   // Get selected country name

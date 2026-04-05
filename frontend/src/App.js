@@ -22,6 +22,7 @@ import ContactUs from "./pages/ContactUs";
 import FAQ from "./pages/FAQ";
 import TermsOfService from "./pages/TermsOfService";
 import CookiePolicy from "./pages/CookiePolicy";
+import VisaDetail from "./pages/VisaDetail";
 import { Toaster } from "./components/ui/toaster";
 
 function App() {
@@ -74,6 +75,7 @@ function App() {
                 </PrivateRoute>
               }
             />
+            <Route path="/visa/:visaId" element={<VisaDetail />} />
             <Route path="/requirements" element={<Home />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/about" element={<AboutUs />} />
