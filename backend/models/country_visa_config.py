@@ -48,6 +48,9 @@ class CountryVisaConfig(BaseModel):
     transit_enabled: bool = False
     transit_govt_fee: float = 0.0
     transit_our_fee: float = 0.0
+
+    # Discount
+    discount_amount: float = 0.0
     
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
@@ -91,6 +94,8 @@ class CountryVisaConfigCreate(BaseModel):
     transit_govt_fee: float = 0.0
     transit_our_fee: float = 0.0
 
+    discount_amount: float = 0.0
+
 class CountryVisaConfigUpdate(BaseModel):
     country_enabled: Optional[bool] = None
     
@@ -126,6 +131,8 @@ class CountryVisaConfigUpdate(BaseModel):
     transit_enabled: Optional[bool] = None
     transit_govt_fee: Optional[float] = None
     transit_our_fee: Optional[float] = None
+
+    discount_amount: Optional[float] = None
 
 class VisaOptionResponse(BaseModel):
     id: str

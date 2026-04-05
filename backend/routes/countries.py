@@ -552,21 +552,40 @@ async def get_enabled_purposes(country_code: str):
     return {'purposes': purposes}
 
 
-class BulkTouristFeesRequest(BaseModel):
+class BulkVisaFeesRequest(BaseModel):
+    # Tourist 30d (seasonal)
     tourist_30d_govt_fee_apr_jun: Optional[float] = None
     tourist_30d_govt_fee_jul_mar: Optional[float] = None
     tourist_30d_our_fee: Optional[float] = None
+    # Tourist 1yr
     tourist_1yr_govt_fee: Optional[float] = None
     tourist_1yr_our_fee: Optional[float] = None
+    # Tourist 5yr
     tourist_5yr_govt_fee: Optional[float] = None
     tourist_5yr_our_fee: Optional[float] = None
+    # Business
+    business_govt_fee: Optional[float] = None
+    business_our_fee: Optional[float] = None
+    # Conference
+    conference_govt_fee: Optional[float] = None
+    conference_our_fee: Optional[float] = None
+    # Medical
+    medical_govt_fee: Optional[float] = None
+    medical_our_fee: Optional[float] = None
+    # Medical Attendant
+    medical_attendant_govt_fee: Optional[float] = None
+    medical_attendant_our_fee: Optional[float] = None
+    # Transit
+    transit_govt_fee: Optional[float] = None
+    transit_our_fee: Optional[float] = None
+    # Discount
+    discount_amount: Optional[float] = None
 
-@router.post("/bulk-tourist-fees")
-async def bulk_set_tourist_fees(payload: BulkTouristFeesRequest):
+@router.post("/bulk-visa-fees")
+async def bulk_set_visa_fees(payload: BulkVisaFeesRequest):
     """
-    Upsert tourist visa fee defaults for every country in ALL_COUNTRIES.
-    Only updates the supplied fee fields — never touches country_enabled or
-    tourist_enabled, so no country gets accidentally turned on.
+    Upsert visa fee defaults (all types) + discount_amount for every country.
+    Only updates the supplied fields — never touches any enabled/disabled toggles.
     Returns counts of created vs updated documents.
     """
     fee_fields = {k: v for k, v in payload.dict().items() if v is not None}
@@ -621,6 +640,7 @@ async def bulk_set_tourist_fees(payload: BulkTouristFeesRequest):
                 'transit_enabled': False,
                 'transit_govt_fee': 0.0,
                 'transit_our_fee': 0.0,
+                'discount_amount': 0.0,
                 'created_at': datetime.utcnow(),
                 **fee_fields,
             }
@@ -633,6 +653,11 @@ async def bulk_set_tourist_fees(payload: BulkTouristFeesRequest):
         'updated': updated,
         'total': created + updated,
     }
+
+# Keep old endpoint as alias for backward compatibility
+@router.post("/bulk-tourist-fees")
+async def bulk_set_tourist_fees_alias(payload: BulkVisaFeesRequest):
+    return await bulk_set_visa_fees(payload)
 
 
 @router.put("/{country_code}")
@@ -687,6 +712,7 @@ async def update_country_config(country_code: str, config_update: CountryVisaCon
             'transit_enabled': False,
             'transit_govt_fee': 0.0,
             'transit_our_fee': 0.0,
+            'discount_amount': 0.0,
             'created_at': datetime.utcnow(),
             'updated_at': datetime.utcnow(),
             **update_data

@@ -6,6 +6,27 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-06] - Bulk visa fee defaults expanded + discount_amount field
+
+### Added
+- **`discount_amount: float`** field (`backend/models/country_visa_config.py`)
+  - Added to all three Pydantic classes (`CountryVisaConfig`, `CountryVisaConfigCreate`, `CountryVisaConfigUpdate`).
+  - Defaults to `0.0`.
+
+- **`POST /api/countries/bulk-visa-fees`** (`backend/routes/countries.py`)
+  - Replaces the tourist-only bulk endpoint. Now accepts fees for all visa types: tourist 30d (Apr–Jun / Jul–Mar), tourist 1yr, tourist 5yr, business, conference, medical, medical_attendant, transit — plus `discount_amount`.
+  - `POST /api/countries/bulk-tourist-fees` kept as a backward-compatible alias.
+
+- **Expanded "Bulk Set Visa Fee Defaults" panel** (`frontend/src/pages/AdminPanel.jsx`)
+  - Renamed from "Bulk Set Tourist Fee Defaults".
+  - Tourist section: 30 Day (Apr–Jun + Jul–Mar govt fees, our fee, live totals), 1 Year, 5 Year.
+  - Other visa types section: Business, Conference, Medical, Medical Attendant, Transit — each with govt fee, our fee, and live total.
+  - Discount section: single flat discount_amount input applied to all countries.
+
+- **Per-country Discount Amount field** (`frontend/src/pages/AdminPanel.jsx`)
+  - New input row above the Save button in the per-country expanded config view.
+  - Saved via the existing `saveCountryConfig` call.
+
 ## [2026-04-05] - Bulk tourist fee defaults in Admin panel
 
 ### Added
