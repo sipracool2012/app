@@ -23,8 +23,20 @@ async def get_utility_settings():
     """Get utility settings (public — no auth required)."""
     doc = await db.utility_settings.find_one({})
     if not doc:
-        return {"show_fee_breakdown": True}
-    return {"show_fee_breakdown": doc.get("show_fee_breakdown", True)}
+        return {
+            "show_fee_breakdown": True,
+            "draft_expiry_days": 7,
+            "draft_expiry_hours": 0,
+            "draft_expiry_minutes": 0,
+            "draft_expiry_seconds": 0,
+        }
+    return {
+        "show_fee_breakdown": doc.get("show_fee_breakdown", True),
+        "draft_expiry_days": doc.get("draft_expiry_days", 7),
+        "draft_expiry_hours": doc.get("draft_expiry_hours", 0),
+        "draft_expiry_minutes": doc.get("draft_expiry_minutes", 0),
+        "draft_expiry_seconds": doc.get("draft_expiry_seconds", 0),
+    }
 
 
 @router.patch("/settings")
@@ -51,9 +63,21 @@ async def update_utility_settings(
             {"$set": set_data}
         )
     else:
-        defaults = {"show_fee_breakdown": True}
+        defaults = {
+            "show_fee_breakdown": True,
+            "draft_expiry_days": 7,
+            "draft_expiry_hours": 0,
+            "draft_expiry_minutes": 0,
+            "draft_expiry_seconds": 0,
+        }
         defaults.update(set_data)
         await db.utility_settings.insert_one(defaults)
 
     doc = await db.utility_settings.find_one({})
-    return {"show_fee_breakdown": doc.get("show_fee_breakdown", True)}
+    return {
+        "show_fee_breakdown": doc.get("show_fee_breakdown", True),
+        "draft_expiry_days": doc.get("draft_expiry_days", 7),
+        "draft_expiry_hours": doc.get("draft_expiry_hours", 0),
+        "draft_expiry_minutes": doc.get("draft_expiry_minutes", 0),
+        "draft_expiry_seconds": doc.get("draft_expiry_seconds", 0),
+    }

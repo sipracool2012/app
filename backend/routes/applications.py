@@ -3,7 +3,7 @@ from fastapi.responses import StreamingResponse
 from models.application import ApplicationCreate, Application, ApplicationStatusUpdate
 from utils.auth import get_current_user
 from utils.email import send_application_confirmation, send_application_status_update
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Optional
 from bson import ObjectId
 from pathlib import Path
@@ -32,6 +32,26 @@ def get_db():
 db = get_db()
 
 
+def generate_temp_id() -> str:
+    """Generate a temporary application ID: TEMP{DDMMYYYY}{HHMMSS}"""
+    now = datetime.utcnow()
+    return f"TEMP{now.strftime('%d%m%Y%H%M%S')}"
+
+
+async def get_expiry_delta() -> timedelta:
+    """Read draft expiry config from utility_settings. Default: 7 days."""
+    doc = await db.utility_settings.find_one({})
+    if not doc:
+        return timedelta(days=7)
+    days = doc.get("draft_expiry_days", 7)
+    hours = doc.get("draft_expiry_hours", 0)
+    minutes = doc.get("draft_expiry_minutes", 0)
+    seconds = doc.get("draft_expiry_seconds", 0)
+    total = timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
+    # Ensure at least 1 minute to avoid immediate deletion
+    return total if total.total_seconds() > 0 else timedelta(days=7)
+
+
 # ============ DRAFT ENDPOINTS ============
 
 @router.patch("/draft", response_model=dict)
@@ -39,17 +59,22 @@ async def save_draft(
     draft_data: dict,
     user_id: str = Depends(get_current_user)
 ):
-    """Save or update a draft application. One draft per user (upsert)."""
+    """Save or update a draft application. One draft per user per visa (upsert).
+    Also assigns a TEMP ID on first save and resets/extends expiresAt on every save."""
     now = datetime.utcnow()
     
     # Remove any _id field from incoming data
     draft_data.pop("_id", None)
     draft_data.pop("id", None)
     
+    expiry_delta = await get_expiry_delta()
+    expires_at = now + expiry_delta
+
     draft_data.update({
         "userId": user_id,
         "status": "draft",
-        "updatedAt": now
+        "updatedAt": now,
+        "expiresAt": expires_at,
     })
     
     visa_id = draft_data.get("visaId")
@@ -63,11 +88,24 @@ async def save_draft(
             {"_id": existing["_id"]},
             {"$set": draft_data}
         )
-        return {"message": "Draft updated", "draftId": str(existing["_id"])}
+        return {
+            "message": "Draft updated",
+            "draftId": str(existing["_id"]),
+            "tempId": existing.get("applicationId", ""),
+            "expiresAt": expires_at.isoformat(),
+        }
     else:
         draft_data["createdAt"] = now
+        # Assign TEMP ID only if not already present
+        if not draft_data.get("applicationId"):
+            draft_data["applicationId"] = generate_temp_id()
         result = await db.applications.insert_one(draft_data)
-        return {"message": "Draft created", "draftId": str(result.inserted_id)}
+        return {
+            "message": "Draft created",
+            "draftId": str(result.inserted_id),
+            "tempId": draft_data["applicationId"],
+            "expiresAt": expires_at.isoformat(),
+        }
 
 
 @router.get("/draft", response_model=dict)
@@ -142,7 +180,8 @@ async def get_my_applications(user_id: str = Depends(get_current_user)):
             "currentStep": app.get("currentStep", 1),
             "createdAt": app.get("createdAt", datetime.utcnow()).isoformat() if isinstance(app.get("createdAt"), datetime) else str(app.get("createdAt", "")),
             "updatedAt": app.get("updatedAt", datetime.utcnow()).isoformat() if isinstance(app.get("updatedAt"), datetime) else str(app.get("updatedAt", "")),
-            "submittedDate": app.get("submittedDate", "").isoformat() if isinstance(app.get("submittedDate"), datetime) else str(app.get("submittedDate", ""))
+            "submittedDate": app.get("submittedDate", "").isoformat() if isinstance(app.get("submittedDate"), datetime) else str(app.get("submittedDate", "")),
+            "expiresAt": app["expiresAt"].isoformat() if isinstance(app.get("expiresAt"), datetime) else str(app.get("expiresAt", "")),
         })
     
     return {"applications": result, "total": len(result)}

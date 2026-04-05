@@ -6,6 +6,24 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-05] - Draft application expiry, TEMP ID, admin expiry config
+
+### Added
+- **TEMP application ID** (`backend/routes/applications.py`)
+  - Every new draft is automatically assigned a temporary ID in the format `TEMP{DDMMYYYY}{HHMMSS}` (e.g. `TEMP05042026143022`) at creation time, visible in My Applications before a real `APP…` ID is assigned at submission.
+  - `PATCH /api/applications/draft` response now includes `tempId` and `expiresAt` fields.
+
+- **Draft expiry — auto-delete** (`backend/server.py`, `backend/routes/applications.py`)
+  - Drafts now store an `expiresAt` timestamp computed from the configurable expiry duration.
+  - Every `PATCH /api/applications/draft` call (save/update) resets the `expiresAt` to now + configured duration, effectively extending the timer when the user revisits.
+  - A background `asyncio` task runs every 60 seconds and hard-deletes any documents where `status == "draft"` and `expiresAt < now`.
+  - `GET /api/applications/my-applications` now includes `expiresAt` per application so the frontend can display the countdown.
+
+- **Draft expiry configuration — Admin Utility Settings** (`backend/models/utility_settings.py`, `backend/routes/utility.py`, `frontend/src/components/admin/UtilitySettings.jsx`)
+  - New fields on `utility_settings`: `draft_expiry_days`, `draft_expiry_hours`, `draft_expiry_minutes`, `draft_expiry_seconds`. Default: 7 days.
+  - `GET /api/utility/settings` and `PATCH /api/utility/settings` now include these fields.
+  - New "Draft Application Expiry" card in Admin → Utility Settings with four number inputs (Days / Hours / Minutes / Seconds), a live "Total:" summary line, and saved via the existing Save button.
+
 ## [2026-04-05] - Favicon installation
 
 ### Added

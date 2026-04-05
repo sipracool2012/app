@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
+import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Switch } from '../ui/switch';
 import { useToast } from '../../hooks/use-toast';
-import { Save, Wrench } from 'lucide-react';
+import { Save, Wrench, Clock } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -13,6 +14,10 @@ const UtilitySettings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showFeeBreakdown, setShowFeeBreakdown] = useState(true);
+  const [expiryDays, setExpiryDays] = useState(7);
+  const [expiryHours, setExpiryHours] = useState(0);
+  const [expiryMinutes, setExpiryMinutes] = useState(0);
+  const [expirySeconds, setExpirySeconds] = useState(0);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -21,6 +26,10 @@ const UtilitySettings = () => {
         if (!response.ok) throw new Error('Failed to load');
         const data = await response.json();
         setShowFeeBreakdown(data.show_fee_breakdown ?? true);
+        setExpiryDays(data.draft_expiry_days ?? 7);
+        setExpiryHours(data.draft_expiry_hours ?? 0);
+        setExpiryMinutes(data.draft_expiry_minutes ?? 0);
+        setExpirySeconds(data.draft_expiry_seconds ?? 0);
       } catch (err) {
         console.error('Failed to fetch utility settings:', err);
         toast({
@@ -45,7 +54,13 @@ const UtilitySettings = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-        body: JSON.stringify({ show_fee_breakdown: showFeeBreakdown }),
+        body: JSON.stringify({
+          show_fee_breakdown: showFeeBreakdown,
+          draft_expiry_days: Number(expiryDays),
+          draft_expiry_hours: Number(expiryHours),
+          draft_expiry_minutes: Number(expiryMinutes),
+          draft_expiry_seconds: Number(expirySeconds),
+        }),
       });
 
       if (!response.ok) throw new Error('Failed to save');
@@ -99,6 +114,79 @@ const UtilitySettings = () => {
               onCheckedChange={setShowFeeBreakdown}
             />
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Draft Application Expiry */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-gray-600" />
+            <CardTitle className="text-base">Draft Application Expiry</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-xs text-gray-500">
+            Draft applications will be automatically deleted after this duration. Each time a
+            user saves progress or revisits their draft, the timer resets. Applications are
+            assigned a <span className="font-mono font-medium">TEMP…</span> ID until submitted.
+          </p>
+          <div className="grid grid-cols-4 gap-4">
+            <div className="space-y-1">
+              <Label htmlFor="expiry-days" className="text-sm font-medium">Days</Label>
+              <Input
+                id="expiry-days"
+                type="number"
+                min={0}
+                value={expiryDays}
+                onChange={(e) => setExpiryDays(Math.max(0, parseInt(e.target.value) || 0))}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="expiry-hours" className="text-sm font-medium">Hours</Label>
+              <Input
+                id="expiry-hours"
+                type="number"
+                min={0}
+                max={23}
+                value={expiryHours}
+                onChange={(e) => setExpiryHours(Math.max(0, Math.min(23, parseInt(e.target.value) || 0)))}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="expiry-minutes" className="text-sm font-medium">Minutes</Label>
+              <Input
+                id="expiry-minutes"
+                type="number"
+                min={0}
+                max={59}
+                value={expiryMinutes}
+                onChange={(e) => setExpiryMinutes(Math.max(0, Math.min(59, parseInt(e.target.value) || 0)))}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="expiry-seconds" className="text-sm font-medium">Seconds</Label>
+              <Input
+                id="expiry-seconds"
+                type="number"
+                min={0}
+                max={59}
+                value={expirySeconds}
+                onChange={(e) => setExpirySeconds(Math.max(0, Math.min(59, parseInt(e.target.value) || 0)))}
+              />
+            </div>
+          </div>
+          <p className="text-xs text-gray-400">
+            Total:{' '}
+            {[
+              expiryDays > 0 && `${expiryDays}d`,
+              expiryHours > 0 && `${expiryHours}h`,
+              expiryMinutes > 0 && `${expiryMinutes}m`,
+              expirySeconds > 0 && `${expirySeconds}s`,
+            ]
+              .filter(Boolean)
+              .join(' ') || '0s (defaults to 7 days)'}
+          </p>
         </CardContent>
       </Card>
 
