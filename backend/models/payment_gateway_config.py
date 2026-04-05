@@ -18,6 +18,7 @@ class PaymentGatewayConfig(BaseModel):
     paypal_client_id: str = ""
     paypal_secret: str = ""
     paypal_mode: str = "sandbox"  # sandbox or live
+    paypal_currency: str = "USD"  # e.g. USD, GBP, EUR, AUD
     
     # Tazapay Configuration
     tazapay_enabled: bool = False
@@ -45,6 +46,7 @@ class PaymentGatewayConfigUpdate(BaseModel):
     paypal_client_id: Optional[str] = None
     paypal_secret: Optional[str] = None
     paypal_mode: Optional[str] = None
+    paypal_currency: Optional[str] = None
     
     tazapay_enabled: Optional[bool] = None
     tazapay_api_key: Optional[str] = None

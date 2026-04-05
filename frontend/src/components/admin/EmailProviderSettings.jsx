@@ -19,7 +19,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Switch } from '../ui/switch';
 import { useToast } from '../../hooks/use-toast';
-import { Save, Eye, EyeOff, Mail } from 'lucide-react';
+import { Save, Eye, EyeOff, Mail, ShieldCheck } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -34,6 +34,8 @@ const EmailProviderSettings = () => {
   });
 
   const [config, setConfig] = useState({
+    otp_login_enabled: true,
+    otp_signup_enabled: false,
     mandrill_enabled: true,
     mandrill_api_key: '',
     sendpulse_enabled: false,
@@ -133,6 +135,53 @@ const EmailProviderSettings = () => {
         Providers are tried in order: <strong>Mandrill → SendPulse → Postmark</strong>. If a
         provider is disabled or delivery fails, the next enabled provider is used.
       </p>
+
+      {/* ── OTP Verification Settings ── */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-blue-600" />
+            <CardTitle>OTP Verification</CardTitle>
+          </div>
+          <p className="text-sm text-gray-500 mt-1">
+            Control whether a one-time password is required after credentials are accepted.
+            Disabling OTP allows direct login/signup without an email verification step.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <div>
+              <p className="font-medium">Require OTP on Login</p>
+              <p className="text-sm text-gray-500">
+                When enabled, users must enter a 6-digit code sent to their email after entering their password.
+              </p>
+            </div>
+            <Switch
+              id="otp-login-enabled"
+              checked={config.otp_login_enabled}
+              onCheckedChange={(checked) =>
+                setConfig((prev) => ({ ...prev, otp_login_enabled: checked }))
+              }
+            />
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <div>
+              <p className="font-medium">Require OTP on Sign Up</p>
+              <p className="text-sm text-gray-500">
+                When enabled, new accounts are only created after the user verifies their email address with a code.
+              </p>
+            </div>
+            <Switch
+              id="otp-signup-enabled"
+              checked={config.otp_signup_enabled}
+              onCheckedChange={(checked) =>
+                setConfig((prev) => ({ ...prev, otp_signup_enabled: checked }))
+              }
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* ── Mandrill ── */}
       <Card>

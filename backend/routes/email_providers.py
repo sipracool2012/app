@@ -56,6 +56,8 @@ async def get_email_provider_config(current_user_id: str = Depends(get_current_u
         sendpulse_smtp_port=config.get("sendpulse_smtp_port", 587),
         postmark_enabled=config.get("postmark_enabled", False),
         postmark_configured=bool(config.get("postmark_server_token")),
+        otp_login_enabled=config.get("otp_login_enabled", True),
+        otp_signup_enabled=config.get("otp_signup_enabled", False),
         updated_at=config.get("updated_at", datetime.utcnow()),
     )
 
@@ -90,6 +92,8 @@ async def get_email_provider_config_admin(current_user_id: str = Depends(get_cur
         "sendpulse_smtp_password": mask(config.get("sendpulse_smtp_password", "")),
         "postmark_enabled": config.get("postmark_enabled", False),
         "postmark_server_token": mask(config.get("postmark_server_token", "")),
+        "otp_login_enabled": config.get("otp_login_enabled", True),
+        "otp_signup_enabled": config.get("otp_signup_enabled", False),
         "updated_at": config.get("updated_at", datetime.utcnow()),
     }
 

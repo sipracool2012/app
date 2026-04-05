@@ -38,13 +38,24 @@ const SignIn = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post('/api/auth/login', formData);
-      // Backend dispatched the OTP — move to OTP entry step
-      toast({
-        title: 'Verification code sent',
-        description: 'A 6-digit code has been sent to your email. It expires in 5 minutes.',
-      });
-      setStep('otp');
+      const response = await api.post('/api/auth/login', formData);
+      const data = response.data;
+
+      if (data.token) {
+        // OTP login disabled — backend returned token directly
+        setToken(data.token);
+        setCurrentUser(data.user);
+        handleLogin(data.user);
+        toast({ title: 'Success', description: 'Logged in successfully!' });
+        navigate('/');
+      } else {
+        // OTP required — move to OTP entry step
+        toast({
+          title: 'Verification code sent',
+          description: 'A 6-digit code has been sent to your email. It expires in 5 minutes.',
+        });
+        setStep('otp');
+      }
     } catch (error) {
       toast({
         title: 'Error',

@@ -10,11 +10,16 @@ from bson import ObjectId
 from pydantic import BaseModel
 import httpx
 import logging
+import hmac
+import hashlib
 
 logger = logging.getLogger(__name__)
 
 PAYPAL_SANDBOX_BASE = "https://api-m.sandbox.paypal.com"
 PAYPAL_LIVE_BASE = "https://api-m.paypal.com"
+RAZORPAY_BASE = "https://api.razorpay.com/v1"
+TAZAPAY_SANDBOX_BASE = "https://api.sandbox.tazapay.com"
+TAZAPAY_LIVE_BASE = "https://api.tazapay.com"
 
 class PayPalCreateOrderRequest(BaseModel):
     application_id: str
@@ -25,6 +30,24 @@ class PayPalCreateOrderRequest(BaseModel):
 class PayPalCaptureOrderRequest(BaseModel):
     order_id: str
     application_id: str
+
+class RazorpayCreateOrderRequest(BaseModel):
+    application_id: str
+    amount: float
+    currency: str = "USD"
+
+class RazorpayVerifyRequest(BaseModel):
+    application_id: str
+    order_id: str
+    payment_id: str
+    signature: str
+
+class TazapayCheckoutRequest(BaseModel):
+    application_id: str
+    amount: float
+    email: str
+    success_url: str
+    failure_url: str
 
 router = APIRouter()
 
@@ -269,6 +292,7 @@ async def paypal_create_order(
     client_id = config["paypal_client_id"]
     secret = config["paypal_secret"]
     mode = config.get("paypal_mode", "sandbox")
+    currency = config.get("paypal_currency", "USD")
     base_url = PAYPAL_SANDBOX_BASE if mode == "sandbox" else PAYPAL_LIVE_BASE
 
     try:
@@ -282,7 +306,7 @@ async def paypal_create_order(
                         "reference_id": req.application_id,
                         "description": f"Visa application {req.application_id}",
                         "amount": {
-                            "currency_code": "USD",
+                            "currency_code": currency,
                             "value": f"{req.amount:.2f}"
                         }
                     }],
@@ -365,4 +389,189 @@ async def paypal_capture_order(
         raise HTTPException(status_code=502, detail=f"PayPal error: {e.response.text}")
     except Exception as e:
         logger.exception("PayPal capture unexpected error")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ─── Razorpay ──────────────────────────────────────────────────────────────────
+
+@router.post("/razorpay/create-order")
+async def razorpay_create_order(
+    req: RazorpayCreateOrderRequest,
+    current_user_id: str = Depends(get_current_user),
+):
+    """Create a Razorpay order and return order details for the frontend checkout."""
+    config = await db.payment_gateway_config.find_one({})
+    if not config or not config.get("razorpay_enabled") or not config.get("razorpay_key_id"):
+        raise HTTPException(status_code=400, detail="Razorpay is not configured or enabled")
+
+    key_id = config["razorpay_key_id"]
+    key_secret = config["razorpay_key_secret"]
+
+    try:
+        async with httpx.AsyncClient() as http:
+            resp = await http.post(
+                f"{RAZORPAY_BASE}/orders",
+                json={
+                    "amount": int(req.amount * 100),  # Razorpay expects smallest currency unit
+                    "currency": req.currency,
+                    "receipt": req.application_id[:40],
+                    "notes": {"application_id": req.application_id},
+                },
+                auth=(key_id, key_secret),
+                timeout=20,
+            )
+            resp.raise_for_status()
+            order = resp.json()
+
+        await db.applications.update_one(
+            {"applicationId": req.application_id},
+            {"$set": {"razorpay_order_id": order["id"], "payment_amount": req.amount, "updatedAt": datetime.utcnow()}}
+        )
+
+        return {
+            "order_id": order["id"],
+            "amount": order["amount"],
+            "currency": order["currency"],
+            "key_id": key_id,
+        }
+
+    except httpx.HTTPStatusError as e:
+        logger.exception("Razorpay create-order failed")
+        raise HTTPException(status_code=502, detail=f"Razorpay error: {e.response.text}")
+    except Exception as e:
+        logger.exception("Razorpay create-order unexpected error")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/razorpay/verify-payment")
+async def razorpay_verify_payment(
+    req: RazorpayVerifyRequest,
+    current_user_id: str = Depends(get_current_user),
+):
+    """Verify Razorpay payment signature and mark the application as submitted."""
+    config = await db.payment_gateway_config.find_one({})
+    if not config or not config.get("razorpay_key_secret"):
+        raise HTTPException(status_code=400, detail="Razorpay is not configured")
+
+    key_secret = config["razorpay_key_secret"]
+
+    # HMAC-SHA256 verification
+    body = f"{req.order_id}|{req.payment_id}"
+    expected = hmac.new(key_secret.encode(), body.encode(), hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(expected, req.signature):
+        raise HTTPException(status_code=400, detail="Invalid payment signature")
+
+    await db.applications.update_one(
+        {"applicationId": req.application_id},
+        {"$set": {
+            "status": "submitted",
+            "razorpay_payment_id": req.payment_id,
+            "razorpay_order_id": req.order_id,
+            "updatedAt": datetime.utcnow(),
+        }}
+    )
+
+    return {"success": True, "transaction_id": req.payment_id}
+
+
+# ─── Tazapay ───────────────────────────────────────────────────────────────────
+
+@router.post("/tazapay/create-checkout")
+async def tazapay_create_checkout(
+    req: TazapayCheckoutRequest,
+    current_user_id: str = Depends(get_current_user),
+):
+    """Create a Tazapay checkout session and return the redirect URL."""
+    config = await db.payment_gateway_config.find_one({})
+    if not config or not config.get("tazapay_enabled") or not config.get("tazapay_api_key"):
+        raise HTTPException(status_code=400, detail="Tazapay is not configured or enabled")
+
+    mode = config.get("tazapay_mode", "sandbox")
+    base_url = TAZAPAY_SANDBOX_BASE if mode == "sandbox" else TAZAPAY_LIVE_BASE
+    api_key = config["tazapay_api_key"]
+    secret_key = config["tazapay_secret_key"]
+
+    try:
+        async with httpx.AsyncClient() as http:
+            resp = await http.post(
+                f"{base_url}/v2/checkout",
+                json={
+                    "reference_id": req.application_id,
+                    "buyer_email": req.email,
+                    "currency": "USD",
+                    "amount": req.amount,
+                    "description": f"Visa application {req.application_id}",
+                    "success_url": req.success_url,
+                    "failure_url": req.failure_url,
+                },
+                auth=(api_key, secret_key),
+                timeout=20,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+
+        redirect_url = data["data"]["redirect_url"]
+        session_id = data["data"].get("session_id", "")
+
+        await db.applications.update_one(
+            {"applicationId": req.application_id},
+            {"$set": {"tazapay_session_id": session_id, "payment_amount": req.amount, "updatedAt": datetime.utcnow()}}
+        )
+
+        return {"redirect_url": redirect_url, "session_id": session_id}
+
+    except httpx.HTTPStatusError as e:
+        logger.exception("Tazapay create-checkout failed")
+        raise HTTPException(status_code=502, detail=f"Tazapay error: {e.response.text}")
+    except Exception as e:
+        logger.exception("Tazapay create-checkout unexpected error")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/tazapay/verify/{session_id}")
+async def tazapay_verify(
+    session_id: str,
+    application_id: str,
+    current_user_id: str = Depends(get_current_user),
+):
+    """Verify a Tazapay session and mark the application as submitted."""
+    config = await db.payment_gateway_config.find_one({})
+    if not config or not config.get("tazapay_api_key"):
+        raise HTTPException(status_code=400, detail="Tazapay is not configured")
+
+    mode = config.get("tazapay_mode", "sandbox")
+    base_url = TAZAPAY_SANDBOX_BASE if mode == "sandbox" else TAZAPAY_LIVE_BASE
+
+    try:
+        async with httpx.AsyncClient() as http:
+            resp = await http.get(
+                f"{base_url}/v1/session/{session_id}",
+                auth=(config["tazapay_api_key"], config["tazapay_secret_key"]),
+                timeout=20,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+
+        payment_status = data.get("data", {}).get("payment_status", "")
+        if payment_status not in ("success", "completed", "paid"):
+            raise HTTPException(status_code=400, detail=f"Payment not completed: {payment_status}")
+
+        await db.applications.update_one(
+            {"applicationId": application_id},
+            {"$set": {
+                "status": "submitted",
+                "tazapay_session_id": session_id,
+                "updatedAt": datetime.utcnow(),
+            }}
+        )
+
+        return {"success": True, "transaction_id": session_id}
+
+    except HTTPException:
+        raise
+    except httpx.HTTPStatusError as e:
+        logger.exception("Tazapay verify failed")
+        raise HTTPException(status_code=502, detail=f"Tazapay error: {e.response.text}")
+    except Exception as e:
+        logger.exception("Tazapay verify unexpected error")
         raise HTTPException(status_code=500, detail=str(e))

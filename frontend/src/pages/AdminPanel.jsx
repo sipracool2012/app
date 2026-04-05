@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download, Filter, Search, Eye, Settings, Globe, Save, ChevronDown, ChevronUp, CreditCard, Users, AlertTriangle, Mail } from 'lucide-react';
+import { Download, Filter, Search, Eye, Settings, Globe, Save, ChevronDown, ChevronUp, CreditCard, Users, AlertTriangle, Mail, Wrench } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
@@ -15,6 +15,7 @@ import PaymentGatewaySettings from '../components/admin/PaymentGatewaySettings';
 import { FlagIcon } from '../components/ui/FlagIcon';
 import UserManagement from '../components/admin/UserManagement';
 import EmailProviderSettings from '../components/admin/EmailProviderSettings';
+import UtilitySettings from '../components/admin/UtilitySettings';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -82,17 +83,16 @@ const AdminPanel = () => {
 
     fetchCurrentUser();
 
-    // Load applications from API
+    // Load applications from API (including drafts for full stat counts)
     const fetchApplications = async () => {
       try {
-        const response = await fetch(`${BACKEND_URL}/api/applications`, {
+        const response = await fetch(`${BACKEND_URL}/api/applications?include_drafts=true`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
         });
         const data = await response.json();
         setApplications(data.applications || []);
-        setFilteredApps(data.applications || []);
       } catch (error) {
         console.error('Failed to fetch applications:', error);
         toast({
@@ -149,13 +149,17 @@ const AdminPanel = () => {
     let filtered = applications;
 
     // Filter by status
-    if (statusFilter !== 'all') {
+    if (statusFilter === 'all') {
+      // "All" excludes drafts — admins must explicitly select "Draft" to see them
+      filtered = filtered.filter(app => app.status !== 'draft');
+    } else {
       filtered = filtered.filter(app => app.status === statusFilter);
     }
 
     // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(app =>
+        app.applicationId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.surname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -352,6 +356,7 @@ const AdminPanel = () => {
 
   const getStatusBadge = (status) => {
     const colors = {
+      draft:     'bg-gray-100 text-gray-600',
       pending:   'bg-yellow-100 text-yellow-800',
       submitted: 'bg-blue-100 text-blue-800',
       paid:      'bg-indigo-100 text-indigo-800',
@@ -400,7 +405,7 @@ const AdminPanel = () => {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* Super Admin sees 5 tabs; regular Admin sees 1 tab (Applications only) */}
-          <TabsList className={`grid w-full ${currentUser?.role === 'super_admin' ? 'max-w-5xl grid-cols-5' : 'max-w-xs grid-cols-1'}`}>
+          <TabsList className={`grid w-full ${currentUser?.role === 'super_admin' ? 'max-w-5xl grid-cols-6' : 'max-w-xs grid-cols-1'}`}>
             <TabsTrigger value="applications" className="flex items-center gap-2">
               <Eye className="w-4 h-4" />
               Applications
@@ -433,18 +438,35 @@ const AdminPanel = () => {
                 User Management
               </TabsTrigger>
             )}
+            {/* Utility — Super Admin only */}
+            {currentUser?.role === 'super_admin' && (
+              <TabsTrigger value="utility" className="flex items-center gap-2">
+                <Wrench className="w-4 h-4" />
+                Utility
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* Applications Tab */}
           <TabsContent value="applications" className="space-y-6">
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-7 gap-4">
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-xs font-medium text-gray-600">Total</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-2xl font-bold">{applications.length}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-xs font-medium text-gray-600">Draft</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold text-gray-500">
+                    {applications.filter(a => a.status === 'draft').length}
+                  </p>
                 </CardContent>
               </Card>
               <Card>
@@ -521,6 +543,7 @@ const AdminPanel = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="draft">Draft / In Progress</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
                       <SelectItem value="submitted">Submitted</SelectItem>
                       <SelectItem value="paid">Paid</SelectItem>
@@ -568,21 +591,27 @@ const AdminPanel = () => {
                       ) : (
                         filteredApps.map((app) => (
                           <TableRow key={app.applicationId}>
-                            <TableCell className="font-medium">{app.applicationId}</TableCell>
-                            <TableCell>{app.surname} {app.givenNames}</TableCell>
-                            <TableCell>{app.email}</TableCell>
-                            <TableCell>{app.nationality}</TableCell>
-                            <TableCell>{app.visaService}</TableCell>
+                            <TableCell className="font-medium">
+                              {app.applicationId
+                                ? app.applicationId
+                                : <span className="text-gray-400 italic">Not assigned</span>}
+                            </TableCell>
+                            <TableCell>{app.surname || app.givenNames ? `${app.surname || ''} ${app.givenNames || ''}`.trim() : <span className="text-gray-400 italic">—</span>}</TableCell>
+                            <TableCell>{app.email || <span className="text-gray-400 italic">—</span>}</TableCell>
+                            <TableCell>{app.nationality || <span className="text-gray-400 italic">—</span>}</TableCell>
+                            <TableCell>{app.visaService || <span className="text-gray-400 italic">—</span>}</TableCell>
                             <TableCell>{getStatusBadge(app.status)}</TableCell>
                             <TableCell>
-                              {new Date(app.submittedDate).toLocaleDateString()}
+                              {app.submittedDate && app.submittedDate !== 'None' && app.submittedDate !== ''
+                                ? new Date(app.submittedDate).toLocaleDateString()
+                                : <span className="text-gray-400 italic">Not submitted</span>}
                             </TableCell>
                             <TableCell>
                               <div className="flex space-x-2">
-                                {/* Super admin can move to any status freely.
-                                    Regular admin is restricted to ALLOWED_TRANSITIONS only.
-                                    Terminal statuses (approved/rejected) show a read-only badge for non-super-admins. */}
-                                {currentUser?.role === 'super_admin' || (ALLOWED_TRANSITIONS[app.status] || []).length > 0 ? (
+                                {/* Drafts only show a delete button — no status transitions until submitted */}
+                                {app.status === 'draft' ? (
+                                  <span className="text-xs text-gray-400 italic">In Progress</span>
+                                ) : currentUser?.role === 'super_admin' || (ALLOWED_TRANSITIONS[app.status] || []).length > 0 ? (
                                   <Select
                                     value={app.status}
                                     onValueChange={(value) => updateStatus(app.applicationId, value)}
@@ -617,13 +646,15 @@ const AdminPanel = () => {
                                 ) : (
                                   getStatusBadge(app.status)
                                 )}
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => downloadCSV(app)}
-                                >
-                                  <Download className="w-4 h-4" />
-                                </Button>
+                                {app.status !== 'draft' && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => downloadCSV(app)}
+                                  >
+                                    <Download className="w-4 h-4" />
+                                  </Button>
+                                )}
                               </div>
                             </TableCell>
                           </TableRow>
@@ -1092,6 +1123,13 @@ const AdminPanel = () => {
           {currentUser?.role === 'super_admin' && (
             <TabsContent value="users" className="space-y-6">
               <UserManagement />
+            </TabsContent>
+          )}
+
+          {/* Utility Tab */}
+          {currentUser?.role === 'super_admin' && (
+            <TabsContent value="utility" className="space-y-6">
+              <UtilitySettings />
             </TabsContent>
           )}
         </Tabs>

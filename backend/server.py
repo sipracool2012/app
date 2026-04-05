@@ -4,10 +4,12 @@ from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import asyncio
+from datetime import datetime
 from pathlib import Path
 
 # Import routes
-from routes import auth, applications, upload, countries, constants, payment_gateways, email_providers
+from routes import auth, applications, upload, countries, constants, payment_gateways, email_providers, utility
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -40,6 +42,7 @@ app.include_router(countries.router)
 app.include_router(constants.router)
 app.include_router(payment_gateways.router, prefix="/api/payment-gateways", tags=["payment-gateways"])
 app.include_router(email_providers.router, prefix="/api/email-providers", tags=["email-providers"])
+app.include_router(utility.router, prefix="/api/utility", tags=["utility"])
 app.include_router(api_router)
 
 # CORS middleware
@@ -62,6 +65,23 @@ logger = logging.getLogger(__name__)
 async def startup_event():
     logger.info("Starting Clear eVisa Visa Application API")
     logger.info(f"Connected to MongoDB: {os.environ.get('DB_NAME')}")
+    asyncio.create_task(draft_expiry_cleanup_loop())
+
+
+async def draft_expiry_cleanup_loop():
+    """Background task: every 60 seconds delete expired draft applications."""
+    while True:
+        try:
+            now = datetime.utcnow()
+            result = await db.applications.delete_many({
+                "status": "draft",
+                "expiresAt": {"$lt": now}
+            })
+            if result.deleted_count:
+                logger.info(f"Draft cleanup: deleted {result.deleted_count} expired draft(s).")
+        except Exception as e:
+            logger.error(f"Draft cleanup error: {e}")
+        await asyncio.sleep(60)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():

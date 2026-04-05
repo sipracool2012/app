@@ -36,6 +36,7 @@ const PaymentGatewaySettings = () => {
     paypal_client_id: '',
     paypal_secret: '',
     paypal_mode: 'sandbox',
+    paypal_currency: 'USD',
     
     // Tazapay
     tazapay_enabled: false,
@@ -229,6 +230,32 @@ const PaymentGatewaySettings = () => {
                 <SelectItem value="live">Live (Production)</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="paypal-currency">Currency</Label>
+            <Select
+              value={config.paypal_currency || 'USD'}
+              onValueChange={(value) => setConfig({ ...config, paypal_currency: value })}
+            >
+              <SelectTrigger id="paypal-currency">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="USD">USD – US Dollar</SelectItem>
+                <SelectItem value="GBP">GBP – British Pound</SelectItem>
+                <SelectItem value="EUR">EUR – Euro</SelectItem>
+                <SelectItem value="AUD">AUD – Australian Dollar</SelectItem>
+                <SelectItem value="CAD">CAD – Canadian Dollar</SelectItem>
+                <SelectItem value="SGD">SGD – Singapore Dollar</SelectItem>
+                <SelectItem value="HKD">HKD – Hong Kong Dollar</SelectItem>
+                <SelectItem value="JPY">JPY – Japanese Yen</SelectItem>
+                <SelectItem value="MYR">MYR – Malaysian Ringgit</SelectItem>
+                <SelectItem value="THB">THB – Thai Baht</SelectItem>
+                <SelectItem value="PHP">PHP – Philippine Peso</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-gray-500">Must match the primary currency of your PayPal account. PayPal does not support INR.</p>
           </div>
 
           <div className="space-y-2">

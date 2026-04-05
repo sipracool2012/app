@@ -31,6 +31,10 @@ class EmailProviderConfig(BaseModel):
     postmark_enabled: bool = False
     postmark_server_token: str = ""
 
+    # --- OTP Verification ---
+    otp_login_enabled: bool = True    # True = existing 2-step OTP login; False = direct token on credentials
+    otp_signup_enabled: bool = False  # True = verify email with OTP before account is created
+
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     updated_by: str = ""
 
@@ -53,6 +57,9 @@ class EmailProviderConfigUpdate(BaseModel):
     postmark_enabled: Optional[bool] = None
     postmark_server_token: Optional[str] = None
 
+    otp_login_enabled: Optional[bool] = None
+    otp_signup_enabled: Optional[bool] = None
+
 
 class EmailProviderConfigResponse(BaseModel):
     """Public response — never exposes raw API keys/passwords."""
@@ -66,5 +73,8 @@ class EmailProviderConfigResponse(BaseModel):
 
     postmark_enabled: bool
     postmark_configured: bool
+
+    otp_login_enabled: bool
+    otp_signup_enabled: bool
 
     updated_at: datetime

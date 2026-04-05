@@ -6,6 +6,170 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-05] - Draft application expiry, TEMP ID, admin expiry config
+
+### Added
+- **TEMP application ID** (`backend/routes/applications.py`)
+  - Every new draft is automatically assigned a temporary ID in the format `TEMP{DDMMYYYY}{HHMMSS}` (e.g. `TEMP05042026143022`) at creation time, visible in My Applications before a real `APP…` ID is assigned at submission.
+  - `PATCH /api/applications/draft` response now includes `tempId` and `expiresAt` fields.
+
+- **Draft expiry — auto-delete** (`backend/server.py`, `backend/routes/applications.py`)
+  - Drafts now store an `expiresAt` timestamp computed from the configurable expiry duration.
+  - Every `PATCH /api/applications/draft` call (save/update) resets the `expiresAt` to now + configured duration, effectively extending the timer when the user revisits.
+  - A background `asyncio` task runs every 60 seconds and hard-deletes any documents where `status == "draft"` and `expiresAt < now`.
+  - `GET /api/applications/my-applications` now includes `expiresAt` per application so the frontend can display the countdown.
+
+- **Draft expiry configuration — Admin Utility Settings** (`backend/models/utility_settings.py`, `backend/routes/utility.py`, `frontend/src/components/admin/UtilitySettings.jsx`)
+  - New fields on `utility_settings`: `draft_expiry_days`, `draft_expiry_hours`, `draft_expiry_minutes`, `draft_expiry_seconds`. Default: 7 days.
+  - `GET /api/utility/settings` and `PATCH /api/utility/settings` now include these fields.
+  - New "Draft Application Expiry" card in Admin → Utility Settings with four number inputs (Days / Hours / Minutes / Seconds), a live "Total:" summary line, and saved via the existing Save button.
+
+## [2026-04-05] - Favicon installation
+
+### Added
+- **Favicon & web manifest** (`frontend/public/`)
+  - Added `apple-touch-icon.png`, `favicon-16x16.png`, `favicon-32x32.png`, `favicon.ico`, `android-chrome-192x192.png`, `android-chrome-512x512.png`, and `site.webmanifest` to the public root.
+  - Added corresponding `<link>` tags to `frontend/public/index.html`:
+    - `<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">`
+    - `<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">`
+    - `<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">`
+    - `<link rel="manifest" href="/site.webmanifest">`
+
+---
+
+## [2026-04-04] - Multi-draft application support; Continue button fix
+
+### Added
+- **Multi-draft applications** (`backend/routes/applications.py`, `frontend/src/pages/VisaApplication.jsx`)
+  - Users can now have multiple concurrent draft applications, one per visa type.
+  - `PATCH /api/applications/draft` upsert is now scoped by `userId + visaId`, so drafts for different visa options are stored independently.
+  - New `GET /api/applications/drafts` endpoint returns all drafts for the logged-in user (up to 100).
+  - `VisaApplication.jsx` loads all drafts on mount, matches the current `visaId` to resume the correct draft at its saved step.
+  - If the user navigates to a visa option while having existing draft(s) for *other* visa options, a conflict modal is shown with clickable cards for each existing draft (resume from step 1) and a "No, Start New Application" button that dismisses without deleting any drafts.
+
+- **My Applications — Continue button fix** (`backend/routes/applications.py`, `frontend/src/pages/MyApplications.jsx`)
+  - `GET /api/applications/my-applications` now returns `visaId` for each application (with fallback to `selectedVisaOption.id` for older records).
+  - `handleContinueDraft` navigates to `/apply/{visaId}` so each draft's Continue button routes to the correct visa application form at the saved step.
+
+### Changed
+- `backend/routes/applications.py`: `my-applications` response includes `visaId` field.
+- `frontend/src/pages/MyApplications.jsx`: guard added to show an error toast if `visaId` is missing (legacy records).
+
+---
+
+## [2026-04-04] - Razorpay & Tazapay payment integration
+
+### Added
+- **Razorpay integration** (`backend/routes/payment_gateways.py`, `frontend/src/components/application-steps/Step10Payment.jsx`)
+  - `POST /api/payment-gateways/razorpay/create-order` — authenticates with Razorpay REST API, creates an order (amount converted to smallest currency unit), persists `razorpay_order_id` on the application, returns `{order_id, amount, currency, key_id}`.
+  - `POST /api/payment-gateways/razorpay/verify-payment` — validates the Razorpay HMAC-SHA256 payment signature; on success marks application `status = submitted` and stores `razorpay_payment_id`.
+  - Frontend: dynamically loads Razorpay Checkout SDK (`checkout.razorpay.com/v1/checkout.js`) on demand, opens the inline payment modal, and on handler success calls verify then redirects to `/payment-return?gateway=razorpay&transaction_id=...`.
+  - Payment cancellation (modal dismissed) is handled gracefully — processing state is reset without an error toast.
+
+- **Tazapay integration** (`backend/routes/payment_gateways.py`, `frontend/src/components/application-steps/Step10Payment.jsx`)
+  - `POST /api/payment-gateways/tazapay/create-checkout` — calls Tazapay `/v2/checkout`, persists `tazapay_session_id` on the application, returns `{redirect_url, session_id}`.
+  - `GET /api/payment-gateways/tazapay/verify/{session_id}?application_id=...` — fetches session status from Tazapay; accepted statuses `success`/`completed`/`paid` mark application `submitted`.
+  - Sandbox base URL `api.sandbox.tazapay.com` / live `api.tazapay.com` selected from config `tazapay_mode`.
+  - Frontend redirects to Tazapay hosted page; on return, `PaymentReturn` detects `gateway=tazapay` and calls the verify endpoint.
+
+- **`PaymentReturn.jsx` — multi-gateway support**
+  - Detects `gateway` query param (`paypal` / `razorpay` / `tazapay`) and branches accordingly:
+    - `razorpay` — verification already done inline; reads `transaction_id` from URL and shows success.
+    - `tazapay` — calls backend verify endpoint, then shows success or failure.
+    - `paypal` (default) — existing capture flow unchanged.
+  - "Transaction ID" label made gateway-agnostic (removed PayPal-specific label text).
+
+### Changed
+- `backend/routes/payment_gateways.py`: added `import hmac`, `import hashlib`; new request models `RazorpayCreateOrderRequest`, `RazorpayVerifyRequest`, `TazapayCheckoutRequest`; defined `RAZORPAY_BASE`, `TAZAPAY_SANDBOX_BASE`, `TAZAPAY_LIVE_BASE` constants.
+
+---
+
+## [2026-04-04] - Admin-controlled fee breakdown visibility; new Utility tab; progress stepper; payment gateway radio cards; declaration
+
+### Added
+- **Utility Settings — admin toggle for fee breakdown visibility** (`backend/models/utility_settings.py`, `backend/routes/utility.py`, `backend/server.py`, `frontend/src/components/admin/UtilitySettings.jsx`, `frontend/src/pages/AdminPanel.jsx`, `frontend/src/components/application-steps/Step10Payment.jsx`)
+  - New `utility_settings` MongoDB collection with a `show_fee_breakdown` boolean field (default `true`).
+  - New backend model `UtilitySettings` / `UtilitySettingsUpdate` (`backend/models/utility_settings.py`).
+  - New routes registered at `/api/utility`:
+    - `GET /api/utility/settings` — public, returns current settings.
+    - `PATCH /api/utility/settings` — admin/super_admin only, updates settings.
+  - New **Utility** tab added to Admin Panel (super_admin only), with a **"Show Fee Breakdown to Customers"** toggle and Save button (`frontend/src/components/admin/UtilitySettings.jsx`).
+  - Admin Panel tab grid updated from `grid-cols-5` → `grid-cols-6` to accommodate the new tab.
+  - Payment step (`Step10Payment`) now fetches `/api/utility/settings` on load and conditionally renders the itemised fee rows (Government Fee, Processing Fee, Our Fee). The **Fee Breakdown heading**, **visa option name**, and **Total Amount** are always shown regardless of the toggle.
+
+- **Application form progress stepper** (`frontend/src/pages/VisaApplication.jsx`)
+  - Replaced the flat black linear progress bar with a connected stepper.
+  - Each completed step shows a green circle with a white tick; the active step shows a blue circle with the step number; future steps are grey.
+  - Connector lines between dots fill green as each step is completed.
+  - Step labels remain visible on large screens (`lg:block`); dots are always shown on all screen sizes.
+  - Removed the now-unused `Progress` component import.
+
+- **Payment step — gateway radio cards, logos, and declaration** (`frontend/src/components/application-steps/Step10Payment.jsx`)
+  - Replaced the dropdown gateway selector with clickable radio cards — one card per enabled gateway, with a radio indicator, logo image, description text, and a Test Mode badge.
+  - Logo images loaded from CDN (PayPal, Razorpay SVGs) with automatic fallback to a `CreditCard` icon + name if the image fails to load.
+  - Added a **Declaration of Applicant** section (blue header matching theme) with two mandatory checkboxes:
+    1. I declare the information is truthful, complete and correct.
+    2. I have read and understood the terms and conditions, refund policy, and privacy policy.
+  - The **Pay Now** button is disabled until a gateway is selected and both declaration checkboxes are ticked.
+  - Fixed duplicate-declaration colour: Declaration header changed from custom `#1a85b8` to `bg-blue-600` to match the site theme.
+  - Fixed compile error caused by duplicate component declaration (old code left appended after rewrite); removed the stale block.
+
+---
+
+## [2026-04-03] - Configurable PayPal currency; fix "seller doesn't accept payments in your currency"
+
+### Fixed
+- **PayPal sandbox error: "This seller doesn't accept payments in your currency"** (`backend/routes/payment_gateways.py`, `backend/models/payment_gateway_config.py`, `frontend/src/components/admin/PaymentGatewaySettings.jsx`)
+  - Root cause: currency was hardcoded to `USD` in the PayPal `create-order` call, but the sandbox merchant account's primary currency was different.
+  - Added `paypal_currency` field (default `"USD"`) to `PaymentGatewayConfig` and `PaymentGatewayConfigUpdate` models.
+  - `create-order` endpoint now reads `config.paypal_currency` instead of hardcoding `"USD"`.
+  - Admin Panel → Payment Gateways → PayPal now has a **Currency** dropdown (USD, GBP, EUR, AUD, CAD, SGD, HKD, JPY, MYR, THB, PHP) with a note that the value must match the primary currency of the PayPal account and that INR is not supported by PayPal.
+
+## [2026-04-03] - *Draft applications visible in Admin Panel"
+
+
+
+### Added
+- **Draft applications visible in Admin Panel** (`backend/routes/applications.py`, `frontend/src/pages/AdminPanel.jsx`)
+  - Backend `GET /api/applications` now accepts `include_drafts=true` query param to include draft records in the response.
+  - Passing `status=draft` explicitly also works to fetch only drafts.
+  - Admin panel initial load now fetches all applications including drafts so stat cards are accurate.
+  - New **"Draft"** stat card showing count of in-progress applications alongside Pending, Submitted, Paid, Approved, Rejected.
+  - **"Draft / In Progress"** option added to the status filter dropdown.
+  - "All Status" filter continues to exclude drafts (admins must explicitly select Draft to see them).
+  - Table rows for draft applications handle missing data gracefully:
+    - Application ID shows "Not assigned" (italic) when the draft hasn't reached the document upload step yet.
+    - Name, email, nationality, visa type show "—" if not yet filled in.
+    - Submitted date shows "Not submitted" for drafts.
+    - No status-change selector or CSV download button shown for draft rows; they display "In Progress" instead.
+
+## [2026-04-03] - OTP verification for sign-up; admin toggle for login/signup OTP
+
+### Added
+- **OTP-gated sign-up flow** (`backend/routes/auth.py`, `frontend/src/pages/SignUp.jsx`)
+  - When `otp_signup_enabled` is `True` in the email provider config, `/api/auth/register` no longer creates the account immediately. Instead it stores a pending registration (hashed password + role) in a `pending_registrations` collection, dispatches a 6-digit OTP, and returns `otp_required: true`.
+  - New endpoint `POST /api/auth/verify-signup-otp` validates the OTP, creates the user, cleans up the pending record, and returns a JWT token — identical flow to login OTP.
+  - Bootstrap guard: the very first user (who becomes `super_admin`) always bypasses signup OTP regardless of config, preventing a chicken-and-egg lockout.
+  - `SignUp.jsx` handles both response shapes: if `otp_required` is present it switches to an OTP entry step (same design as `SignIn` OTP step); otherwise it logs the user in directly.
+
+- **Conditional OTP for login** (`backend/routes/auth.py`, `frontend/src/pages/SignIn.jsx`)
+  - `/api/auth/login` now checks `otp_login_enabled` from the DB config (default `True` to preserve existing behaviour).
+  - If `False`, credentials are validated and a JWT token is returned directly — no OTP dispatch.
+  - `SignIn.jsx` `handleCredentialsSubmit` now reads the response: if `data.token` is present it completes the login immediately; otherwise it falls through to the OTP step.
+
+- **OTP Verification settings card in Admin Panel Email Providers tab** (`frontend/src/components/admin/EmailProviderSettings.jsx`)
+  - New card at the top of the Email Providers panel (before Mandrill) with two toggles:
+    - **Require OTP on Login** — maps to `otp_login_enabled` (default `True`).
+    - **Require OTP on Sign Up** — maps to `otp_signup_enabled` (default `False`).
+  - Saved alongside other provider settings via `PUT /api/email-providers/config`.
+
+### Changed
+- **`backend/models/email_provider_config.py`**: Added `otp_login_enabled: bool = True` and `otp_signup_enabled: bool = False` to `EmailProviderConfig`, `EmailProviderConfigUpdate`, and `EmailProviderConfigResponse`.
+- **`backend/routes/email_providers.py`**: Both OTP fields included in GET `/config`, GET `/config/admin`, and handled by PUT `/config`.
+- **`backend/models/user.py`**: Added `SignupOTPVerifyRequest` model (email + otp).
+
+---
+
 ## [2026-04-03] - Fixed country flags not displaying in Admin Country Config tab
 
 ### Fixed

@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, ChevronRight, Check, Save } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Save, AlertCircle } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
-import { Progress } from '../components/ui/progress';
 import { useToast } from '../hooks/use-toast';
 import { getAuthHeaders, getCurrentUser } from '../utils/auth';
 
@@ -38,6 +37,7 @@ const steps = [
 const VisaApplication = () => {
   const { visaId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
@@ -45,6 +45,8 @@ const VisaApplication = () => {
   const [draftLoaded, setDraftLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
+  const [conflictDrafts, setConflictDrafts] = useState([]);
+  const [showConflict, setShowConflict] = useState(false);
   const saveTimeoutRef = useRef(null);
 
   const fetchVisaOption = async (vId) => {
@@ -67,21 +69,31 @@ const VisaApplication = () => {
   useEffect(() => {
     const loadDraft = async () => {
       try {
-        const res = await fetch(`${BACKEND_URL}/api/applications/draft`, {
+        const res = await fetch(`${BACKEND_URL}/api/applications/drafts`, {
           headers: getAuthHeaders()
         });
         if (res.ok) {
           const data = await res.json();
-          if (data.draft) {
-            const draft = data.draft;
-            const savedStep = draft.currentStep || 1;
+          const allDrafts = data.drafts || [];
+
+          // Draft for the exact visa the user is currently applying for
+          const currentDraft = allDrafts.find(d => d.visaId === visaId);
+          // Drafts for other visa options
+          const otherDrafts = allDrafts
+            .filter(d => d.visaId !== visaId)
+            .sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
+
+          if (currentDraft) {
+            // Load this draft — if coming via "Yes, continue" from conflict popup, start from step 1
+            const draft = { ...currentDraft };
+            const forceStep1 = location.state?.startFromStep1;
+            const savedStep = forceStep1 ? 1 : (draft.currentStep || 1);
             delete draft.userId;
             delete draft.status;
             delete draft.createdAt;
             delete draft.updatedAt;
             delete draft.currentStep;
 
-            // Fetch fees if not already stored in draft
             let selectedVisaOption = draft.selectedVisaOption || null;
             if (!selectedVisaOption) {
               selectedVisaOption = await fetchVisaOption(visaId);
@@ -93,8 +105,15 @@ const VisaApplication = () => {
               title: t('application.draftLoaded'),
               description: t('application.draftLoadedDesc', { step: savedStep }),
             });
+          } else if (otherDrafts.length > 0) {
+            // User has draft(s) for different visa(s) — show conflict modal
+            setConflictDrafts(otherDrafts);
+            setShowConflict(true);
+            // Prepare fresh form for the new visa in the background
+            const selectedVisaOption = await fetchVisaOption(visaId);
+            setFormData(prev => ({ ...prev, visaId, selectedVisaOption }));
           } else {
-            // No draft — fetch fees for fresh start
+            // No drafts at all — fresh start
             const selectedVisaOption = await fetchVisaOption(visaId);
             setFormData(prev => ({ ...prev, visaId, selectedVisaOption }));
           }
@@ -241,11 +260,60 @@ const VisaApplication = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
+      {/* Conflict Modal — existing drafts for different visa options */}
+      {showConflict && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-white rounded-xl shadow-xl p-6 max-w-md w-full">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="p-2 bg-amber-100 rounded-lg shrink-0">
+                <AlertCircle className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 text-base">
+                  You have existing draft {conflictDrafts.length === 1 ? 'application' : 'applications'}
+                </h3>
+                <p className="text-gray-500 text-sm mt-1">
+                  Would you like to continue one of them, or start a new application?
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2 mb-5">
+              {conflictDrafts.map((draft, idx) => (
+                <button
+                  key={idx}
+                  className="w-full text-left border border-blue-200 bg-blue-50 hover:bg-blue-100 rounded-lg p-3 transition-colors"
+                  onClick={() => {
+                    setShowConflict(false);
+                    navigate(`/apply/${draft.visaId}`, { state: { startFromStep1: true } });
+                  }}
+                >
+                  <div className="font-medium text-blue-800 text-sm">
+                    {draft.selectedVisaOption?.name || draft.visaId}
+                  </div>
+                  <div className="text-xs text-blue-500 mt-0.5">
+                    Step {draft.currentStep || 1} of {steps.length} saved — click to continue from Step 1
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => setShowConflict(false)}
+            >
+              No, Start New Application
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Progress Bar */}
+        {/* Progress Stepper */}
         <Card className="mb-6" data-testid="progress-card">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-semibold text-gray-900">
                 {t('application.step', { current: currentStep, total: steps.length })}: {t(steps[currentStep - 1].nameKey)}
               </h2>
@@ -263,26 +331,63 @@ const VisaApplication = () => {
                 <span className="text-sm text-gray-600">{t('application.complete', { percent: Math.round(progress) })}</span>
               </div>
             </div>
-            <Progress value={progress} className="h-2" />
 
-            {/* Steps indicator */}
-            <div className="mt-6 hidden md:flex justify-between">
-              {steps.map((step) => (
-                <div key={step.id} className="flex flex-col items-center">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                      step.id < currentStep
-                        ? 'bg-green-500 text-white'
-                        : step.id === currentStep
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-200 text-gray-600'
-                    }`}
-                  >
-                    {step.id < currentStep ? <Check className="w-4 h-4" /> : step.id}
-                  </div>
-                  <span className="text-xs mt-1 text-gray-600 hidden lg:block">{t(step.nameKey)}</span>
-                </div>
-              ))}
+            {/* Stepper */}
+            <div className="relative mt-2">
+              {/* Full background line */}
+              <div
+                className="absolute h-0.5 bg-gray-200"
+                style={{ top: '14px', left: '14px', right: '14px' }}
+              />
+              {/* Green progress line */}
+              <div
+                className="absolute h-0.5 bg-green-500 transition-all duration-300"
+                style={{
+                  top: '14px',
+                  left: '14px',
+                  width: `calc((100% - 28px) * ${(currentStep - 1) / (steps.length - 1)})`
+                }}
+              />
+              {/* Dots + labels */}
+              <div className="flex justify-between relative">
+                {steps.map((step) => {
+                  const isCompleted = step.id < currentStep;
+                  const isActive = step.id === currentStep;
+                  const isVisited = step.id <= currentStep;
+                  return (
+                    <div
+                      key={step.id}
+                      className={`flex flex-col items-center ${isVisited && !isActive ? 'cursor-pointer' : 'cursor-default'}`}
+                      onClick={() => {
+                        if (isVisited && !isActive) {
+                          setCurrentStep(step.id);
+                          triggerAutoSave(formData, step.id);
+                        }
+                      }}
+                    >
+                      <div
+                        className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold relative z-10 transition-colors ${
+                          isCompleted
+                            ? 'bg-green-500 text-white hover:bg-green-600'
+                            : isActive
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-200 text-gray-500'
+                        }`}
+                      >
+                        {isCompleted ? <Check className="w-3.5 h-3.5" /> : step.id}
+                      </div>
+                      <span
+                        className={`text-xs mt-1 text-center leading-tight hidden sm:block ${
+                          isVisited ? 'text-gray-700' : 'text-gray-400'
+                        }`}
+                        style={{ maxWidth: '52px' }}
+                      >
+                        {t(step.nameKey)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </CardContent>
         </Card>

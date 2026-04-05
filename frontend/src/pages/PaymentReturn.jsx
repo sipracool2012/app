@@ -13,7 +13,10 @@ const PaymentReturn = () => {
 
   const applicationId = searchParams.get('application_id') || '';
   const amount = parseFloat(searchParams.get('amount') || '0');
+  const gateway = searchParams.get('gateway') || 'paypal'; // paypal | razorpay | tazapay
   const orderId = searchParams.get('token'); // PayPal appends ?token=ORDER_ID
+  const sessionId = searchParams.get('session_id'); // Tazapay
+  const razorpayTxId = searchParams.get('transaction_id'); // Razorpay (already verified)
   const cancelled = searchParams.get('cancelled') === '1';
 
   const [state, setState] = useState('loading'); // 'loading' | 'success' | 'failed'
@@ -27,6 +30,30 @@ const PaymentReturn = () => {
       setErrorMsg('Payment was cancelled. You can retry whenever you are ready.');
       return;
     }
+
+    if (gateway === 'razorpay') {
+      // Already verified inline — transaction_id passed in URL
+      if (razorpayTxId) {
+        setTransactionId(razorpayTxId);
+        setState('success');
+      } else {
+        setState('failed');
+        setErrorMsg('Payment verification data missing. Please contact support.');
+      }
+      return;
+    }
+
+    if (gateway === 'tazapay') {
+      if (!sessionId) {
+        setState('failed');
+        setErrorMsg('No Tazapay session found. Please retry from below.');
+        return;
+      }
+      verifyTazapay();
+      return;
+    }
+
+    // Default: PayPal
     if (!orderId) {
       setState('failed');
       setErrorMsg('No payment order found. Please retry from below.');
@@ -52,6 +79,28 @@ const PaymentReturn = () => {
 
       const result = await response.json();
       setTransactionId(result.transaction_id || '');
+      setState('success');
+    } catch (err) {
+      setErrorMsg(err.message || 'Payment could not be confirmed. Please retry or contact support.');
+      setState('failed');
+    }
+  };
+
+  const verifyTazapay = async () => {
+    setState('loading');
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/api/payment-gateways/tazapay/verify/${sessionId}?application_id=${encodeURIComponent(applicationId)}`,
+        { headers: getAuthHeaders() }
+      );
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.detail || 'Tazapay payment verification failed');
+      }
+
+      const result = await response.json();
+      setTransactionId(result.transaction_id || sessionId);
       setState('success');
     } catch (err) {
       setErrorMsg(err.message || 'Payment could not be confirmed. Please retry or contact support.');
@@ -131,7 +180,7 @@ const PaymentReturn = () => {
               <p className="text-2xl font-bold text-blue-600">{applicationId}</p>
               {transactionId && (
                 <p className="text-xs text-gray-500 mt-3">
-                  PayPal Transaction ID: <span className="font-mono">{transactionId}</span>
+                  Transaction ID: <span className="font-mono">{transactionId}</span>
                 </p>
               )}
               <p className="text-sm text-gray-600 mt-3">

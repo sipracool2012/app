@@ -1,0 +1,109 @@
+Field,Value
+visaId,us-business
+email,admin@clearevisa.com
+passportType,Ordinary
+portOfArrival,
+expectedArrivalDate,2026-04-30
+visaService,1 year Indian Business eVisa
+visaServiceSubtype,Sale/Purchase/Trade
+passportNumber,A123123123
+dateOfIssue,2026-03-30
+dateOfExpiry,2026-04-18
+otherPassportHeld,No
+yogaInstituteName,
+yogaInstituteAddress,
+yogaInstitutePhone,
+educationalQualification,
+givenNames,Rohit
+livedTwoYears,Yes
+qualificationFrom,USA SCHOOL
+religion,
+surname,Sinha Mahapatra
+visibleMarks,None
+country,
+houseNoStreet,"B1109, Venkatesh Graffiti Glover"
+phoneCountryCode,+1
+phoneNumber,8436005887
+postalCode,411036
+stateProvince,Maharashtra
+villageTownCity,Pune
+fatherCountryOfBirth,
+fatherName,Thomas Lines Ansell
+fatherNationality,
+fatherPlaceOfBirth,Leicester
+fatherPreviousNationality,
+maritalStatus,Single
+motherCountryOfBirth,
+motherName,Kathleen Fortay Drewery
+motherNationality,
+motherPlaceOfBirth,UNITED KINGDOM
+motherPreviousNationality,
+pakistanConnection,No
+spouseCountryOfBirth,
+spouseName,
+spouseNationality,
+spousePlaceOfBirth,
+spousePreviousNationality,
+designation,
+employerAddress,JAGANNATHPUR
+employerName,Sipras fashion
+employerPhone,09933698424
+militaryService,No
+pastOccupation,
+pastOccupationIfAny,
+presentOccupation,Government service
+citiesPreviouslyVisited,
+companyAddress,1 JAGANNATHPUR
+companyName,Clear eVisa Services
+companyPhoneCountryCode,+1
+companyPhoneNumber,9933698424
+companyWebsite,https://Test.com
+conferenceAddress,
+conferenceEndDate,
+conferenceName,
+conferenceStartDate,
+countriesVisitedLast10Years,India
+hotelBooked,No
+indianFirmAddress,"B1109, Venkatesh Graffiti Glover"
+indianFirmName,Sipra Satpathi
+indianFirmPhoneCountryCode,+91
+indianFirmPhoneNumber,8436005887
+indianFirmWebsite,https://Test.com
+lastIndianVisaNo,
+oldVisaIssueDate,
+oldVisaIssuePlace,
+oldVisaType,
+organizerAddress,
+organizerEmail,
+organizerName,
+organizerPhoneCountryCode,+91
+organizerPhoneNumber,
+placesToVisit,A
+placesToVisitLine2,
+previousAddress,
+visitedIndiaBefore,No
+visitedSAARCCountries,No
+homeReferenceAddress,"B1109, Venkatesh Graffiti Glover"
+homeReferenceName,Rohit Sinha Mahapatra
+homeReferencePhoneCountryCode,+1
+homeReferencePhoneNumber,8436005887
+indiaReferenceAddress,"B1109, Venkatesh Graffiti Glover"
+indiaReferenceName,Rohit Sinha Mahapatra
+indiaReferencePhoneCountryCode,+91
+indiaReferencePhoneNumber,8436005887
+applicationId,APP20260403141614
+arrestedConvicted,No
+arrestedConvictedReason,
+asylumSought,No
+asylumSoughtReason,
+cyberCrime,No
+cyberCrimeReason,
+humanTrafficking,No
+humanTraffickingReason,
+refusedEntry,No
+refusedEntryReason,
+terroristViews,No
+terroristViewsReason,
+payment_amount,190.5
+paypal_order_id,30386119SW208711W
+selectedVisaOption,"{'id': 'us-business', 'name': '1 year Indian Business eVisa', 'visa_type': 'business', 'duration': '1yr', 'price': 190.5, 'govt_fee': 140, 'our_fee': 47, 'processing_fee': 3.5, 'entries': 'Multiple', 'stay_duration': '180 days per visit', 'validity': '1 year', 'purpose': 'Business', 'approved_by': 'April 08', 'approval_days': 5}"
