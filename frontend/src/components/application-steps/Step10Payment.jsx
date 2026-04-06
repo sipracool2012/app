@@ -46,10 +46,12 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
   const [feeDisplayMode, setFeeDisplayMode] = useState('full_breakdown');
   const [declareTruth, setDeclareTruth] = useState(false);
   const [declareTerms, setDeclareTerms] = useState(false);
+  const [liveVisaOption, setLiveVisaOption] = useState(null);
 
   useEffect(() => {
     fetchEnabledGateways();
     fetchUtilitySettings();
+    fetchLiveFees();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -65,8 +67,25 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
     }
   };
 
-  // Fees come from selectedVisaOption stored in formData/draft (locked at application start)
-  const visaOption = data?.selectedVisaOption || null;
+  // Re-fetch the latest visa option fees from the API so the payment page always
+  // shows current pricing (admin may have updated fees since the draft was created).
+  const fetchLiveFees = async () => {
+    const visaId = data?.visaId || data?.selectedVisaOption?.id;
+    if (!visaId) return;
+    const countryCode = visaId.split('-')[0].toUpperCase();
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/countries/${countryCode}/visa-options`);
+      if (!res.ok) return;
+      const json = await res.json();
+      const found = (json.options || []).find(o => o.id === visaId);
+      if (found) setLiveVisaOption(found);
+    } catch {
+      // silently keep draft fees as fallback
+    }
+  };
+
+  // Use live fees (refreshed on mount) falling back to draft-locked fees
+  const visaOption = liveVisaOption || data?.selectedVisaOption || null;
   const govtFee = visaOption?.govt_fee ?? 0;
   const ourFee = visaOption?.our_fee ?? 0;
   const govtProcessingFee = visaOption?.processing_fee ?? (govtFee * 0.025);

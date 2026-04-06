@@ -6,6 +6,17 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-06] - Payment step syncs fees live from database on load
+
+### Changed
+- **Step 10 Payment — live fee refresh on mount** (`frontend/src/components/application-steps/Step10Payment.jsx`)
+  - Added `fetchLiveFees()` called in `useEffect` alongside the existing gateway and utility-settings fetches.
+  - Uses `data.visaId` (or `selectedVisaOption.id` as fallback) to call `GET /api/countries/{code}/visa-options` and find the matching option by ID.
+  - Introduces `liveVisaOption` state — when the fetch succeeds the fee breakdown (govt fee, our fee, processing fee, discount, total) is recalculated from the freshest DB values; if the fetch fails, the draft-locked `selectedVisaOption` fees are used as a silent fallback.
+  - Ensures that if an admin updates fees between when the user started filling the form and when they reach payment, the payment page always shows (and charges) the current pricing.
+
+---
+
 ## [2026-04-06] - "India (Visa) for (Country)" label on all application steps
 
 ### Added
