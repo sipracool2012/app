@@ -214,7 +214,8 @@ const VisaApplication = () => {
       const nextStep = currentStep + 1;
 
       // When moving to the Document Upload step (step 9), generate an application ID
-      if (nextStep === 9 && !updatedData.applicationId) {
+      // Also replace any TEMP ID with a real APP ID
+      if (nextStep === 9 && (!updatedData.applicationId || updatedData.applicationId.startsWith('TEMP'))) {
         try {
           const res = await fetch(`${BACKEND_URL}/api/applications/assign-id`, {
             method: 'POST',
