@@ -313,8 +313,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Partner Logos */}
-      <section className="bg-blue-50 py-12">
+      {/* Partner Logos — temporarily hidden */}
+      {/* <section className="bg-blue-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-blue-600 font-medium mb-8">{t('home.trustedByBrands')}</p>
           <div className="flex flex-wrap justify-center items-center gap-12">
@@ -328,7 +328,7 @@ const Home = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* How Clear eVisa Works */}
       <section className="py-20">

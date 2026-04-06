@@ -6,6 +6,38 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-06] - Hide partner logos section; fix Requirements country dropdown
+
+### Fixed
+- **Requirements page country dropdown empty** (`frontend/src/pages/Requirements.jsx`)
+  - `GET /api/countries/all` returns `country_code`, `country_name`, `flag_emoji` — page was incorrectly mapping `c.code`, `c.name`, `c.flag` (all `undefined`).
+  - Corrected mapping so all 193 countries now populate the searchable dropdown.
+
+### Changed
+- **Partner logos section hidden** (`frontend/src/pages/Home.jsx`)
+  - "Clear eVisa is trusted by the best travel brands" section (blue background with partner logo images) commented out temporarily.
+
+---
+
+## [2026-04-06] - Requirements page (/requirements)
+
+### Added
+- **`Requirements.jsx`** (`frontend/src/pages/Requirements.jsx`)
+  - New public page at `/requirements` — Sherpa-style visa requirement checker for India eVisa.
+  - **Left sidebar:** fixed Destination (India), searchable passport-country dropdown (all 193 countries), 6 travel-purpose buttons (Tourist, Business, Medical, Medical Attendant, Conference, Transit), "Check Requirements" CTA.
+  - **Status banner:** green "eVisa available" or orange "Embassy visa required" based on API response.
+  - **Visa options cards:** pulled live from `GET /api/countries/{code}/visa-options?purpose=` — shows name, price, entries, stay duration, validity, estimated approval date, and "Apply Now" button routing to `/visa/:visaId`.
+  - **Required Documents** checklist with info tooltips, per travel purpose.
+  - **Entry Requirements** tiles: passport validity, blank pages, entry type, minors rule.
+  - **How to Apply** 4-step timeline.
+  - **CTA banner:** "View All Visa Options" link back to Home with country pre-selected.
+  - URL query params supported: `/requirements?from=US&purpose=tourist` auto-triggers search on load.
+  - No new backend endpoint needed — reuses existing `/api/countries/all` and `/api/countries/{code}/visa-options`.
+
+- **`App.js`** — `/requirements` route updated from `<Home />` placeholder to `<Requirements />`.
+
+---
+
 ## [2026-04-06] - Added 9 missing countries; fixed seed_sample_countries() schema
 
 ### Added
