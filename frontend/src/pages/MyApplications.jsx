@@ -225,8 +225,13 @@ const MyApplications = () => {
                           </span>
                         </div>
                         <div className="text-sm text-gray-700">
-                          {app.visaService && (
-                            <p className="font-medium">{app.visaService}</p>
+                          {(app.visaOptionName || app.visaService) && (
+                            <p className="font-medium">
+                              {app.visaOptionName
+                                ? `India ${app.visaOptionName}${app.passportName ? ` for ${app.passportName}` : ''}`
+                                : app.visaService
+                              }
+                            </p>
                           )}
                           {(app.givenNames || app.surname) && (
                             <p className="text-gray-500">

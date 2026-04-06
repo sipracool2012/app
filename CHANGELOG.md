@@ -6,6 +6,21 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-06] - "India (Visa) for (Country)" label on My Applications cards
+
+### Changed
+- **`GET /api/applications/my-applications`** (`backend/routes/applications.py`)
+  - Added two new fields to every application record in the response:
+    - `visaOptionName` — resolved from `selectedVisaOption.name` stored in the draft/application document.
+    - `passportName` — the passport country name stored in the document.
+
+- **My Applications card title** (`frontend/src/pages/MyApplications.jsx`)
+  - Application cards now display `"India {visaOptionName} for {passportName}"` when `visaOptionName` is available, matching the format used on the application form steps and payment page.
+  - Falls back to the plain `visaService` string for older applications that predate the `selectedVisaOption` field.
+  - The `passportName` suffix is omitted if the field is empty (e.g. applications started before this change).
+
+---
+
 ## [2026-04-06] - Payment step syncs fees live from database on load
 
 ### Changed
