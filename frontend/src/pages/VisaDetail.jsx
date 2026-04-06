@@ -112,6 +112,7 @@ const VisaDetail = () => {
   const passportName = searchParams.get('passportName') || passportCode;
 
   const [visaOption, setVisaOption] = useState(null);
+  const [countryDemonym, setCountryDemonym] = useState('');
   const [loading, setLoading] = useState(true);
   const [travellers, setTravellers] = useState(1);
   const [feeDisplayMode, setFeeDisplayMode] = useState('full_breakdown');
@@ -140,6 +141,7 @@ const VisaDetail = () => {
           const data = await res.json();
           const option = (data.options || []).find(o => o.id === visaId);
           setVisaOption(option || null);
+          setCountryDemonym(data.country_demonym || '');
         }
       } catch (e) {
         console.error(e);
@@ -151,7 +153,7 @@ const VisaDetail = () => {
   }, [visaId]);
 
   const handleStartApplication = () => {
-    navigate(`/apply/${visaId}`, { state: { passportName } });
+    navigate(`/apply/${visaId}`, { state: { passportName, passportDemonym: countryDemonym } });
   };
 
   if (loading) {
@@ -172,7 +174,7 @@ const VisaDetail = () => {
   }
 
   const docs = REQUIRED_DOCS[visaOption.visa_type] || REQUIRED_DOCS.tourist;
-  const description = VISA_DESCRIPTION(visaOption, passportName);
+  const description = VISA_DESCRIPTION(visaOption, countryDemonym || passportName);
   const discount = parseFloat(visaOption.discount_amount) || 0;
   const basePrice = visaOption.price;
   const displayedUnitPrice =
@@ -187,9 +189,10 @@ const VisaDetail = () => {
   const totalOurFee = visaOption.our_fee * travellers;
   const totalDiscount = discount * travellers;
 
-  const headerTitle = passportName
-    ? `India ${visaOption.name} for ${passportName} Citizens`
-    : `India ${visaOption.name}`;
+  const displayDemonym = countryDemonym || passportName;
+  const headerTitle = displayDemonym
+    ? `${visaOption.name} for ${displayDemonym} Citizens`
+    : visaOption.name;
 
   return (
     <div className="min-h-screen bg-white">

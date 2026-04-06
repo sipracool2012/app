@@ -322,7 +322,7 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
           <h4 className="text-lg font-semibold mb-4">{t('forms.step10.feeBreakdown')}</h4>
           {visaOption && (
             <p className="text-sm text-blue-600 font-medium mb-4">
-              India {visaOption.name}{data?.passportName ? ` for ${data.passportName}` : ''}
+              {visaOption.name}{(data?.passportDemonym || data?.passportName) ? ` for ${data?.passportDemonym || data?.passportName} Citizens` : ''}
             </p>
           )}
           {feeDisplayMode === 'full_breakdown' && (

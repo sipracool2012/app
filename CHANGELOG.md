@@ -6,6 +6,38 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-07] - Demonym field added to countries; label format updated site-wide
+
+### Added
+- **`demonym` field on all 193 countries** (`backend/routes/countries.py` — `ALL_COUNTRIES`)
+  - Every country now has a `demonym` key (e.g. `"Albanian"`, `"French"`, `"Emirati"`).
+
+### Changed
+- **`GET /api/countries/enabled`**
+  - Response now includes a `demonym` field alongside `code`, `name`, and `flag`.
+- **`GET /api/countries/{code}/visa-options`**
+  - Response now includes `country_demonym` at the top level (alongside `country_name`), available for both the no-options and options-available responses.
+- **`GET /api/applications/my-applications`** (`backend/routes/applications.py`)
+  - Added `passportDemonym` field to each application record in the response (reads from the stored draft document).
+- **VisaDetail page** (`frontend/src/pages/VisaDetail.jsx`)
+  - Fetches `country_demonym` from the visa-options API on load, stored in `countryDemonym` state.
+  - Page header title changed from `"India {visaName} for {passportName} Citizens"` → `"{visaName} for {demonym} Citizens"` (drops "India" prefix, uses demonym).
+  - VISA_DESCRIPTION helper now uses demonym (e.g. `"Albanian passport holders"`).
+  - `handleStartApplication` passes `passportDemonym` alongside `passportName` in navigation state.
+- **VisaApplication page** (`frontend/src/pages/VisaApplication.jsx`)
+  - `formData` seeded with `passportDemonym` from `location.state?.passportDemonym` or draft on load.
+  - Blue subtitle on all 10 steps changed from `"India {visaName} for {passportName}"` → `"{visaName} for {demonym} Citizens"`.
+- **Step 10 Payment** (`frontend/src/components/application-steps/Step10Payment.jsx`)
+  - Label changed from `"India {visaName} for {passportName}"` → `"{visaName} for {demonym} Citizens"` using `passportDemonym` with fallback to `passportName`.
+- **My Applications cards** (`frontend/src/pages/MyApplications.jsx`)
+  - Card title changed from `"India {visaOptionName} for {passportName}"` → `"{visaOptionName} for {demonym} Citizens"` using `passportDemonym` with fallback to `passportName`.
+- **Home page Learn More section** (`frontend/src/pages/Home.jsx`)
+  - `getSelectedCountryDemonym()` helper added; used in learnMoreTitle and learnMoreSubtitle so they show e.g. `"Albanian"` instead of `"Albania"`.
+- **i18n strings** (`frontend/src/i18n/locales/en-US.json`, `en.json`)
+  - `learnMoreTitle`: updated from `"…for {{country}} passport holders"` → `"…for {{country}} citizens"`.
+
+---
+
 ## [2026-04-06] - "India (Visa) for (Country)" label on My Applications cards
 
 ### Changed

@@ -122,6 +122,12 @@ const Home = () => {
     return country ? country.name : '';
   };
 
+  // Get selected country demonym (falls back to name if not available)
+  const getSelectedCountryDemonym = () => {
+    const country = enabledCountries.find(c => c.code === selectedCountry);
+    return (country && country.demonym) ? country.demonym : getSelectedCountryName();
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
@@ -344,7 +350,7 @@ const Home = () => {
 
               {/* Section header */}
               <h2 className="text-3xl font-bold text-center text-gray-900 mb-3">
-                {t('home.learnMoreTitle', { visaName: oneYearTourist.name, country: getSelectedCountryName() })}
+                {t('home.learnMoreTitle', { visaName: oneYearTourist.name, country: getSelectedCountryDemonym() })}
               </h2>
               <div className="w-24 h-1 bg-blue-600 mx-auto mb-12 rounded-full"></div>
 
@@ -353,7 +359,7 @@ const Home = () => {
                 {/* Left — narrative content */}
                 <div className="space-y-4">
                   <h3 className="text-xl font-bold text-gray-900">
-                    {t('home.learnMoreSubtitle', { country: getSelectedCountryName() })}
+                    {t('home.learnMoreSubtitle', { country: getSelectedCountryDemonym() })}
                   </h3>
                   <p className="text-gray-600 leading-relaxed">{t('home.learnMorePara1')}</p>
                   <p className="text-gray-600 leading-relaxed">{t('home.learnMorePara2')}</p>

@@ -41,8 +41,8 @@ const VisaApplication = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
-  // Seed passportName from navigation state (passed from VisaDetail) or fall back to stored draft value
-  const [formData, setFormData] = useState({ visaId, passportName: location.state?.passportName || '' });
+  // Seed passportName and passportDemonym from navigation state (passed from VisaDetail) or fall back to stored draft value
+  const [formData, setFormData] = useState({ visaId, passportName: location.state?.passportName || '', passportDemonym: location.state?.passportDemonym || '' });
   const [draftLoaded, setDraftLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
@@ -105,8 +105,11 @@ const VisaApplication = () => {
               || draft.passportName
               || selectedVisaOption?.country_name
               || '';
+            const passportDemonym = location.state?.passportDemonym
+              || draft.passportDemonym
+              || '';
 
-            setFormData(prev => ({ ...prev, ...draft, visaId, selectedVisaOption, passportName }));
+            setFormData(prev => ({ ...prev, ...draft, visaId, selectedVisaOption, passportName, passportDemonym }));
             setCurrentStep(savedStep);
             toast({
               title: t('application.draftLoaded'),
@@ -330,7 +333,7 @@ const VisaApplication = () => {
                 </h2>
                 {formData.selectedVisaOption && (
                   <p className="text-sm text-blue-600 mt-0.5">
-                    India {formData.selectedVisaOption.name}{formData.passportName ? ` for ${formData.passportName}` : ''}
+                    {formData.selectedVisaOption.name}{(formData.passportDemonym || formData.passportName) ? ` for ${formData.passportDemonym || formData.passportName} Citizens` : ''}
                   </p>
                 )}
               </div>

@@ -228,7 +228,7 @@ const MyApplications = () => {
                           {(app.visaOptionName || app.visaService) && (
                             <p className="font-medium">
                               {app.visaOptionName
-                                ? `India ${app.visaOptionName}${app.passportName ? ` for ${app.passportName}` : ''}`
+                                ? `${app.visaOptionName}${(app.passportDemonym || app.passportName) ? ` for ${app.passportDemonym || app.passportName} Citizens` : ''}`
                                 : app.visaService
                               }
                             </p>

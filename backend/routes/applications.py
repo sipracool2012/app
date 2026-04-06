@@ -176,6 +176,7 @@ async def get_my_applications(user_id: str = Depends(get_current_user)):
             "visaServiceSubtype": app.get("visaServiceSubtype", ""),
             "visaOptionName": (app.get("selectedVisaOption") or {}).get("name", ""),
             "passportName": app.get("passportName", ""),
+            "passportDemonym": app.get("passportDemonym", ""),
             "surname": app.get("surname", ""),
             "givenNames": app.get("givenNames", ""),
             "email": app.get("email", ""),
