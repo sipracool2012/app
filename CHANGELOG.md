@@ -6,6 +6,23 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-06] - Learn More section on Home page (1-year Tourist eVisa)
+
+### Added
+- **"Learn more" info section** (`frontend/src/pages/Home.jsx`)
+  - Appears directly after the (hidden) partner logos block, before "How Clear eVisa Works".
+  - Only renders when a country is selected **and** the visa options include a `1 year` / `Tourism` eVisa — hidden completely otherwise.
+  - **Title:** `"Learn more: {visaName} for {Country} passport holders"` with a blue accent underline, matching Sherpa layout.
+  - **Two-column layout:**
+    - Left: "Everything you need to know for {Country} citizens" narrative (4 paragraphs covering stay limits, eVisa process, flight boarding rules, airport/seaport entry).
+    - Right: Quick Summary bullets (purpose, max stay duration, email delivery, 5-day submission lead time) + "What do I need to apply?" with required-for-purchase and can-add-later document checklists + "Apply Now" button wired to the 1-year tourist visa.
+  - **3 FAQ blocks** below the two-column layout, dynamically populated from live visa data (`stay_duration`, `validity`, `name`).
+  - Visa lookup uses regex matching (`/1\s*year/i` on `validity`, `/tourism/i` on `purpose`) so it works regardless of exact name casing.
+  - All strings added to `en-US.json` and `en.json` translation files (`learnMoreTitle`, `learnMoreSubtitle`, `learnMorePara1–4`, `quickSummary`, `summaryPurpose/Stay/Email/Submit`, `whatDoINeedTitle`, `requiredForPurchase/Later`, `requirementAccommodation/Passport/Headshot`, `faq1–3Title/Ans`).
+  - `CheckCircle2` icon imported from `lucide-react`.
+
+---
+
 ## [2026-04-06] - Hide partner logos section; fix Requirements country dropdown
 
 ### Fixed
