@@ -302,7 +302,9 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
         <CardContent className="p-6">
           <h4 className="text-lg font-semibold mb-4">{t('forms.step10.feeBreakdown')}</h4>
           {visaOption && (
-            <p className="text-sm text-gray-500 mb-3">{visaOption.name}</p>
+            <p className="text-sm text-blue-600 font-medium mb-4">
+              India {visaOption.name}{data?.passportName ? ` for ${data.passportName}` : ''}
+            </p>
           )}
           {feeDisplayMode === 'full_breakdown' && (
             <div className="space-y-3">

@@ -41,7 +41,8 @@ const VisaApplication = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({ visaId });
+  // Seed passportName from navigation state (passed from VisaDetail) or fall back to stored draft value
+  const [formData, setFormData] = useState({ visaId, passportName: location.state?.passportName || '' });
   const [draftLoaded, setDraftLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
@@ -99,7 +100,13 @@ const VisaApplication = () => {
               selectedVisaOption = await fetchVisaOption(visaId);
             }
 
-            setFormData(prev => ({ ...prev, ...draft, visaId, selectedVisaOption }));
+            // Prefer passportName from nav state; fall back to draft value or country_name on visa option
+            const passportName = location.state?.passportName
+              || draft.passportName
+              || selectedVisaOption?.country_name
+              || '';
+
+            setFormData(prev => ({ ...prev, ...draft, visaId, selectedVisaOption, passportName }));
             setCurrentStep(savedStep);
             toast({
               title: t('application.draftLoaded'),
@@ -111,11 +118,13 @@ const VisaApplication = () => {
             setShowConflict(true);
             // Prepare fresh form for the new visa in the background
             const selectedVisaOption = await fetchVisaOption(visaId);
-            setFormData(prev => ({ ...prev, visaId, selectedVisaOption }));
+            const passportName = location.state?.passportName || selectedVisaOption?.country_name || '';
+            setFormData(prev => ({ ...prev, visaId, selectedVisaOption, passportName }));
           } else {
             // No drafts at all — fresh start
             const selectedVisaOption = await fetchVisaOption(visaId);
-            setFormData(prev => ({ ...prev, visaId, selectedVisaOption }));
+            const passportName = location.state?.passportName || selectedVisaOption?.country_name || '';
+            setFormData(prev => ({ ...prev, visaId, selectedVisaOption, passportName }));
           }
         }
       } catch (err) {
@@ -315,9 +324,16 @@ const VisaApplication = () => {
         <Card className="mb-6" data-testid="progress-card">
           <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-semibold text-gray-900">
-                {t('application.step', { current: currentStep, total: steps.length })}: {t(steps[currentStep - 1].nameKey)}
-              </h2>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  {t('application.step', { current: currentStep, total: steps.length })}: {t(steps[currentStep - 1].nameKey)}
+                </h2>
+                {formData.selectedVisaOption && (
+                  <p className="text-sm text-blue-600 mt-0.5">
+                    India {formData.selectedVisaOption.name}{formData.passportName ? ` for ${formData.passportName}` : ''}
+                  </p>
+                )}
+              </div>
               <div className="flex items-center gap-3">
                 {saving && (
                   <span className="text-xs text-blue-600 flex items-center gap-1" data-testid="saving-indicator">

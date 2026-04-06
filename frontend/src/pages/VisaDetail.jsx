@@ -151,7 +151,7 @@ const VisaDetail = () => {
   }, [visaId]);
 
   const handleStartApplication = () => {
-    navigate(`/apply/${visaId}`);
+    navigate(`/apply/${visaId}`, { state: { passportName } });
   };
 
   if (loading) {

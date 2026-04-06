@@ -6,6 +6,35 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-06] - "India (Visa) for (Country)" label on all application steps
+
+### Added
+- **Visa + passport country subtitle on every step** (`frontend/src/pages/VisaApplication.jsx`)
+  - A blue subtitle `"India {visaName} for {passportName}"` now appears below the step name in the progress card header on all 10 steps.
+  - Hidden if `selectedVisaOption` is not yet resolved.
+
+### Changed
+- **`passportName` stored in `formData` and persisted to draft** (`frontend/src/pages/VisaApplication.jsx`)
+  - `passportName` is seeded from `location.state.passportName` (passed by `VisaDetail`) on fresh starts.
+  - All three draft-load paths (existing draft, conflict modal background, fresh) resolve `passportName` — preferring nav state, then draft's stored value, then `selectedVisaOption.country_name` as fallback.
+- **`VisaDetail.jsx` — pass `passportName` to application form**
+  - `handleStartApplication` now navigates to `/apply/{visaId}` with `{ state: { passportName } }` so the name survives into the form without re-fetching.
+- **Step 10 Payment fee breakdown label** (`frontend/src/components/application-steps/Step10Payment.jsx`)
+  - Replaced the plain grey `visaOption.name` text before the fee table with a styled blue `"India {visaName} for {passportName}"` label, consistent with other steps.
+
+---
+
+## [2026-04-06] - TEMP Application ID replaced by APP ID at Document Upload step
+
+### Fixed
+- **TEMP ID never replaced** (`frontend/src/pages/VisaApplication.jsx`, `backend/routes/applications.py`)
+  - Drafts receive a `TEMP{timestamp}` ID on first save; the frontend condition `!applicationId` meant `assign-id` was never called when a TEMP ID already existed.
+  - **Frontend:** condition changed to `!applicationId || applicationId.startsWith('TEMP')` so `assign-id` is always triggered on entering step 9 with a TEMP ID.
+  - **Backend `POST /api/applications/assign-id`:** now detects TEMP IDs (`startswith("TEMP")`), generates a proper `APP{timestamp}` ID, updates the DB record, renames `uploads/TEMP…/` folder to `uploads/APP…/`, and renames any files inside that folder that carry the old TEMP prefix.
+  - Upload folder and all uploaded file names now consistently use the `APP…` prefix from step 9 onwards.
+
+---
+
 ## [2026-04-06] - Learn More section on Home page (1-year Tourist eVisa)
 
 ### Added
