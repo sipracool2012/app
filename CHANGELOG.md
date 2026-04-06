@@ -6,6 +6,22 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-06] - Added 9 missing countries; fixed seed_sample_countries() schema
+
+### Added
+- **9 missing countries added to `ALL_COUNTRIES`** (`backend/routes/countries.py`)
+  - Cayman Islands (KY), Cook Islands (CK), Gibraltar (GI), Guernsey (GG), Isle of Man (IM), Jersey (JE), Montserrat (MS), Niue (NU), Turks and Caicos Islands (TC).
+  - Source: `Etourist_fee_final.csv` government fee sheet (175 country rows cross-referenced against existing list).
+
+### Fixed
+- **`seed_sample_countries()` schema updated** (`backend/routes/countries.py`)
+  - Removed stale fields: `payment_fee`, `processing_fee` (flat), `tourist_30d_govt_fee` (single non-seasonal).
+  - Added `base_doc()` helper closure — all 35+ current schema fields default to `0.0` / `False`; sample countries only override what they enable.
+  - Added missing fields per sample country: `tourist_30d_govt_fee_apr_jun` / `tourist_30d_govt_fee_jul_mar` (seasonal split), `_our_fee` per visa type, `conference_*`, `medical_attendant_*`, `transit_*`, `discount_amount`.
+  - Govt fees aligned to CSV values: US 5yr = $160, GB 5yr = $484, CA 5yr = $200.
+
+---
+
 ## [2026-04-05] - Fix: with_discount mode shows only total, no line items
 
 ### Fixed
