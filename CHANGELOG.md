@@ -6,6 +6,10 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-07] - Refund Policy page added at /refund-policy
+- Created `frontend/src/pages/RefundPolicy.jsx` with content adapted from indiasevisa.org/refund, styled to match the ClearEVisa theme
+- Registered `/refund-policy` route in `App.js`
+
 ## [2026-04-07] - Demonym field added to countries; label format updated site-wide
 
 ### Added

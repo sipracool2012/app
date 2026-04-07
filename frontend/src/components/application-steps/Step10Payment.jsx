@@ -465,7 +465,7 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
               <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">terms and conditions</a>,{' '}
               <a href="/refund-policy" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">refund policy</a>{' '}
               and{' '}
-              <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">privacy policy</a>.
+              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">privacy policy</a>.
             </span>
           </label>
         </CardContent>

@@ -22,6 +22,7 @@ import ContactUs from "./pages/ContactUs";
 import FAQ from "./pages/FAQ";
 import TermsOfService from "./pages/TermsOfService";
 import CookiePolicy from "./pages/CookiePolicy";
+import RefundPolicy from "./pages/RefundPolicy";
 import VisaDetail from "./pages/VisaDetail";
 import Requirements from "./pages/Requirements";
 import { Toaster } from "./components/ui/toaster";
@@ -87,6 +88,7 @@ function App() {
             <Route path="/faq" element={<FAQ />} />
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/cookies" element={<CookiePolicy />} />
+            <Route path="/refund-policy" element={<RefundPolicy />} />
           </Routes>
           <Footer />
           <Toaster />
