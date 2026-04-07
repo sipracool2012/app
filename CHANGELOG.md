@@ -6,6 +6,12 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-07] - Transactions tab added to Admin Panel (super admin only)
+- Backend: all 3 payment gateways (PayPal, Razorpay, Tazapay) now record a document in the `payments` MongoDB collection on successful payment
+- Backend: new `GET /api/payment-gateways/transactions` endpoint (super_admin only) with filters: gateway, date range, full-text search, pagination
+- Frontend: new `TransactionsPanel.jsx` component with summary cards, filter bar, paginated table
+- Frontend: "Transactions" tab added to Admin Panel, visible to super_admin only (grid-cols updated to 7)
+
 ## [2026-04-07] - Refund Policy page added at /refund-policy
 - Created `frontend/src/pages/RefundPolicy.jsx` with content adapted from indiasevisa.org/refund, styled to match the ClearEVisa theme
 - Registered `/refund-policy` route in `App.js`

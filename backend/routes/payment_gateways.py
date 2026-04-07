@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, Query
+from typing import Optional
 from models.payment_gateway_config import (
     PaymentGatewayConfig,
     PaymentGatewayConfigUpdate,
@@ -63,6 +64,29 @@ load_dotenv(ROOT_DIR / '.env')
 MONGO_URL = os.environ.get('MONGO_URL')
 client = AsyncIOMotorClient(MONGO_URL)
 db = client[os.environ.get('DB_NAME')]
+
+
+async def _record_transaction(
+    application_id: str,
+    gateway: str,
+    transaction_id: str,
+    amount: float,
+    currency: str = "USD",
+):
+    """Insert a record into the payments collection."""
+    app = await db.applications.find_one({"applicationId": application_id})
+    email = app.get("email", "") if app else ""
+    await db.payments.insert_one({
+        "application_id": application_id,
+        "email": email,
+        "amount": amount,
+        "currency": currency,
+        "gateway": gateway,
+        "transaction_id": transaction_id,
+        "status": "success",
+        "created_at": datetime.utcnow(),
+    })
+
 
 @router.get("/config", response_model=PaymentGatewayConfigResponse)
 async def get_payment_gateway_config(current_user_id: str = Depends(get_current_user)):
@@ -372,6 +396,10 @@ async def paypal_capture_order(
         transaction_id = capture["purchase_units"][0]["payments"]["captures"][0]["id"]
 
         # Mark application as submitted + record transaction
+        capture_amount = float(
+            capture["purchase_units"][0]["payments"]["captures"][0]["amount"]["value"]
+        )
+        capture_currency = capture["purchase_units"][0]["payments"]["captures"][0]["amount"]["currency_code"]
         await db.applications.update_one(
             {"applicationId": req.application_id},
             {"$set": {
@@ -381,6 +409,7 @@ async def paypal_capture_order(
                 "updatedAt": datetime.utcnow()
             }}
         )
+        await _record_transaction(req.application_id, "paypal", transaction_id, capture_amount, capture_currency)
 
         return {"success": True, "transaction_id": transaction_id, "status": "COMPLETED"}
 
@@ -461,6 +490,8 @@ async def razorpay_verify_payment(
     if not hmac.compare_digest(expected, req.signature):
         raise HTTPException(status_code=400, detail="Invalid payment signature")
 
+    app_doc = await db.applications.find_one({"applicationId": req.application_id})
+    pay_amount = float(app_doc.get("payment_amount", 0)) if app_doc else 0.0
     await db.applications.update_one(
         {"applicationId": req.application_id},
         {"$set": {
@@ -470,6 +501,7 @@ async def razorpay_verify_payment(
             "updatedAt": datetime.utcnow(),
         }}
     )
+    await _record_transaction(req.application_id, "razorpay", req.payment_id, pay_amount)
 
     return {"success": True, "transaction_id": req.payment_id}
 
@@ -556,6 +588,8 @@ async def tazapay_verify(
         if payment_status not in ("success", "completed", "paid"):
             raise HTTPException(status_code=400, detail=f"Payment not completed: {payment_status}")
 
+        app_doc = await db.applications.find_one({"applicationId": application_id})
+        pay_amount = float(app_doc.get("payment_amount", 0)) if app_doc else 0.0
         await db.applications.update_one(
             {"applicationId": application_id},
             {"$set": {
@@ -564,6 +598,7 @@ async def tazapay_verify(
                 "updatedAt": datetime.utcnow(),
             }}
         )
+        await _record_transaction(application_id, "tazapay", session_id, pay_amount)
 
         return {"success": True, "transaction_id": session_id}
 
@@ -575,3 +610,61 @@ async def tazapay_verify(
     except Exception as e:
         logger.exception("Tazapay verify unexpected error")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ─── Transactions (super_admin only) ───────────────────────────────────────────
+
+@router.get("/transactions")
+async def list_transactions(
+    current_user_id: str = Depends(get_current_user),
+    gateway: Optional[str] = Query(None),
+    date_from: Optional[str] = Query(None),   # YYYY-MM-DD
+    date_to: Optional[str] = Query(None),     # YYYY-MM-DD
+    search: Optional[str] = Query(None),      # application_id or email
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=200),
+):
+    """List payment transactions (super_admin only)."""
+    user = await db.users.find_one({"_id": ObjectId(current_user_id)})
+    if not user or user.get("role") != "super_admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Super admin access required")
+
+    query: dict = {}
+    if gateway and gateway != "all":
+        query["gateway"] = gateway
+    if date_from or date_to:
+        dt_filter = {}
+        if date_from:
+            dt_filter["$gte"] = datetime.strptime(date_from, "%Y-%m-%d")
+        if date_to:
+            from datetime import timedelta
+            dt_filter["$lt"] = datetime.strptime(date_to, "%Y-%m-%d") + timedelta(days=1)
+        query["created_at"] = dt_filter
+    if search:
+        safe = search.replace("(", "\\(").replace(")", "\\)")
+        query["$or"] = [
+            {"application_id": {"$regex": safe, "$options": "i"}},
+            {"email": {"$regex": safe, "$options": "i"}},
+            {"transaction_id": {"$regex": safe, "$options": "i"}},
+        ]
+
+    total = await db.payments.count_documents(query)
+    skip = (page - 1) * limit
+    cursor = db.payments.find(query).sort("created_at", -1).skip(skip).limit(limit)
+    docs = await cursor.to_list(length=limit)
+
+    transactions = []
+    for doc in docs:
+        transactions.append({
+            "id": str(doc["_id"]),
+            "application_id": doc.get("application_id", ""),
+            "email": doc.get("email", ""),
+            "amount": doc.get("amount", 0),
+            "currency": doc.get("currency", "USD"),
+            "gateway": doc.get("gateway", ""),
+            "transaction_id": doc.get("transaction_id", ""),
+            "status": doc.get("status", ""),
+            "created_at": doc.get("created_at", "").isoformat() if doc.get("created_at") else "",
+        })
+
+    return {"transactions": transactions, "total": total, "page": page, "limit": limit}
