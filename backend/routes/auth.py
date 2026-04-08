@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-from models.user import UserCreate, UserLogin, UserResponse, TokenResponse, User, UserRoleUpdate, OTPVerifyRequest, LoginInitiateResponse, SignupOTPVerifyRequest
+from models.user import UserCreate, UserLogin, UserResponse, TokenResponse, User, UserRoleUpdate, UserEmailRoleUpdate, OTPVerifyRequest, LoginInitiateResponse, SignupOTPVerifyRequest
 from utils.auth import get_password_hash, verify_password, create_access_token, get_current_user
 from datetime import datetime, timedelta
 from typing import List
@@ -344,9 +344,9 @@ async def get_all_users(current_user_id: str = Depends(get_current_user)):
             detail="Not authorized to access this resource"
         )
     
-    # Get all users
+    # Get only admin and super_admin users
     users = []
-    async for user in db.users.find():
+    async for user in db.users.find({"role": {"$in": ["admin", "super_admin"]}}):
         users.append(UserResponse(
             id=str(user["_id"]),
             fullName=user["fullName"],
@@ -402,6 +402,49 @@ async def update_user_role(
     # Get updated user
     updated_user = await db.users.find_one({"_id": ObjectId(user_id)})
     
+    return UserResponse(
+        id=str(updated_user["_id"]),
+        fullName=updated_user["fullName"],
+        email=updated_user["email"],
+        role=updated_user["role"]
+    )
+
+@router.patch("/users/promote", response_model=UserResponse)
+async def promote_user_by_email(
+    data: UserEmailRoleUpdate,
+    current_user_id: str = Depends(get_current_user)
+):
+    """
+    Promote/update a user's role by email address (super_admin only).
+    """
+    from bson import ObjectId
+
+    current_user = await db.users.find_one({"_id": ObjectId(current_user_id)})
+    if not current_user or current_user.get("role") != "super_admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only super admins can update user roles"
+        )
+
+    if data.role not in ["admin", "super_admin"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Role must be 'admin' or 'super_admin'"
+        )
+
+    target_user = await db.users.find_one({"email": data.email})
+    if not target_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No user found with that email address"
+        )
+
+    await db.users.update_one(
+        {"_id": target_user["_id"]},
+        {"$set": {"role": data.role, "updatedAt": datetime.utcnow()}}
+    )
+
+    updated_user = await db.users.find_one({"_id": target_user["_id"]})
     return UserResponse(
         id=str(updated_user["_id"]),
         fullName=updated_user["fullName"],

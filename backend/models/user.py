@@ -31,6 +31,11 @@ class UserRoleUpdate(BaseModel):
     role: str  # user, admin, super_admin
 
 
+class UserEmailRoleUpdate(BaseModel):
+    email: EmailStr
+    role: str  # admin or super_admin
+
+
 class OTPVerifyRequest(BaseModel):
     """Request body for /api/auth/verify-otp."""
     email: EmailStr

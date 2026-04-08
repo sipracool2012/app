@@ -6,6 +6,13 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-08] - User Management: show only admins, add promote-by-email form
+- Backend: `GET /api/auth/users` now returns only `admin` and `super_admin` users (excludes regular users)
+- Backend: new `PATCH /api/auth/users/promote` endpoint — accepts `{email, role}` to promote any user to admin/super_admin by email (super_admin only)
+- Backend: added `UserEmailRoleUpdate` Pydantic model in `models/user.py`
+- Frontend: User Management page now lists only admins and super admins
+- Frontend: added "Assign Admin Role" form — enter a user's email, select Admin or Super Admin, click Save to apply the role and return to the user list
+
 ## [2026-04-07] - Transactions tab added to Admin Panel (super admin only)
 - Backend: all 3 payment gateways (PayPal, Razorpay, Tazapay) now record a document in the `payments` MongoDB collection on successful payment
 - Backend: new `GET /api/payment-gateways/transactions` endpoint (super_admin only) with filters: gateway, date range, full-text search, pagination
