@@ -6,6 +6,290 @@ Format: `## [Date] - Description`
 
 ---
 
+## [2026-04-07] - Transactions tab added to Admin Panel (super admin only)
+- Backend: all 3 payment gateways (PayPal, Razorpay, Tazapay) now record a document in the `payments` MongoDB collection on successful payment
+- Backend: new `GET /api/payment-gateways/transactions` endpoint (super_admin only) with filters: gateway, date range, full-text search, pagination
+- Frontend: new `TransactionsPanel.jsx` component with summary cards, filter bar, paginated table
+- Frontend: "Transactions" tab added to Admin Panel, visible to super_admin only (grid-cols updated to 7)
+
+## [2026-04-07] - Refund Policy page added at /refund-policy
+- Created `frontend/src/pages/RefundPolicy.jsx` with content adapted from indiasevisa.org/refund, styled to match the ClearEVisa theme
+- Registered `/refund-policy` route in `App.js`
+
+## [2026-04-07] - Demonym field added to countries; label format updated site-wide
+
+### Added
+- **`demonym` field on all 193 countries** (`backend/routes/countries.py` — `ALL_COUNTRIES`)
+  - Every country now has a `demonym` key (e.g. `"Albanian"`, `"French"`, `"Emirati"`).
+
+### Changed
+- **`GET /api/countries/enabled`**
+  - Response now includes a `demonym` field alongside `code`, `name`, and `flag`.
+- **`GET /api/countries/{code}/visa-options`**
+  - Response now includes `country_demonym` at the top level (alongside `country_name`), available for both the no-options and options-available responses.
+- **`GET /api/applications/my-applications`** (`backend/routes/applications.py`)
+  - Added `passportDemonym` field to each application record in the response (reads from the stored draft document).
+- **VisaDetail page** (`frontend/src/pages/VisaDetail.jsx`)
+  - Fetches `country_demonym` from the visa-options API on load, stored in `countryDemonym` state.
+  - Page header title changed from `"India {visaName} for {passportName} Citizens"` → `"{visaName} for {demonym} Citizens"` (drops "India" prefix, uses demonym).
+  - VISA_DESCRIPTION helper now uses demonym (e.g. `"Albanian passport holders"`).
+  - `handleStartApplication` passes `passportDemonym` alongside `passportName` in navigation state.
+- **VisaApplication page** (`frontend/src/pages/VisaApplication.jsx`)
+  - `formData` seeded with `passportDemonym` from `location.state?.passportDemonym` or draft on load.
+  - Blue subtitle on all 10 steps changed from `"India {visaName} for {passportName}"` → `"{visaName} for {demonym} Citizens"`.
+- **Step 10 Payment** (`frontend/src/components/application-steps/Step10Payment.jsx`)
+  - Label changed from `"India {visaName} for {passportName}"` → `"{visaName} for {demonym} Citizens"` using `passportDemonym` with fallback to `passportName`.
+- **My Applications cards** (`frontend/src/pages/MyApplications.jsx`)
+  - Card title changed from `"India {visaOptionName} for {passportName}"` → `"{visaOptionName} for {demonym} Citizens"` using `passportDemonym` with fallback to `passportName`.
+- **Home page Learn More section** (`frontend/src/pages/Home.jsx`)
+  - `getSelectedCountryDemonym()` helper added; used in learnMoreTitle and learnMoreSubtitle so they show e.g. `"Albanian"` instead of `"Albania"`.
+- **i18n strings** (`frontend/src/i18n/locales/en-US.json`, `en.json`)
+  - `learnMoreTitle`: updated from `"…for {{country}} passport holders"` → `"…for {{country}} citizens"`.
+
+---
+
+## [2026-04-06] - "India (Visa) for (Country)" label on My Applications cards
+
+### Changed
+- **`GET /api/applications/my-applications`** (`backend/routes/applications.py`)
+  - Added two new fields to every application record in the response:
+    - `visaOptionName` — resolved from `selectedVisaOption.name` stored in the draft/application document.
+    - `passportName` — the passport country name stored in the document.
+
+- **My Applications card title** (`frontend/src/pages/MyApplications.jsx`)
+  - Application cards now display `"India {visaOptionName} for {passportName}"` when `visaOptionName` is available, matching the format used on the application form steps and payment page.
+  - Falls back to the plain `visaService` string for older applications that predate the `selectedVisaOption` field.
+  - The `passportName` suffix is omitted if the field is empty (e.g. applications started before this change).
+
+---
+
+## [2026-04-06] - Payment step syncs fees live from database on load
+
+### Changed
+- **Step 10 Payment — live fee refresh on mount** (`frontend/src/components/application-steps/Step10Payment.jsx`)
+  - Added `fetchLiveFees()` called in `useEffect` alongside the existing gateway and utility-settings fetches.
+  - Uses `data.visaId` (or `selectedVisaOption.id` as fallback) to call `GET /api/countries/{code}/visa-options` and find the matching option by ID.
+  - Introduces `liveVisaOption` state — when the fetch succeeds the fee breakdown (govt fee, our fee, processing fee, discount, total) is recalculated from the freshest DB values; if the fetch fails, the draft-locked `selectedVisaOption` fees are used as a silent fallback.
+  - Ensures that if an admin updates fees between when the user started filling the form and when they reach payment, the payment page always shows (and charges) the current pricing.
+
+---
+
+## [2026-04-06] - "India (Visa) for (Country)" label on all application steps
+
+### Added
+- **Visa + passport country subtitle on every step** (`frontend/src/pages/VisaApplication.jsx`)
+  - A blue subtitle `"India {visaName} for {passportName}"` now appears below the step name in the progress card header on all 10 steps.
+  - Hidden if `selectedVisaOption` is not yet resolved.
+
+### Changed
+- **`passportName` stored in `formData` and persisted to draft** (`frontend/src/pages/VisaApplication.jsx`)
+  - `passportName` is seeded from `location.state.passportName` (passed by `VisaDetail`) on fresh starts.
+  - All three draft-load paths (existing draft, conflict modal background, fresh) resolve `passportName` — preferring nav state, then draft's stored value, then `selectedVisaOption.country_name` as fallback.
+- **`VisaDetail.jsx` — pass `passportName` to application form**
+  - `handleStartApplication` now navigates to `/apply/{visaId}` with `{ state: { passportName } }` so the name survives into the form without re-fetching.
+- **Step 10 Payment fee breakdown label** (`frontend/src/components/application-steps/Step10Payment.jsx`)
+  - Replaced the plain grey `visaOption.name` text before the fee table with a styled blue `"India {visaName} for {passportName}"` label, consistent with other steps.
+
+---
+
+## [2026-04-06] - TEMP Application ID replaced by APP ID at Document Upload step
+
+### Fixed
+- **TEMP ID never replaced** (`frontend/src/pages/VisaApplication.jsx`, `backend/routes/applications.py`)
+  - Drafts receive a `TEMP{timestamp}` ID on first save; the frontend condition `!applicationId` meant `assign-id` was never called when a TEMP ID already existed.
+  - **Frontend:** condition changed to `!applicationId || applicationId.startsWith('TEMP')` so `assign-id` is always triggered on entering step 9 with a TEMP ID.
+  - **Backend `POST /api/applications/assign-id`:** now detects TEMP IDs (`startswith("TEMP")`), generates a proper `APP{timestamp}` ID, updates the DB record, renames `uploads/TEMP…/` folder to `uploads/APP…/`, and renames any files inside that folder that carry the old TEMP prefix.
+  - Upload folder and all uploaded file names now consistently use the `APP…` prefix from step 9 onwards.
+
+---
+
+## [2026-04-06] - Learn More section on Home page (1-year Tourist eVisa)
+
+### Added
+- **"Learn more" info section** (`frontend/src/pages/Home.jsx`)
+  - Appears directly after the (hidden) partner logos block, before "How Clear eVisa Works".
+  - Only renders when a country is selected **and** the visa options include a `1 year` / `Tourism` eVisa — hidden completely otherwise.
+  - **Title:** `"Learn more: {visaName} for {Country} passport holders"` with a blue accent underline, matching Sherpa layout.
+  - **Two-column layout:**
+    - Left: "Everything you need to know for {Country} citizens" narrative (4 paragraphs covering stay limits, eVisa process, flight boarding rules, airport/seaport entry).
+    - Right: Quick Summary bullets (purpose, max stay duration, email delivery, 5-day submission lead time) + "What do I need to apply?" with required-for-purchase and can-add-later document checklists + "Apply Now" button wired to the 1-year tourist visa.
+  - **3 FAQ blocks** below the two-column layout, dynamically populated from live visa data (`stay_duration`, `validity`, `name`).
+  - Visa lookup uses regex matching (`/1\s*year/i` on `validity`, `/tourism/i` on `purpose`) so it works regardless of exact name casing.
+  - All strings added to `en-US.json` and `en.json` translation files (`learnMoreTitle`, `learnMoreSubtitle`, `learnMorePara1–4`, `quickSummary`, `summaryPurpose/Stay/Email/Submit`, `whatDoINeedTitle`, `requiredForPurchase/Later`, `requirementAccommodation/Passport/Headshot`, `faq1–3Title/Ans`).
+  - `CheckCircle2` icon imported from `lucide-react`.
+
+---
+
+## [2026-04-06] - Hide partner logos section; fix Requirements country dropdown
+
+### Fixed
+- **Requirements page country dropdown empty** (`frontend/src/pages/Requirements.jsx`)
+  - `GET /api/countries/all` returns `country_code`, `country_name`, `flag_emoji` — page was incorrectly mapping `c.code`, `c.name`, `c.flag` (all `undefined`).
+  - Corrected mapping so all 193 countries now populate the searchable dropdown.
+
+### Changed
+- **Partner logos section hidden** (`frontend/src/pages/Home.jsx`)
+  - "Clear eVisa is trusted by the best travel brands" section (blue background with partner logo images) commented out temporarily.
+
+---
+
+## [2026-04-06] - Requirements page (/requirements)
+
+### Added
+- **`Requirements.jsx`** (`frontend/src/pages/Requirements.jsx`)
+  - New public page at `/requirements` — Sherpa-style visa requirement checker for India eVisa.
+  - **Left sidebar:** fixed Destination (India), searchable passport-country dropdown (all 193 countries), 6 travel-purpose buttons (Tourist, Business, Medical, Medical Attendant, Conference, Transit), "Check Requirements" CTA.
+  - **Status banner:** green "eVisa available" or orange "Embassy visa required" based on API response.
+  - **Visa options cards:** pulled live from `GET /api/countries/{code}/visa-options?purpose=` — shows name, price, entries, stay duration, validity, estimated approval date, and "Apply Now" button routing to `/visa/:visaId`.
+  - **Required Documents** checklist with info tooltips, per travel purpose.
+  - **Entry Requirements** tiles: passport validity, blank pages, entry type, minors rule.
+  - **How to Apply** 4-step timeline.
+  - **CTA banner:** "View All Visa Options" link back to Home with country pre-selected.
+  - URL query params supported: `/requirements?from=US&purpose=tourist` auto-triggers search on load.
+  - No new backend endpoint needed — reuses existing `/api/countries/all` and `/api/countries/{code}/visa-options`.
+
+- **`App.js`** — `/requirements` route updated from `<Home />` placeholder to `<Requirements />`.
+
+---
+
+## [2026-04-06] - Added 9 missing countries; fixed seed_sample_countries() schema
+
+### Added
+- **9 missing countries added to `ALL_COUNTRIES`** (`backend/routes/countries.py`)
+  - Cayman Islands (KY), Cook Islands (CK), Gibraltar (GI), Guernsey (GG), Isle of Man (IM), Jersey (JE), Montserrat (MS), Niue (NU), Turks and Caicos Islands (TC).
+  - Source: `Etourist_fee_final.csv` government fee sheet (175 country rows cross-referenced against existing list).
+
+### Fixed
+- **`seed_sample_countries()` schema updated** (`backend/routes/countries.py`)
+  - Removed stale fields: `payment_fee`, `processing_fee` (flat), `tourist_30d_govt_fee` (single non-seasonal).
+  - Added `base_doc()` helper closure — all 35+ current schema fields default to `0.0` / `False`; sample countries only override what they enable.
+  - Added missing fields per sample country: `tourist_30d_govt_fee_apr_jun` / `tourist_30d_govt_fee_jul_mar` (seasonal split), `_our_fee` per visa type, `conference_*`, `medical_attendant_*`, `transit_*`, `discount_amount`.
+  - Govt fees aligned to CSV values: US 5yr = $160, GB 5yr = $484, CA 5yr = $200.
+
+---
+
+## [2026-04-05] - Fix: with_discount mode shows only total, no line items
+
+### Fixed
+- **`with_discount` display mode** (`frontend/src/pages/VisaDetail.jsx`, `frontend/src/components/application-steps/Step10Payment.jsx`)
+  - Previously showed all three fee rows (Government, Processing, Service) plus a Discount row.
+  - Now shows **only** the discounted total. A single green "Discount applied: -$X" line is shown below the total as confirmation — no individual fee rows are exposed.
+
+---
+
+## [2026-04-06] - Pricing Display Mode (4-way enum replacing toggle)
+
+### Changed
+- **`show_fee_breakdown: bool`** → **`fee_display_mode: str`** across backend and frontend.
+  - Old boolean removed from `UtilitySettings` and `UtilitySettingsUpdate` models (`backend/models/utility_settings.py`).
+  - Backward-compat migration in GET/PATCH handlers (`backend/routes/utility.py`): existing `show_fee_breakdown=True` records are automatically read as `full_breakdown`; `False` → `total_only`.
+  - Validation added: PATCH rejects unknown mode strings.
+  - `fee_display_mode` is exposed on `GET /api/utility/settings` (public).
+
+- **Four pricing display modes:**
+  | Value | Behaviour |
+  |---|---|
+  | `full_breakdown` | Shows Government Fee + Processing Fee + Service Fee + Total |
+  | `total_only` | Shows only the final Total (no line items) |
+  | `our_fee_only` | Shows only the Service (our) Fee |
+  | `with_discount` | Shows full breakdown + Discount row, final total is price minus `discount_amount` |
+
+### Added
+- **`discount_amount` included in every visa option** (`backend/routes/countries.py`)
+  - The per-country `discount_amount` from `country_visa_configs` is now included in each entry of `GET /api/countries/{code}/visa-options` as `discount_amount`.
+  - Required by the `with_discount` display mode on the frontend.
+
+- **Pricing Display radio cards in Admin Utility Settings** (`frontend/src/components/admin/UtilitySettings.jsx`)
+  - Replaced the single toggle with a 2×2 radio card grid, one card per mode.
+  - Each card shows an icon, label, and description. Selected card is highlighted blue.
+  - `Switch` import removed; added `DollarSign`, `Tag`, `AlignLeft`, `Percent` icons.
+
+- **Home.jsx visa cards** now respect `fee_display_mode`:
+  - `our_fee_only` → shows only the service fee with label "Service fee".
+  - `with_discount` → shows discounted price; original price struck through above it.
+  - `full_breakdown` / `total_only` → shows `visa.price` (no change from before).
+
+- **VisaDetail intermediate page** (`frontend/src/pages/VisaDetail.jsx`):
+  - `full_breakdown` → shows all three fee rows.
+  - `total_only` → shows only the total (no fee rows).
+  - `our_fee_only` → shows only the Service Fee row.
+  - `with_discount` → shows all three fee rows + a green Discount row; displayed unit price and total use `price - discount_amount`.
+
+- **Step 10 Payment page** (`frontend/src/components/application-steps/Step10Payment.jsx`):
+  - Same four-mode logic as VisaDetail.
+  - `with_discount`: discount row shown in green; Total row shows struck-through full price above the discounted amount.
+
+
+
+### Added
+- **`discount_amount: float`** field (`backend/models/country_visa_config.py`)
+  - Added to all three Pydantic classes (`CountryVisaConfig`, `CountryVisaConfigCreate`, `CountryVisaConfigUpdate`).
+  - Defaults to `0.0`.
+
+- **`POST /api/countries/bulk-visa-fees`** (`backend/routes/countries.py`)
+  - Replaces the tourist-only bulk endpoint. Now accepts fees for all visa types: tourist 30d (Apr–Jun / Jul–Mar), tourist 1yr, tourist 5yr, business, conference, medical, medical_attendant, transit — plus `discount_amount`.
+  - `POST /api/countries/bulk-tourist-fees` kept as a backward-compatible alias.
+
+- **Expanded "Bulk Set Visa Fee Defaults" panel** (`frontend/src/pages/AdminPanel.jsx`)
+  - Renamed from "Bulk Set Tourist Fee Defaults".
+  - Tourist section: 30 Day (Apr–Jun + Jul–Mar govt fees, our fee, live totals), 1 Year, 5 Year.
+  - Other visa types section: Business, Conference, Medical, Medical Attendant, Transit — each with govt fee, our fee, and live total.
+  - Discount section: single flat discount_amount input applied to all countries.
+
+- **Per-country Discount Amount field** (`frontend/src/pages/AdminPanel.jsx`)
+  - New input row above the Save button in the per-country expanded config view.
+  - Saved via the existing `saveCountryConfig` call.
+
+## [2026-04-05] - Bulk tourist fee defaults in Admin panel
+
+### Added
+- **`POST /api/countries/bulk-tourist-fees`** (`backend/routes/countries.py`)
+  - New endpoint that upserts tourist fee values across every country in the system at once.
+  - Accepts any combination of: `tourist_30d_govt_fee_apr_jun`, `tourist_30d_govt_fee_jul_mar`, `tourist_30d_our_fee`, `tourist_1yr_govt_fee`, `tourist_1yr_our_fee`, `tourist_5yr_govt_fee`, `tourist_5yr_our_fee`.
+  - For existing country configs it performs a `$set` update (only the supplied fields). For countries with no config yet it creates a new record with all toggles set to `false` — no country or visa type is enabled automatically.
+  - Returns `{ created, updated, total }` counts.
+
+- **Bulk Set Tourist Fee Defaults panel** (`frontend/src/pages/AdminPanel.jsx`)
+  - Collapsible card at the top of the Country Config tab (super_admin only).
+  - Three column layout: 30 Day (with Apr–Jun and Jul–Mar seasonal govt fees + our fee), 1 Year, 5 Year.
+  - Live total preview per sub-type using the 2.5% processing fee formula.
+  - "Apply to All Countries" button calls the new endpoint; only non-empty fields are sent so partially-filled forms don't accidentally zero out existing values.
+  - Country list refreshes automatically after a successful bulk save.
+
+---
+
+## [2026-04-05] - Seasonal 30-day tourist govt fee; VisaDetail improvements
+
+### Added
+- **Seasonal government fee for 30-day tourist eVisa** (`backend/models/country_visa_config.py`, `backend/routes/countries.py`, `frontend/src/pages/AdminPanel.jsx`)
+  - Two new fee fields per country: `tourist_30d_govt_fee_apr_jun` (April–June) and `tourist_30d_govt_fee_jul_mar` (July–March).
+  - The `/api/countries/{code}/visa-options` endpoint automatically selects the correct seasonal fee based on the current month; falls back to legacy `tourist_30d_govt_fee` if seasonal fields are zero.
+  - Admin panel 30 Days section now shows two labelled govt fee inputs ("Govt Fee (Apr–Jun)" and "Govt Fee (Jul–Mar)") with live per-season total previews.
+
+### Changed
+- **`VisaDetail.jsx`** — Fee breakdown section (government fee, processing fee, service fee rows) is now controlled by the **Utility → Pricing Display** toggle; fetches `GET /api/utility/settings` on mount and hides the breakdown when `show_fee_breakdown` is `false`.
+- **`VisaDetail.jsx`** — Info tooltips now drop **below** the icon (`top-full + mt-1`) instead of above, preventing clipping at the top of the page.
+- **`VisaDetail.jsx`** — Removed `overflow-hidden` from the sticky pricing sidebar card so tooltips inside the sidebar are no longer clipped.
+
+---
+
+## [2026-04-05] - Visa detail intermediate page before application
+
+### Added
+- **`VisaDetail` page** (`frontend/src/pages/VisaDetail.jsx`)
+  - New intermediate page at `/visa/:visaId` shown when a user clicks "Apply Online" on a visa card in the Home page.
+  - Displays visa metadata (entries, maximum stay, validity, travel purpose) with icons and tooltip info popovers.
+  - Dynamic description per visa type (tourist / business / medical / medical_attendant / conference / transit).
+  - "What you need" section listing required documents per visa type.
+  - Collapsible FAQ accordion (7 standard India eVisa questions).
+  - Sticky right-hand pricing sidebar with travellers counter (±), per-traveller price, running total, and full fee breakdown (government fee, processing fee, service fee).
+  - "Start Application" button navigates to `/apply/:visaId`.
+  - Page-level top bar shows back arrow, India flag, and dynamic title: **"India {visa name} for {Passport Country} Citizens"**.
+
+### Changed
+- **`Home.jsx`** — "Apply Online" button now navigates to `/visa/:visaId?passport=XX&passportName=...` instead of directly to `/apply/:visaId`, routing users through the new detail page first.
+- **`App.js`** — Added `/visa/:visaId` route (public, no auth required).
+
 ## [2026-04-05] - Draft application expiry, TEMP ID, admin expiry config
 
 ### Added

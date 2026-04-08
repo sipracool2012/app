@@ -43,12 +43,15 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
   const [enabledGateways, setEnabledGateways] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showFeeBreakdown, setShowFeeBreakdown] = useState(true);
+  const [feeDisplayMode, setFeeDisplayMode] = useState('full_breakdown');
   const [declareTruth, setDeclareTruth] = useState(false);
   const [declareTerms, setDeclareTerms] = useState(false);
+  const [liveVisaOption, setLiveVisaOption] = useState(null);
 
   useEffect(() => {
     fetchEnabledGateways();
     fetchUtilitySettings();
+    fetchLiveFees();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -58,17 +61,43 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
       if (!response.ok) return;
       const data = await response.json();
       setShowFeeBreakdown(data.show_fee_breakdown ?? true);
+      setFeeDisplayMode(data.fee_display_mode ?? 'full_breakdown');
     } catch {
       // silently fall back to showing the breakdown
     }
   };
 
-  // Fees come from selectedVisaOption stored in formData/draft (locked at application start)
-  const visaOption = data?.selectedVisaOption || null;
+  // Re-fetch the latest visa option fees from the API so the payment page always
+  // shows current pricing (admin may have updated fees since the draft was created).
+  const fetchLiveFees = async () => {
+    const visaId = data?.visaId || data?.selectedVisaOption?.id;
+    if (!visaId) return;
+    const countryCode = visaId.split('-')[0].toUpperCase();
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/countries/${countryCode}/visa-options`);
+      if (!res.ok) return;
+      const json = await res.json();
+      const found = (json.options || []).find(o => o.id === visaId);
+      if (found) setLiveVisaOption(found);
+    } catch {
+      // silently keep draft fees as fallback
+    }
+  };
+
+  // Use live fees (refreshed on mount) falling back to draft-locked fees
+  const visaOption = liveVisaOption || data?.selectedVisaOption || null;
   const govtFee = visaOption?.govt_fee ?? 0;
   const ourFee = visaOption?.our_fee ?? 0;
   const govtProcessingFee = visaOption?.processing_fee ?? (govtFee * 0.025);
-  const totalAmount = govtFee + ourFee + govtProcessingFee;
+  const discount = parseFloat(visaOption?.discount_amount) || 0;
+  const fullTotal = govtFee + ourFee + govtProcessingFee;
+  const displayedTotal =
+    feeDisplayMode === 'our_fee_only'
+      ? ourFee
+      : feeDisplayMode === 'with_discount'
+      ? Math.max(0, fullTotal - discount)
+      : fullTotal;
+  const totalAmount = displayedTotal;
 
   const fetchEnabledGateways = async () => {
     try {
@@ -292,9 +321,11 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
         <CardContent className="p-6">
           <h4 className="text-lg font-semibold mb-4">{t('forms.step10.feeBreakdown')}</h4>
           {visaOption && (
-            <p className="text-sm text-gray-500 mb-3">{visaOption.name}</p>
+            <p className="text-sm text-blue-600 font-medium mb-4">
+              {visaOption.name}{(data?.passportDemonym || data?.passportName) ? ` for ${data?.passportDemonym || data?.passportName} Citizens` : ''}
+            </p>
           )}
-          {showFeeBreakdown && (
+          {feeDisplayMode === 'full_breakdown' && (
             <div className="space-y-3">
               <div className="flex justify-between py-2 border-b">
                 <span className="text-gray-600">{t('forms.step10.governmentFee')}</span>
@@ -310,9 +341,28 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
               </div>
             </div>
           )}
+          {feeDisplayMode === 'our_fee_only' && (
+            <div className="space-y-3">
+              <div className="flex justify-between py-2 border-b">
+                <span className="text-gray-600">{t('forms.step10.ourFee')}</span>
+                <span className="font-semibold">${ourFee.toFixed(2)}</span>
+              </div>
+            </div>
+          )}
+          {feeDisplayMode === 'with_discount' && discount > 0 && (
+            <div className="flex justify-between py-2 border-b text-green-600">
+              <span className="font-medium">Discount applied</span>
+              <span className="font-semibold">-${discount.toFixed(2)}</span>
+            </div>
+          )}
           <div className="flex justify-between py-3 text-lg border-t-2">
             <span className="font-bold">{t('forms.step10.totalAmount')}</span>
-            <span className="font-bold text-blue-600">${totalAmount.toFixed(2)}</span>
+            <div className="text-right">
+              {feeDisplayMode === 'with_discount' && discount > 0 && (
+                <span className="text-sm line-through text-gray-400 block">${fullTotal.toFixed(2)}</span>
+              )}
+              <span className="font-bold text-blue-600">${totalAmount.toFixed(2)}</span>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -415,7 +465,7 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
               <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">terms and conditions</a>,{' '}
               <a href="/refund-policy" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">refund policy</a>{' '}
               and{' '}
-              <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">privacy policy</a>.
+              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">privacy policy</a>.
             </span>
           </label>
         </CardContent>

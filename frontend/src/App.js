@@ -22,6 +22,9 @@ import ContactUs from "./pages/ContactUs";
 import FAQ from "./pages/FAQ";
 import TermsOfService from "./pages/TermsOfService";
 import CookiePolicy from "./pages/CookiePolicy";
+import RefundPolicy from "./pages/RefundPolicy";
+import VisaDetail from "./pages/VisaDetail";
+import Requirements from "./pages/Requirements";
 import { Toaster } from "./components/ui/toaster";
 
 function App() {
@@ -74,7 +77,8 @@ function App() {
                 </PrivateRoute>
               }
             />
-            <Route path="/requirements" element={<Home />} />
+            <Route path="/visa/:visaId" element={<VisaDetail />} />
+            <Route path="/requirements" element={<Requirements />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/about" element={<AboutUs />} />
             <Route path="/careers" element={<Careers />} />
@@ -84,6 +88,7 @@ function App() {
             <Route path="/faq" element={<FAQ />} />
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/cookies" element={<CookiePolicy />} />
+            <Route path="/refund-policy" element={<RefundPolicy />} />
           </Routes>
           <Footer />
           <Toaster />

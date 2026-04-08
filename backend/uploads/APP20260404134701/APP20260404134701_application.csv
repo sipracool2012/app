@@ -1,43 +1,47 @@
 Field,Value
-visaId,af-tourist-30d
-selectedVisaOption,"{'id': 'us-tourist-30d', 'name': '30 day Indian Tourist eVisa', 'visa_type': 'tourist', 'duration': '30d', 'price': 72.62, 'govt_fee': 25, 'our_fee': 47, 'processing_fee': 0.62, 'entries': 'Double', 'stay_duration': '30 days', 'validity': '120 days', 'purpose': 'Tourism', 'approved_by': 'April 09', 'approval_days': 5}"
+visaId,au-tourist-1yr
+passportName,Australia
+passportDemonym,
+selectedVisaOption,"{'id': 'au-tourist-1yr', 'name': '1 year Indian Tourist eVisa', 'visa_type': 'tourist', 'duration': '1yr', 'price': 88, 'govt_fee': 40, 'our_fee': 47, 'processing_fee': 1, 'entries': 'Multiple', 'stay_duration': '90 days per visit', 'validity': '1 year', 'purpose': 'Tourism', 'approved_by': 'April 11', 'approval_days': 5, 'discount_amount': 50}"
 email,admin@clearevisa.com
 passportType,Ordinary
-portOfArrival,
-expectedArrivalDate,2026-04-09
-visaService,30 day Indian Tourist eVisa
+portOfArrival,Ahmedabad Airport
+expectedArrivalDate,2026-04-29
+visaService,1 year Indian Tourist eVisa
 visaServiceSubtype,"Tourism, Recreation, Sight-seeing"
-passportNumber,A123123123
-dateOfIssue,2026-04-04
-dateOfExpiry,2026-04-04
+passportNumber,PN123456789
+dateOfIssue,2026-03-29
+dateOfExpiry,2026-05-01
 otherPassportHeld,No
 yogaInstituteName,
 yogaInstituteAddress,
 yogaInstitutePhone,
+expiresAt,2026-04-13T21:40:26.615000
+applicationId,APP20260404134701
 educationalQualification,
-givenNames,Rohit
+givenNames,XS
 livedTwoYears,Yes
-qualificationFrom,USA SCHOOL
+qualificationFrom,XS
 religion,
 surname,Sinha Mahapatra
 visibleMarks,None
 country,
-houseNoStreet,"B1109, Venkatesh Graffiti Glover"
+houseNoStreet,"D4, Orange Habitat Society"
 phoneCountryCode,+1
 phoneNumber,8436005887
 postalCode,411036
 stateProvince,Maharashtra
 villageTownCity,Pune
 fatherCountryOfBirth,
-fatherName,Thomas Lines Ansell
+fatherName,sdgf
 fatherNationality,
-fatherPlaceOfBirth,india
+fatherPlaceOfBirth,Leicester
 fatherPreviousNationality,
 maritalStatus,Single
 motherCountryOfBirth,
 motherName,Kathleen Fortay Drewery
 motherNationality,
-motherPlaceOfBirth,A
+motherPlaceOfBirth,Stockport
 motherPreviousNationality,
 pakistanConnection,No
 spouseCountryOfBirth,
@@ -46,13 +50,13 @@ spouseNationality,
 spousePlaceOfBirth,
 spousePreviousNationality,
 designation,
-employerAddress,JAGANNATHPUR
-employerName,Sipras fashion
-employerPhone,09933698424
+employerAddress,A
+employerName,A
+employerPhone,
 militaryService,No
 pastOccupation,
 pastOccupationIfAny,
-presentOccupation,
+presentOccupation,Private service
 citiesPreviouslyVisited,
 companyAddress,
 companyName,
@@ -79,20 +83,19 @@ organizerEmail,
 organizerName,
 organizerPhoneCountryCode,+91
 organizerPhoneNumber,
-placesToVisit, MYSURU  BANDI PURU OOTI  COIMBATORE  KOCHI ALAPPUZHA  MADURAI  PHANJAVUR  PUDUCHERRY
+placesToVisit,A
 placesToVisitLine2,
 previousAddress,
 visitedIndiaBefore,No
 visitedSAARCCountries,No
-homeReferenceAddress,"B1109, Venkatesh Graffiti Glover"
-homeReferenceName,Rohit Sinha Mahapatra
+homeReferenceAddress,iamtravel100@gmail.com
+homeReferenceName,iamtravel100@gmail.com
 homeReferencePhoneCountryCode,+1
-homeReferencePhoneNumber,8436005887
-indiaReferenceAddress,"B1109, Venkatesh Graffiti Glover"
-indiaReferenceName,Rohit Sinha Mahapatra
+homeReferencePhoneNumber,1231231234
+indiaReferenceAddress,JAGANNATHPUR
+indiaReferenceName,Satpati
 indiaReferencePhoneCountryCode,+91
-indiaReferencePhoneNumber,8436005887
-applicationId,APP20260404134701
+indiaReferencePhoneNumber,9933698424
 arrestedConvicted,No
 arrestedConvictedReason,
 asylumSought,No
@@ -105,5 +108,3 @@ refusedEntry,No
 refusedEntryReason,
 terroristViews,No
 terroristViewsReason,
-payment_amount,72.62
-paypal_order_id,13080948A92476154

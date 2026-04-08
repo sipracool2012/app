@@ -13,7 +13,9 @@ class CountryVisaConfig(BaseModel):
     # Tourist Visa Configuration
     tourist_enabled: bool = False
     tourist_30d_enabled: bool = False
-    tourist_30d_govt_fee: float = 0.0
+    tourist_30d_govt_fee: float = 0.0          # fallback / legacy
+    tourist_30d_govt_fee_apr_jun: float = 0.0  # April–June season
+    tourist_30d_govt_fee_jul_mar: float = 0.0  # July–March season
     tourist_30d_our_fee: float = 0.0
     tourist_1yr_enabled: bool = False
     tourist_1yr_govt_fee: float = 0.0
@@ -46,6 +48,9 @@ class CountryVisaConfig(BaseModel):
     transit_enabled: bool = False
     transit_govt_fee: float = 0.0
     transit_our_fee: float = 0.0
+
+    # Discount
+    discount_amount: float = 0.0
     
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
@@ -59,6 +64,8 @@ class CountryVisaConfigCreate(BaseModel):
     tourist_enabled: bool = False
     tourist_30d_enabled: bool = False
     tourist_30d_govt_fee: float = 0.0
+    tourist_30d_govt_fee_apr_jun: float = 0.0
+    tourist_30d_govt_fee_jul_mar: float = 0.0
     tourist_30d_our_fee: float = 0.0
     tourist_1yr_enabled: bool = False
     tourist_1yr_govt_fee: float = 0.0
@@ -87,12 +94,16 @@ class CountryVisaConfigCreate(BaseModel):
     transit_govt_fee: float = 0.0
     transit_our_fee: float = 0.0
 
+    discount_amount: float = 0.0
+
 class CountryVisaConfigUpdate(BaseModel):
     country_enabled: Optional[bool] = None
     
     tourist_enabled: Optional[bool] = None
     tourist_30d_enabled: Optional[bool] = None
     tourist_30d_govt_fee: Optional[float] = None
+    tourist_30d_govt_fee_apr_jun: Optional[float] = None
+    tourist_30d_govt_fee_jul_mar: Optional[float] = None
     tourist_30d_our_fee: Optional[float] = None
     tourist_1yr_enabled: Optional[bool] = None
     tourist_1yr_govt_fee: Optional[float] = None
@@ -120,6 +131,8 @@ class CountryVisaConfigUpdate(BaseModel):
     transit_enabled: Optional[bool] = None
     transit_govt_fee: Optional[float] = None
     transit_our_fee: Optional[float] = None
+
+    discount_amount: Optional[float] = None
 
 class VisaOptionResponse(BaseModel):
     id: str

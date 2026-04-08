@@ -174,6 +174,9 @@ async def get_my_applications(user_id: str = Depends(get_current_user)):
             "visaId": visa_id,
             "visaService": app.get("visaService", ""),
             "visaServiceSubtype": app.get("visaServiceSubtype", ""),
+            "visaOptionName": (app.get("selectedVisaOption") or {}).get("name", ""),
+            "passportName": app.get("passportName", ""),
+            "passportDemonym": app.get("passportDemonym", ""),
             "surname": app.get("surname", ""),
             "givenNames": app.get("givenNames", ""),
             "email": app.get("email", ""),
@@ -198,21 +201,31 @@ def generate_application_id() -> str:
 @router.post("/assign-id", response_model=dict)
 async def assign_application_id(user_id: str = Depends(get_current_user)):
     """
-    Generate an application ID for the user's draft and create the upload folder.
-    Called when the user reaches the Document Upload step.
+    Generate a permanent APP ID for the user's draft and create the upload folder.
+    Replaces any existing TEMP ID. Called when the user reaches the Document Upload step.
     """
-    # Check if draft already has an application ID
+    now = datetime.utcnow()
     existing = await db.applications.find_one({"userId": user_id, "status": "draft"})
-    if existing and existing.get("applicationId"):
-        application_id = existing["applicationId"]
-    else:
+    existing_id = existing.get("applicationId", "") if existing else ""
+
+    # Assign a new APP ID if there's no ID yet or the current one is a TEMP placeholder
+    if not existing_id or existing_id.startswith("TEMP"):
         application_id = generate_application_id()
-        now = datetime.utcnow()
         if existing:
             await db.applications.update_one(
                 {"_id": existing["_id"]},
                 {"$set": {"applicationId": application_id, "updatedAt": now}}
             )
+            # Rename the TEMP folder to the new APP folder if it exists
+            if existing_id:
+                old_folder = UPLOAD_DIR / existing_id
+                new_folder = UPLOAD_DIR / application_id
+                if old_folder.exists() and not new_folder.exists():
+                    old_folder.rename(new_folder)
+                    # Rename any files inside that still carry the old TEMP prefix
+                    for f in new_folder.iterdir():
+                        if f.is_file() and f.name.startswith(existing_id):
+                            f.rename(new_folder / f.name.replace(existing_id, application_id, 1))
         else:
             await db.applications.insert_one({
                 "userId": user_id,
@@ -221,8 +234,10 @@ async def assign_application_id(user_id: str = Depends(get_current_user)):
                 "createdAt": now,
                 "updatedAt": now
             })
+    else:
+        application_id = existing_id
 
-    # Create the upload folder for this application
+    # Create the upload folder for this application (no-op if already exists)
     app_folder = UPLOAD_DIR / application_id
     os.makedirs(app_folder, exist_ok=True)
 

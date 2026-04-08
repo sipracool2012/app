@@ -3,17 +3,43 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { Switch } from '../ui/switch';
 import { useToast } from '../../hooks/use-toast';
-import { Save, Wrench, Clock } from 'lucide-react';
+import { Save, Wrench, Clock, DollarSign, Tag, AlignLeft, Percent } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
+const FEE_DISPLAY_OPTIONS = [
+  {
+    value: 'full_breakdown',
+    icon: AlignLeft,
+    label: 'Full Breakdown',
+    desc: 'Customers see Government Fee, Processing Fee, and Service Fee as separate line items, plus the total.',
+  },
+  {
+    value: 'total_only',
+    icon: DollarSign,
+    label: 'Total Only',
+    desc: 'No line items — only the final total amount is shown on the visa card, detail page, and payment step.',
+  },
+  {
+    value: 'our_fee_only',
+    icon: Percent,
+    label: 'Show Our Fee Only',
+    desc: 'Only the service fee (our fee) is displayed. Government and processing fees are hidden.',
+  },
+  {
+    value: 'with_discount',
+    icon: Tag,
+    label: 'Show With Discount',
+    desc: 'Displays the total with the country-level discount_amount deducted. A "Discount" row is shown in breakdowns.',
+  },
+];
 
 const UtilitySettings = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [showFeeBreakdown, setShowFeeBreakdown] = useState(true);
+  const [feeDisplayMode, setFeeDisplayMode] = useState('full_breakdown');
   const [expiryDays, setExpiryDays] = useState(7);
   const [expiryHours, setExpiryHours] = useState(0);
   const [expiryMinutes, setExpiryMinutes] = useState(0);
@@ -25,7 +51,7 @@ const UtilitySettings = () => {
         const response = await fetch(`${BACKEND_URL}/api/utility/settings`);
         if (!response.ok) throw new Error('Failed to load');
         const data = await response.json();
-        setShowFeeBreakdown(data.show_fee_breakdown ?? true);
+        setFeeDisplayMode(data.fee_display_mode ?? 'full_breakdown');
         setExpiryDays(data.draft_expiry_days ?? 7);
         setExpiryHours(data.draft_expiry_hours ?? 0);
         setExpiryMinutes(data.draft_expiry_minutes ?? 0);
@@ -55,7 +81,7 @@ const UtilitySettings = () => {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify({
-          show_fee_breakdown: showFeeBreakdown,
+          fee_display_mode: feeDisplayMode,
           draft_expiry_days: Number(expiryDays),
           draft_expiry_hours: Number(expiryHours),
           draft_expiry_minutes: Number(expiryMinutes),
@@ -92,27 +118,49 @@ const UtilitySettings = () => {
         </div>
       </div>
 
-      {/* Pricing / Fee Breakdown */}
+      {/* Pricing Display Mode */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Pricing Display</CardTitle>
+          <p className="text-xs text-gray-500">
+            Controls how fees are shown on the Home visa cards, Visa Detail page, and the payment step.
+          </p>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="show-fee-breakdown" className="text-sm font-medium">
-                Show Fee Breakdown to Customers
-              </Label>
-              <p className="text-xs text-gray-500 mt-0.5">
-                When enabled, customers see the itemised Government Fee, Processing Fee, and Our Fee
-                on the payment step. When disabled, only the Total Amount is displayed.
-              </p>
-            </div>
-            <Switch
-              id="show-fee-breakdown"
-              checked={showFeeBreakdown}
-              onCheckedChange={setShowFeeBreakdown}
-            />
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {FEE_DISPLAY_OPTIONS.map(({ value, icon: Icon, label, desc }) => {
+              const selected = feeDisplayMode === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setFeeDisplayMode(value)}
+                  className={`relative flex items-start gap-3 rounded-xl border-2 p-4 text-left transition-all focus:outline-none ${
+                    selected
+                      ? 'border-blue-600 bg-blue-50 shadow-sm'
+                      : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {/* Radio dot */}
+                  <span
+                    className={`mt-0.5 flex-shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                      selected ? 'border-blue-600' : 'border-gray-300'
+                    }`}
+                  >
+                    {selected && <span className="w-2 h-2 rounded-full bg-blue-600 block" />}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Icon className={`w-4 h-4 flex-shrink-0 ${selected ? 'text-blue-600' : 'text-gray-500'}`} />
+                      <span className={`text-sm font-semibold ${selected ? 'text-blue-700' : 'text-gray-800'}`}>
+                        {label}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 leading-relaxed">{desc}</p>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </CardContent>
       </Card>

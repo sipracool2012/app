@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Search, ArrowRight, Clock, Info } from 'lucide-react';
+import { Search, ArrowRight, Clock, Info, CheckCircle2 } from 'lucide-react';
 import { FlagIcon } from '../components/ui/FlagIcon';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
@@ -22,6 +22,15 @@ const Home = () => {
   const [countryName, setCountryName] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadingOptions, setLoadingOptions] = useState(false);
+  const [feeDisplayMode, setFeeDisplayMode] = useState('full_breakdown');
+
+  // Fetch utility settings on mount
+  useEffect(() => {
+    fetch(`${BACKEND_URL}/api/utility/settings`)
+      .then(r => r.json())
+      .then(d => setFeeDisplayMode(d.fee_display_mode ?? 'full_breakdown'))
+      .catch(() => {});
+  }, []);
 
   // Fetch enabled countries on mount
   useEffect(() => {
@@ -100,13 +109,23 @@ const Home = () => {
   }, [selectedCountry, selectedPurpose]);
 
   const handleApply = (visaId) => {
-    navigate(`/apply/${visaId}`);
+    const passportCountry = enabledCountries.find(c => c.code === selectedCountry);
+    const params = new URLSearchParams();
+    if (selectedCountry) params.set('passport', selectedCountry);
+    if (passportCountry?.name) params.set('passportName', passportCountry.name);
+    navigate(`/visa/${visaId}?${params.toString()}`);
   };
 
   // Get selected country name
   const getSelectedCountryName = () => {
     const country = enabledCountries.find(c => c.code === selectedCountry);
     return country ? country.name : '';
+  };
+
+  // Get selected country demonym (falls back to name if not available)
+  const getSelectedCountryDemonym = () => {
+    const country = enabledCountries.find(c => c.code === selectedCountry);
+    return (country && country.demonym) ? country.demonym : getSelectedCountryName();
   };
 
   return (
@@ -211,7 +230,21 @@ const Home = () => {
                       </div>
                       
                       {/* Visa Option Cards */}
-                      {visaOptions.map((visa) => (
+                      {visaOptions.map((visa) => {
+                        const discount = parseFloat(visa.discount_amount) || 0;
+                        const displayedPrice =
+                          feeDisplayMode === 'our_fee_only'
+                            ? parseFloat(visa.our_fee) || 0
+                            : feeDisplayMode === 'with_discount'
+                            ? Math.max(0, visa.price - discount)
+                            : visa.price;
+                        const priceLabel =
+                          feeDisplayMode === 'our_fee_only'
+                            ? 'Service fee'
+                            : feeDisplayMode === 'with_discount' && discount > 0
+                            ? 'After discount'
+                            : null;
+                        return (
                         <Card key={visa.id} className="border-2 hover:border-blue-500 transition-all cursor-pointer">
                           <CardContent className="p-6">
                             <div className="flex justify-between items-start mb-4">
@@ -225,7 +258,13 @@ const Home = () => {
                                 </div>
                               </div>
                               <div className="text-right">
-                                <p className="text-2xl font-bold text-gray-900">USD ${visa.price.toFixed(2)}</p>
+                                {feeDisplayMode === 'with_discount' && discount > 0 && (
+                                  <p className="text-sm line-through text-gray-400">USD ${visa.price.toFixed(2)}</p>
+                                )}
+                                <p className="text-2xl font-bold text-gray-900">USD ${displayedPrice.toFixed(2)}</p>
+                                {priceLabel && (
+                                  <p className="text-xs text-gray-500">{priceLabel}</p>
+                                )}
                               </div>
                             </div>
                             <div className="flex items-center text-sm text-blue-600 mb-4">
@@ -240,7 +279,8 @@ const Home = () => {
                             </Button>
                           </CardContent>
                         </Card>
-                      ))}
+                        );
+                      })}
                     </>
                   ) : selectedCountry && !hasEvisaOptions ? (
                     <>
@@ -279,8 +319,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Partner Logos */}
-      <section className="bg-blue-50 py-12">
+      {/* Partner Logos — temporarily hidden */}
+      {/* <section className="bg-blue-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-blue-600 font-medium mb-8">{t('home.trustedByBrands')}</p>
           <div className="flex flex-wrap justify-center items-center gap-12">
@@ -294,7 +334,138 @@ const Home = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
+
+      {/* Learn More Section — shown only for the 1-year Tourist eVisa when a country is selected */}
+      {(() => {
+        const oneYearTourist = selectedCountry && !loadingOptions && hasEvisaOptions
+          ? visaOptions.find(v =>
+              /1\s*year/i.test(v.validity) && /tourism/i.test(v.purpose)
+            )
+          : null;
+        if (!oneYearTourist) return null;
+        return (
+          <section className="py-16 bg-gray-50 border-t border-gray-100">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+              {/* Section header */}
+              <h2 className="text-3xl font-bold text-center text-gray-900 mb-3">
+                {t('home.learnMoreTitle', { visaName: oneYearTourist.name, country: getSelectedCountryDemonym() })}
+              </h2>
+              <div className="w-24 h-1 bg-blue-600 mx-auto mb-12 rounded-full"></div>
+
+              {/* Two-column layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-14">
+                {/* Left — narrative content */}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-gray-900">
+                    {t('home.learnMoreSubtitle', { country: getSelectedCountryDemonym() })}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">{t('home.learnMorePara1')}</p>
+                  <p className="text-gray-600 leading-relaxed">{t('home.learnMorePara2')}</p>
+                  <p className="text-gray-600 leading-relaxed">{t('home.learnMorePara3')}</p>
+                  <p className="text-gray-600 leading-relaxed">{t('home.learnMorePara4')}</p>
+                </div>
+
+                {/* Right — Quick Summary + requirements + CTA */}
+                <div className="space-y-8">
+                  {/* Quick Summary */}
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">{t('home.quickSummary')}</h3>
+                    <ul className="space-y-3">
+                      <li className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-gray-600">
+                          {t('home.summaryPurpose', { visaName: oneYearTourist.name })}{' '}
+                          <strong>{oneYearTourist.purpose}</strong>
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-gray-600">
+                          {t('home.summaryStay', { visaName: oneYearTourist.name })}{' '}
+                          <strong>{oneYearTourist.stay_duration}</strong>
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-gray-600">
+                          {t('home.summaryEmail', { visaName: oneYearTourist.name })}
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-gray-600">
+                          {t('home.summarySubmit', { visaName: oneYearTourist.name })}
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* What do I need to apply? */}
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-3">{t('home.whatDoINeedTitle')}</h4>
+                    <p className="text-sm font-semibold text-gray-700 mb-2">{t('home.requiredForPurchase')}</p>
+                    <ul className="space-y-2 mb-4">
+                      <li className="flex items-center gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+                        <span className="text-sm text-gray-600">{t('home.requirementAccommodation')}</span>
+                      </li>
+                    </ul>
+                    <p className="text-sm font-semibold text-gray-700 mb-2">{t('home.requiredLater')}</p>
+                    <ul className="space-y-2 mb-6">
+                      <li className="flex items-center gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+                        <span className="text-sm text-gray-600">{t('home.requirementPassport')}</span>
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+                        <span className="text-sm text-gray-600">{t('home.requirementHeadshot')}</span>
+                      </li>
+                    </ul>
+                    <Button
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                      size="lg"
+                      onClick={() => handleApply(oneYearTourist.id)}
+                    >
+                      {t('home.applyNow')}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* FAQ */}
+              <div className="space-y-8 max-w-4xl">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-3">
+                    {t('home.faq1Title', { visaName: oneYearTourist.name })}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {t('home.faq1Ans', { visaName: oneYearTourist.name })}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-3">
+                    {t('home.faq2Title')}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {t('home.faq2Ans', { stayDuration: oneYearTourist.stay_duration })}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-3">
+                    {t('home.faq3Title', { visaName: oneYearTourist.name })}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {t('home.faq3Ans', { validity: oneYearTourist.validity })}
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          </section>
+        );
+      })()}
 
       {/* How Clear eVisa Works */}
       <section className="py-20">

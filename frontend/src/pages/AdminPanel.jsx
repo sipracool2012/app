@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download, Filter, Search, Eye, Settings, Globe, Save, ChevronDown, ChevronUp, CreditCard, Users, AlertTriangle, Mail, Wrench } from 'lucide-react';
+import { Download, Filter, Search, Eye, Settings, Globe, Save, ChevronDown, ChevronUp, CreditCard, Users, AlertTriangle, Mail, Wrench, Receipt } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
@@ -16,6 +16,7 @@ import { FlagIcon } from '../components/ui/FlagIcon';
 import UserManagement from '../components/admin/UserManagement';
 import EmailProviderSettings from '../components/admin/EmailProviderSettings';
 import UtilitySettings from '../components/admin/UtilitySettings';
+import TransactionsPanel from '../components/admin/TransactionsPanel';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -38,6 +39,70 @@ const AdminPanel = () => {
   const [filteredCountries, setFilteredCountries] = useState([]);
   const [expandedCountry, setExpandedCountry] = useState(null);
   const [savingCountry, setSavingCountry] = useState(null);
+
+  // Bulk tourist fee defaults state
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkSaving, setBulkSaving] = useState(false);
+  const [bulkFees, setBulkFees] = useState({
+    // Tourist
+    tourist_30d_govt_fee_apr_jun: '',
+    tourist_30d_govt_fee_jul_mar: '',
+    tourist_30d_our_fee: '',
+    tourist_1yr_govt_fee: '',
+    tourist_1yr_our_fee: '',
+    tourist_5yr_govt_fee: '',
+    tourist_5yr_our_fee: '',
+    // Business
+    business_govt_fee: '',
+    business_our_fee: '',
+    // Conference
+    conference_govt_fee: '',
+    conference_our_fee: '',
+    // Medical
+    medical_govt_fee: '',
+    medical_our_fee: '',
+    // Medical Attendant
+    medical_attendant_govt_fee: '',
+    medical_attendant_our_fee: '',
+    // Transit
+    transit_govt_fee: '',
+    transit_our_fee: '',
+    // Discount
+    discount_amount: '',
+  });
+
+  const handleBulkSave = async () => {
+    const payload = {};
+    Object.entries(bulkFees).forEach(([k, v]) => {
+      const num = parseFloat(v);
+      if (!isNaN(num) && v !== '') payload[k] = num;
+    });
+    if (Object.keys(payload).length === 0) {
+      toast({ title: 'Nothing to save', description: 'Enter at least one fee value.', variant: 'destructive' });
+      return;
+    }
+    setBulkSaving(true);
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/countries/bulk-visa-fees`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error('Failed');
+      const data = await res.json();
+      toast({
+        title: 'Bulk update complete',
+        description: `Updated ${data.updated} countries, created ${data.created} new entries.`,
+      });
+      // Refresh countries list so changes reflect immediately
+      const refreshed = await fetch(`${BACKEND_URL}/api/countries/all`);
+      if (refreshed.ok) setCountries(await refreshed.json());
+    } catch (e) {
+      toast({ title: 'Error', description: 'Bulk update failed.', variant: 'destructive' });
+    } finally {
+      setBulkSaving(false);
+    }
+  };
 
   useEffect(() => {
     // Fetch current user info
@@ -293,7 +358,8 @@ const AdminPanel = () => {
           country_enabled: country.country_enabled,
           tourist_enabled: country.tourist_enabled,
           tourist_30d_enabled: country.tourist_30d_enabled,
-          tourist_30d_govt_fee: parseFloat(country.tourist_30d_govt_fee) || 0,
+          tourist_30d_govt_fee_apr_jun: parseFloat(country.tourist_30d_govt_fee_apr_jun) || 0,
+          tourist_30d_govt_fee_jul_mar: parseFloat(country.tourist_30d_govt_fee_jul_mar) || 0,
           tourist_30d_our_fee: parseFloat(country.tourist_30d_our_fee) || 0,
           tourist_1yr_enabled: country.tourist_1yr_enabled,
           tourist_1yr_govt_fee: parseFloat(country.tourist_1yr_govt_fee) || 0,
@@ -316,6 +382,7 @@ const AdminPanel = () => {
           transit_enabled: country.transit_enabled,
           transit_govt_fee: parseFloat(country.transit_govt_fee) || 0,
           transit_our_fee: parseFloat(country.transit_our_fee) || 0,
+          discount_amount: parseFloat(country.discount_amount) || 0,
         })
       });
 
@@ -405,7 +472,7 @@ const AdminPanel = () => {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* Super Admin sees 5 tabs; regular Admin sees 1 tab (Applications only) */}
-          <TabsList className={`grid w-full ${currentUser?.role === 'super_admin' ? 'max-w-5xl grid-cols-6' : 'max-w-xs grid-cols-1'}`}>
+          <TabsList className={`grid w-full ${currentUser?.role === 'super_admin' ? 'max-w-5xl grid-cols-7' : 'max-w-xs grid-cols-1'}`}>
             <TabsTrigger value="applications" className="flex items-center gap-2">
               <Eye className="w-4 h-4" />
               Applications
@@ -443,6 +510,13 @@ const AdminPanel = () => {
               <TabsTrigger value="utility" className="flex items-center gap-2">
                 <Wrench className="w-4 h-4" />
                 Utility
+              </TabsTrigger>
+            )}
+            {/* Transactions — Super Admin only */}
+            {currentUser?.role === 'super_admin' && (
+              <TabsTrigger value="transactions" className="flex items-center gap-2">
+                <Receipt className="w-4 h-4" />
+                Transactions
               </TabsTrigger>
             )}
           </TabsList>
@@ -669,6 +743,122 @@ const AdminPanel = () => {
 
           {/* Country Configuration Tab — Super Admin only */}
           {currentUser?.role === 'super_admin' && <TabsContent value="countries" className="space-y-6">
+
+            {/* ── Bulk Visa Fee Defaults ── */}
+            <Card className="border-2 border-dashed border-blue-200 bg-blue-50">
+              <CardHeader
+                className="cursor-pointer select-none"
+                onClick={() => setBulkOpen(o => !o)}
+              >
+                <CardTitle className="flex items-center justify-between text-blue-700 text-base">
+                  <span className="flex items-center gap-2">
+                    <Settings className="w-4 h-4" />
+                    Bulk Set Visa Fee Defaults
+                    <span className="text-xs font-normal text-blue-500 ml-1">
+                      — apply fee &amp; discount values to all countries at once (no toggles changed)
+                    </span>
+                  </span>
+                  {bulkOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </CardTitle>
+              </CardHeader>
+              {bulkOpen && (
+                <CardContent className="pt-0 space-y-5">
+
+                  {/* Tourist */}
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wider text-blue-600 mb-2">Tourist Visa</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div className="space-y-2 border rounded p-3 bg-white">
+                        <p className="text-sm font-semibold text-gray-700">30 Day</p>
+                        <Input type="number" step="0.01" placeholder="Govt Fee (Apr–Jun)"
+                          value={bulkFees.tourist_30d_govt_fee_apr_jun}
+                          onChange={e => setBulkFees(f => ({ ...f, tourist_30d_govt_fee_apr_jun: e.target.value }))} />
+                        <Input type="number" step="0.01" placeholder="Govt Fee (Jul–Mar)"
+                          value={bulkFees.tourist_30d_govt_fee_jul_mar}
+                          onChange={e => setBulkFees(f => ({ ...f, tourist_30d_govt_fee_jul_mar: e.target.value }))} />
+                        <Input type="number" step="0.01" placeholder="Our Fee"
+                          value={bulkFees.tourist_30d_our_fee}
+                          onChange={e => setBulkFees(f => ({ ...f, tourist_30d_our_fee: e.target.value }))} />
+                        {(parseFloat(bulkFees.tourist_30d_govt_fee_apr_jun) > 0 || parseFloat(bulkFees.tourist_30d_govt_fee_jul_mar) > 0) && (
+                          <div className="text-xs text-gray-500 space-y-0.5">
+                            {parseFloat(bulkFees.tourist_30d_govt_fee_apr_jun) > 0 && <div>Apr–Jun total: ${((parseFloat(bulkFees.tourist_30d_govt_fee_apr_jun)||0)+(parseFloat(bulkFees.tourist_30d_our_fee)||0)+(parseFloat(bulkFees.tourist_30d_govt_fee_apr_jun)||0)*0.025).toFixed(2)}</div>}
+                            {parseFloat(bulkFees.tourist_30d_govt_fee_jul_mar) > 0 && <div>Jul–Mar total: ${((parseFloat(bulkFees.tourist_30d_govt_fee_jul_mar)||0)+(parseFloat(bulkFees.tourist_30d_our_fee)||0)+(parseFloat(bulkFees.tourist_30d_govt_fee_jul_mar)||0)*0.025).toFixed(2)}</div>}
+                          </div>
+                        )}
+                      </div>
+                      <div className="space-y-2 border rounded p-3 bg-white">
+                        <p className="text-sm font-semibold text-gray-700">1 Year</p>
+                        <Input type="number" step="0.01" placeholder="Govt Fee"
+                          value={bulkFees.tourist_1yr_govt_fee}
+                          onChange={e => setBulkFees(f => ({ ...f, tourist_1yr_govt_fee: e.target.value }))} />
+                        <Input type="number" step="0.01" placeholder="Our Fee"
+                          value={bulkFees.tourist_1yr_our_fee}
+                          onChange={e => setBulkFees(f => ({ ...f, tourist_1yr_our_fee: e.target.value }))} />
+                        {parseFloat(bulkFees.tourist_1yr_govt_fee) > 0 && <div className="text-xs text-gray-500">Total: ${((parseFloat(bulkFees.tourist_1yr_govt_fee)||0)+(parseFloat(bulkFees.tourist_1yr_our_fee)||0)+(parseFloat(bulkFees.tourist_1yr_govt_fee)||0)*0.025).toFixed(2)}</div>}
+                      </div>
+                      <div className="space-y-2 border rounded p-3 bg-white">
+                        <p className="text-sm font-semibold text-gray-700">5 Year</p>
+                        <Input type="number" step="0.01" placeholder="Govt Fee"
+                          value={bulkFees.tourist_5yr_govt_fee}
+                          onChange={e => setBulkFees(f => ({ ...f, tourist_5yr_govt_fee: e.target.value }))} />
+                        <Input type="number" step="0.01" placeholder="Our Fee"
+                          value={bulkFees.tourist_5yr_our_fee}
+                          onChange={e => setBulkFees(f => ({ ...f, tourist_5yr_our_fee: e.target.value }))} />
+                        {parseFloat(bulkFees.tourist_5yr_govt_fee) > 0 && <div className="text-xs text-gray-500">Total: ${((parseFloat(bulkFees.tourist_5yr_govt_fee)||0)+(parseFloat(bulkFees.tourist_5yr_our_fee)||0)+(parseFloat(bulkFees.tourist_5yr_govt_fee)||0)*0.025).toFixed(2)}</div>}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Other visa types */}
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wider text-blue-600 mb-2">Other Visa Types</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                      {[
+                        { label: 'Business', gKey: 'business_govt_fee', oKey: 'business_our_fee' },
+                        { label: 'Conference', gKey: 'conference_govt_fee', oKey: 'conference_our_fee' },
+                        { label: 'Medical', gKey: 'medical_govt_fee', oKey: 'medical_our_fee' },
+                        { label: 'Medical Attendant', gKey: 'medical_attendant_govt_fee', oKey: 'medical_attendant_our_fee' },
+                        { label: 'Transit', gKey: 'transit_govt_fee', oKey: 'transit_our_fee' },
+                      ].map(({ label, gKey, oKey }) => (
+                        <div key={gKey} className="space-y-2 border rounded p-3 bg-white">
+                          <p className="text-sm font-semibold text-gray-700">{label}</p>
+                          <Input type="number" step="0.01" placeholder="Govt Fee"
+                            value={bulkFees[gKey]}
+                            onChange={e => setBulkFees(f => ({ ...f, [gKey]: e.target.value }))} />
+                          <Input type="number" step="0.01" placeholder="Our Fee"
+                            value={bulkFees[oKey]}
+                            onChange={e => setBulkFees(f => ({ ...f, [oKey]: e.target.value }))} />
+                          {parseFloat(bulkFees[gKey]) > 0 && <div className="text-xs text-gray-500">Total: ${((parseFloat(bulkFees[gKey])||0)+(parseFloat(bulkFees[oKey])||0)+(parseFloat(bulkFees[gKey])||0)*0.025).toFixed(2)}</div>}
+                        </div>
+                      ))}
+
+                      {/* Discount */}
+                      <div className="space-y-2 border-2 border-orange-200 rounded p-3 bg-orange-50">
+                        <p className="text-sm font-semibold text-orange-700">Discount Amount</p>
+                        <Input type="number" step="0.01" placeholder="Discount ($)"
+                          value={bulkFees.discount_amount}
+                          onChange={e => setBulkFees(f => ({ ...f, discount_amount: e.target.value }))} />
+                        <p className="text-xs text-gray-500">Flat discount applied to all countries</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-1">
+                    <Button
+                      onClick={handleBulkSave}
+                      disabled={bulkSaving}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      {bulkSaving ? 'Applying...' : 'Apply to All Countries'}
+                    </Button>
+                    <p className="text-xs text-gray-500">
+                      Only filled fields are updated. No country/visa toggles are ever changed.
+                    </p>
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -765,9 +955,17 @@ const AdminPanel = () => {
                                   <Input
                                     type="number"
                                     step="0.01"
-                                    placeholder="Govt Fee"
-                                    value={country.tourist_30d_govt_fee || ''}
-                                    onChange={(e) => updateCountryConfig(country.country_code, 'tourist_30d_govt_fee', e.target.value)}
+                                    placeholder="Govt Fee (Apr–Jun)"
+                                    value={country.tourist_30d_govt_fee_apr_jun || ''}
+                                    onChange={(e) => updateCountryConfig(country.country_code, 'tourist_30d_govt_fee_apr_jun', e.target.value)}
+                                    disabled={!country.tourist_30d_enabled}
+                                  />
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="Govt Fee (Jul–Mar)"
+                                    value={country.tourist_30d_govt_fee_jul_mar || ''}
+                                    onChange={(e) => updateCountryConfig(country.country_code, 'tourist_30d_govt_fee_jul_mar', e.target.value)}
                                     disabled={!country.tourist_30d_enabled}
                                   />
                                   <Input
@@ -778,10 +976,14 @@ const AdminPanel = () => {
                                     onChange={(e) => updateCountryConfig(country.country_code, 'tourist_30d_our_fee', e.target.value)}
                                     disabled={!country.tourist_30d_enabled}
                                   />
-                                  {country.tourist_30d_enabled && country.tourist_30d_govt_fee && (
-                                    <div className="text-xs text-gray-600 mt-1">
-                                      <div>Processing: ${((country.tourist_30d_govt_fee || 0) * 0.025).toFixed(2)}</div>
-                                      <div className="font-semibold">Total: ${((parseFloat(country.tourist_30d_govt_fee) || 0) + (parseFloat(country.tourist_30d_our_fee) || 0) + ((country.tourist_30d_govt_fee || 0) * 0.025)).toFixed(2)}</div>
+                                  {country.tourist_30d_enabled && (country.tourist_30d_govt_fee_apr_jun || country.tourist_30d_govt_fee_jul_mar) && (
+                                    <div className="text-xs text-gray-600 mt-1 space-y-0.5">
+                                      {country.tourist_30d_govt_fee_apr_jun > 0 && (
+                                        <div>Apr–Jun total: ${((parseFloat(country.tourist_30d_govt_fee_apr_jun) || 0) + (parseFloat(country.tourist_30d_our_fee) || 0) + (parseFloat(country.tourist_30d_govt_fee_apr_jun) || 0) * 0.025).toFixed(2)}</div>
+                                      )}
+                                      {country.tourist_30d_govt_fee_jul_mar > 0 && (
+                                        <div>Jul–Mar total: ${((parseFloat(country.tourist_30d_govt_fee_jul_mar) || 0) + (parseFloat(country.tourist_30d_our_fee) || 0) + (parseFloat(country.tourist_30d_govt_fee_jul_mar) || 0) * 0.025).toFixed(2)}</div>
+                                      )}
                                     </div>
                                   )}
                                 </div>
@@ -1077,6 +1279,26 @@ const AdminPanel = () => {
                             )}
                           </div>
 
+                          {/* Discount Amount */}
+                          <div className="border rounded p-4 bg-white">
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-medium text-gray-700">Discount Amount</h4>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                placeholder="Discount ($)"
+                                className="w-40"
+                                value={country.discount_amount || ''}
+                                onChange={(e) => updateCountryConfig(country.country_code, 'discount_amount', e.target.value)}
+                              />
+                            </div>
+                            {parseFloat(country.discount_amount) > 0 && (
+                              <div className="text-xs text-gray-500 mt-1 text-right">
+                                Discount applied: -${parseFloat(country.discount_amount).toFixed(2)}
+                              </div>
+                            )}
+                          </div>
+
                           {/* Save Button */}
                           <Button
                             className="w-full bg-blue-600 hover:bg-blue-700 text-white"
@@ -1130,6 +1352,13 @@ const AdminPanel = () => {
           {currentUser?.role === 'super_admin' && (
             <TabsContent value="utility" className="space-y-6">
               <UtilitySettings />
+            </TabsContent>
+          )}
+
+          {/* Transactions Tab — Super Admin only */}
+          {currentUser?.role === 'super_admin' && (
+            <TabsContent value="transactions" className="space-y-6">
+              <TransactionsPanel />
             </TabsContent>
           )}
         </Tabs>
