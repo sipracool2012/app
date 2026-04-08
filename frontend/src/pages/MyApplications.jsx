@@ -10,37 +10,41 @@ import { getAuthHeaders } from '../utils/auth';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const statusConfig = {
-  draft:     { label: 'Draft',          color: 'bg-yellow-100 text-yellow-800', icon: Clock },
-  pending:   { label: 'Pending Review', color: 'bg-yellow-100 text-yellow-800', icon: AlertCircle },
-  submitted: { label: 'Submitted',      color: 'bg-blue-100 text-blue-800',   icon: AlertCircle },
-  paid:      { label: 'Paid',           color: 'bg-indigo-100 text-indigo-800', icon: CheckCircle },
-  processed: { label: 'Processed',      color: 'bg-purple-100 text-purple-800', icon: AlertCircle },
-  approved:  { label: 'Approved',       color: 'bg-green-100 text-green-800',  icon: CheckCircle },
-  rejected:  { label: 'Rejected',       color: 'bg-red-100 text-red-800',     icon: XCircle },
+  draft:          { label: 'Draft',          color: 'bg-yellow-100 text-yellow-800', icon: Clock },
+  paid:           { label: 'Paid',           color: 'bg-indigo-100 text-indigo-800', icon: CheckCircle },
+  pending_review: { label: 'Pending Review', color: 'bg-yellow-100 text-yellow-800', icon: AlertCircle },
+  submitted:      { label: 'Submitted',      color: 'bg-blue-100 text-blue-800',   icon: AlertCircle },
+  processed:      { label: 'Processed',      color: 'bg-purple-100 text-purple-800', icon: AlertCircle },
+  approved:       { label: 'Approved',       color: 'bg-green-100 text-green-800',  icon: CheckCircle },
+  rejected:       { label: 'Rejected',       color: 'bg-red-100 text-red-800',     icon: XCircle },
+  // legacy
+  pending:        { label: 'Pending Review', color: 'bg-yellow-100 text-yellow-800', icon: AlertCircle },
 };
 
 // Ordered workflow steps shown in the stepper.
 // 'rejected' is handled separately as a terminal branch.
 const WORKFLOW_STEPS = [
-  { key: 'pending',   label: 'Pending' },
-  { key: 'submitted', label: 'Submitted' },
-  { key: 'paid',      label: 'Paid' },
-  { key: 'processed', label: 'Processed' },
-  { key: 'approved',  label: 'Approved' },
+  { key: 'paid',           label: 'Paid' },
+  { key: 'pending_review', label: 'Pending Review' },
+  { key: 'submitted',      label: 'Submitted' },
+  { key: 'processed',      label: 'Processed' },
+  { key: 'approved',       label: 'Approved' },
 ];
 
 const stepIndex = Object.fromEntries(WORKFLOW_STEPS.map((s, i) => [s.key, i]));
 
 /**
  * Horizontal stepper that visualises where an application sits in the
- * Pending → Submitted → Paid → Processed → Approved workflow.
+ * Paid → Pending Review → Submitted → Processed → Approved workflow.
  * Rejected applications show a red terminal indicator instead.
  */
 const StatusStepper = ({ status }) => {
   if (status === 'draft') return null;
 
   const isRejected = status === 'rejected';
-  const currentIdx  = isRejected ? -1 : (stepIndex[status] ?? 0);
+  // Map legacy 'pending' to 'pending_review' position
+  const normalised = status === 'pending' ? 'pending_review' : status;
+  const currentIdx  = isRejected ? -1 : (stepIndex[normalised] ?? 0);
 
   return (
     <div className="mt-4 px-1">

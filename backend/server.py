@@ -5,7 +5,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 import asyncio
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 # Import routes
@@ -66,6 +66,7 @@ async def startup_event():
     logger.info("Starting Clear eVisa Visa Application API")
     logger.info(f"Connected to MongoDB: {os.environ.get('DB_NAME')}")
     asyncio.create_task(draft_expiry_cleanup_loop())
+    asyncio.create_task(paid_to_pending_review_loop())
 
 
 async def draft_expiry_cleanup_loop():
@@ -81,6 +82,31 @@ async def draft_expiry_cleanup_loop():
                 logger.info(f"Draft cleanup: deleted {result.deleted_count} expired draft(s).")
         except Exception as e:
             logger.error(f"Draft cleanup error: {e}")
+        await asyncio.sleep(60)
+
+
+async def paid_to_pending_review_loop():
+    """Background task: every 60 seconds promote 'paid' applications to 'pending_review'
+    once they have been in that state for at least 1 hour."""
+    while True:
+        try:
+            cutoff = datetime.utcnow() - timedelta(hours=1)
+            result = await db.applications.update_many(
+                {
+                    "status": "paid",
+                    "paidAt": {"$lt": cutoff}
+                },
+                {
+                    "$set": {
+                        "status": "pending_review",
+                        "updatedAt": datetime.utcnow()
+                    }
+                }
+            )
+            if result.modified_count:
+                logger.info(f"Auto-promoted {result.modified_count} paid application(s) to pending_review.")
+        except Exception as e:
+            logger.error(f"Paid→pending_review promotion error: {e}")
         await asyncio.sleep(60)
 
 @app.on_event("shutdown")

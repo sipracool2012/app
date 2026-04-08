@@ -10,6 +10,7 @@ from pathlib import Path
 import csv
 import io
 import os
+import secrets
 
 router = APIRouter(prefix="/api/applications", tags=["applications"])
 
@@ -66,7 +67,21 @@ async def save_draft(
     # Remove any _id field from incoming data
     draft_data.pop("_id", None)
     draft_data.pop("id", None)
-    
+
+    # Security: never allow an APP ID to be written via save_draft.
+    # APP IDs are assigned exclusively by /assign-id; if the payload carries an APP ID
+    # that was already assigned to a *different* or paid application, strip it so we
+    # don't accidentally duplicate IDs across documents.
+    incoming_app_id = draft_data.get("applicationId", "")
+    if incoming_app_id and not incoming_app_id.startswith("TEMP"):
+        # Check whether this ID already belongs to a non-draft document
+        existing_app = await db.applications.find_one(
+            {"applicationId": incoming_app_id, "status": {"$ne": "draft"}}
+        )
+        if existing_app:
+            # Strip the stale APP ID — assign-id will re-assign if needed
+            draft_data.pop("applicationId", None)
+
     expiry_delta = await get_expiry_delta()
     expires_at = now + expiry_delta
 
@@ -84,6 +99,9 @@ async def save_draft(
     existing = await db.applications.find_one(draft_query)
     
     if existing:
+        # Never overwrite a legitimate APP ID on an existing draft with a stripped/missing one
+        if not draft_data.get("applicationId") and existing.get("applicationId"):
+            draft_data["applicationId"] = existing["applicationId"]
         await db.applications.update_one(
             {"_id": existing["_id"]},
             {"$set": draft_data}
@@ -193,24 +211,46 @@ BASE_DIR = Path(__file__).parent.parent
 UPLOAD_DIR = BASE_DIR / "uploads"
 
 def generate_application_id() -> str:
-    """Generate unique application ID using full timestamp"""
+    """Generate unique application ID: APP{timestamp}{6-char hex} to avoid timestamp collisions."""
     timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
-    return f"APP{timestamp}"
+    suffix = secrets.token_hex(3).upper()  # 6 hex chars
+    return f"APP{timestamp}{suffix}"
 
 
 @router.post("/assign-id", response_model=dict)
-async def assign_application_id(user_id: str = Depends(get_current_user)):
+async def assign_application_id(
+    body: dict = {},
+    user_id: str = Depends(get_current_user)
+):
     """
     Generate a permanent APP ID for the user's draft and create the upload folder.
     Replaces any existing TEMP ID. Called when the user reaches the Document Upload step.
+    Requires visaId in the request body to scope the lookup to the correct draft.
     """
+    from bson import ObjectId
     now = datetime.utcnow()
-    existing = await db.applications.find_one({"userId": user_id, "status": "draft"})
+    visa_id = body.get("visaId") if body else None
+
+    # Build query scoped to the correct draft
+    draft_query: dict = {"userId": user_id, "status": "draft"}
+    if visa_id:
+        draft_query["visaId"] = visa_id
+
+    existing = await db.applications.find_one(draft_query)
     existing_id = existing.get("applicationId", "") if existing else ""
 
     # Assign a new APP ID if there's no ID yet or the current one is a TEMP placeholder
     if not existing_id or existing_id.startswith("TEMP"):
-        application_id = generate_application_id()
+        # Keep generating until we find a unique ID (extremely rare collision guard)
+        for _ in range(10):
+            candidate = generate_application_id()
+            clash = await db.applications.find_one({"applicationId": candidate})
+            if not clash:
+                application_id = candidate
+                break
+        else:
+            application_id = generate_application_id()  # last resort
+
         if existing:
             await db.applications.update_one(
                 {"_id": existing["_id"]},
@@ -229,6 +269,7 @@ async def assign_application_id(user_id: str = Depends(get_current_user)):
         else:
             await db.applications.insert_one({
                 "userId": user_id,
+                "visaId": visa_id,
                 "applicationId": application_id,
                 "status": "draft",
                 "createdAt": now,

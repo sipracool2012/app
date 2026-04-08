@@ -407,33 +407,40 @@ const AdminPanel = () => {
 
   // Status workflow
   // pending   → (system only, set when app is started)
-  // submitted → set when user clicks Pay
-  // paid      → set when payment is confirmed
-  // processed → admin marks as processed
-  // approved  → admin final approval
-  // rejected  → admin final rejection
+  // Status workflow:
+  // draft          → user is filling steps 1-10
+  // paid           → payment confirmed (set automatically by payment gateway)
+  // pending_review → set automatically after 1 hour, or admin does it manually
+  // submitted      → admin manually advances
+  // processed      → admin manually advances
+  // approved       → admin final approval
+  // rejected       → admin final rejection
   const ALLOWED_TRANSITIONS = {
-    pending:   ['submitted'],           // admin can manually advance if needed
-    submitted: ['paid', 'rejected'],
-    paid:      ['processed', 'rejected'],
-    processed: ['approved', 'rejected'],
-    approved:  [],                      // terminal
-    rejected:  [],                      // terminal
+    pending:        ['pending_review', 'rejected'],  // legacy status fallback
+    paid:           ['pending_review', 'rejected'],
+    pending_review: ['submitted', 'rejected'],
+    submitted:      ['processed', 'rejected'],
+    processed:      ['approved', 'rejected'],
+    approved:       [],                              // terminal
+    rejected:       [],                              // terminal
   };
 
   const getStatusBadge = (status) => {
     const colors = {
-      draft:     'bg-gray-100 text-gray-600',
-      pending:   'bg-yellow-100 text-yellow-800',
-      submitted: 'bg-blue-100 text-blue-800',
-      paid:      'bg-indigo-100 text-indigo-800',
-      processed: 'bg-purple-100 text-purple-800',
-      approved:  'bg-green-100 text-green-800',
-      rejected:  'bg-red-100 text-red-800',
+      draft:          'bg-gray-100 text-gray-600',
+      paid:           'bg-indigo-100 text-indigo-800',
+      pending_review: 'bg-yellow-100 text-yellow-800',
+      submitted:      'bg-blue-100 text-blue-800',
+      processed:      'bg-purple-100 text-purple-800',
+      approved:       'bg-green-100 text-green-800',
+      rejected:       'bg-red-100 text-red-800',
+      // legacy
+      pending:        'bg-yellow-100 text-yellow-800',
     };
+    const label = status === 'pending_review' ? 'PENDING REVIEW' : status?.toUpperCase();
     return (
       <Badge className={colors[status] || 'bg-gray-100 text-gray-800'}>
-        {status?.toUpperCase()}
+        {label}
       </Badge>
     );
   };
@@ -524,7 +531,7 @@ const AdminPanel = () => {
           {/* Applications Tab */}
           <TabsContent value="applications" className="space-y-6">
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-7 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-8 gap-4">
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-xs font-medium text-gray-600">Total</CardTitle>
@@ -545,11 +552,21 @@ const AdminPanel = () => {
               </Card>
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-medium text-gray-600">Pending</CardTitle>
+                  <CardTitle className="text-xs font-medium text-gray-600">Paid</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold text-indigo-600">
+                    {applications.filter(a => a.status === 'paid').length}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-xs font-medium text-gray-600">Pending Review</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-2xl font-bold text-yellow-600">
-                    {applications.filter(a => a.status === 'pending').length}
+                    {applications.filter(a => a.status === 'pending_review').length}
                   </p>
                 </CardContent>
               </Card>
@@ -565,11 +582,11 @@ const AdminPanel = () => {
               </Card>
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-medium text-gray-600">Paid</CardTitle>
+                  <CardTitle className="text-xs font-medium text-gray-600">Processed</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-2xl font-bold text-indigo-600">
-                    {applications.filter(a => a.status === 'paid').length}
+                  <p className="text-2xl font-bold text-purple-600">
+                    {applications.filter(a => a.status === 'processed').length}
                   </p>
                 </CardContent>
               </Card>
@@ -618,9 +635,9 @@ const AdminPanel = () => {
                     <SelectContent>
                       <SelectItem value="all">All Status</SelectItem>
                       <SelectItem value="draft">Draft / In Progress</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="submitted">Submitted</SelectItem>
                       <SelectItem value="paid">Paid</SelectItem>
+                      <SelectItem value="pending_review">Pending Review</SelectItem>
+                      <SelectItem value="submitted">Submitted</SelectItem>
                       <SelectItem value="processed">Processed</SelectItem>
                       <SelectItem value="approved">Approved</SelectItem>
                       <SelectItem value="rejected">Rejected</SelectItem>
@@ -696,9 +713,9 @@ const AdminPanel = () => {
                                     <SelectContent>
                                       {currentUser?.role === 'super_admin' ? (
                                         // Super admin sees every status
-                                        ['pending', 'submitted', 'paid', 'processed', 'approved', 'rejected'].map(s => (
+                                        ['paid', 'pending_review', 'submitted', 'processed', 'approved', 'rejected'].map(s => (
                                           <SelectItem key={s} value={s}>
-                                            {s.charAt(0).toUpperCase() + s.slice(1)}
+                                            {s === 'pending_review' ? 'Pending Review' : s.charAt(0).toUpperCase() + s.slice(1)}
                                             {s === app.status ? ' (current)' : ''}
                                           </SelectItem>
                                         ))
@@ -706,11 +723,11 @@ const AdminPanel = () => {
                                         // Regular admin: current status as disabled reference + allowed next states only
                                         <>
                                           <SelectItem value={app.status} disabled>
-                                            {app.status.charAt(0).toUpperCase() + app.status.slice(1)} (current)
+                                            {app.status === 'pending_review' ? 'Pending Review' : app.status.charAt(0).toUpperCase() + app.status.slice(1)} (current)
                                           </SelectItem>
                                           {(ALLOWED_TRANSITIONS[app.status] || []).map(next => (
                                             <SelectItem key={next} value={next}>
-                                              {next.charAt(0).toUpperCase() + next.slice(1)}
+                                              {next === 'pending_review' ? 'Pending Review' : next.charAt(0).toUpperCase() + next.slice(1)}
                                             </SelectItem>
                                           ))}
                                         </>

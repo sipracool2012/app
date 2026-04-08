@@ -395,7 +395,7 @@ async def paypal_capture_order(
 
         transaction_id = capture["purchase_units"][0]["payments"]["captures"][0]["id"]
 
-        # Mark application as submitted + record transaction
+        # Mark application as paid + record transaction
         capture_amount = float(
             capture["purchase_units"][0]["payments"]["captures"][0]["amount"]["value"]
         )
@@ -403,7 +403,8 @@ async def paypal_capture_order(
         await db.applications.update_one(
             {"applicationId": req.application_id},
             {"$set": {
-                "status": "submitted",
+                "status": "paid",
+                "paidAt": datetime.utcnow(),
                 "paypal_transaction_id": transaction_id,
                 "paypal_capture": capture,
                 "updatedAt": datetime.utcnow()
@@ -495,7 +496,8 @@ async def razorpay_verify_payment(
     await db.applications.update_one(
         {"applicationId": req.application_id},
         {"$set": {
-            "status": "submitted",
+            "status": "paid",
+            "paidAt": datetime.utcnow(),
             "razorpay_payment_id": req.payment_id,
             "razorpay_order_id": req.order_id,
             "updatedAt": datetime.utcnow(),
@@ -593,7 +595,8 @@ async def tazapay_verify(
         await db.applications.update_one(
             {"applicationId": application_id},
             {"$set": {
-                "status": "submitted",
+                "status": "paid",
+                "paidAt": datetime.utcnow(),
                 "tazapay_session_id": session_id,
                 "updatedAt": datetime.utcnow(),
             }}

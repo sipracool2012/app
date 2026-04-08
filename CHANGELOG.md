@@ -5,7 +5,35 @@ All notable changes to the Clear eVisa project are documented in this file.
 Format: `## [Date] - Description`
 ---
 
-## [2026-04-08] - with_discount mode now uses our_fee − discount_amount
+## [2026-04-08] - Fix: duplicate APP IDs assigned to draft applications
+
+Three root-cause bugs fixed:
+
+1. **`assign-id` not scoped by `visaId`** (`backend/routes/applications.py`)
+   - `find_one({"userId": ..., "status": "draft"})` could find the wrong draft when a user had multiple concurrent drafts
+   - Fixed: endpoint now accepts `visaId` in the JSON body and scopes the query to `{"userId", "visaId", "status": "draft"}`
+
+2. **Timestamp collision in `generate_application_id()`** (`backend/routes/applications.py`)
+   - `APP{YYYYMMDDHHMMSS}` had second-granularity — two calls in the same second produced identical IDs
+   - Fixed: ID format changed to `APP{YYYYMMDDHHMMSS}{6-char-hex}` (e.g. `APP20260408201007A3F9C1`)
+   - Added uniqueness loop: retries up to 10 times checking `$exists` in DB before committing
+
+3. **`save_draft` trusted `applicationId` from the payload** (`backend/routes/applications.py`)
+   - A stale APP ID carried in `formData` (from a previous session or paid application) would be written to a new draft, creating two documents with the same ID
+   - Fixed: if the incoming `applicationId` is a real APP ID (not TEMP) and it already belongs to a non-draft document, it is stripped before the upsert
+
+4. **Frontend: `assign-id` call did not include `visaId`** (`frontend/src/pages/VisaApplication.jsx`)
+   - Now sends `{ visaId }` in the POST body so the backend finds the correct draft
+   - Fresh starts (no draft) clear any stale `applicationId` from formData
+
+
+- **New status flow:** `draft` → `paid` (payment success) → `pending_review` (auto after 1 hr) → `submitted` (admin) → `processed` (admin) → `approved`/`rejected` (admin)
+- Backend: all 3 payment gateways (PayPal, Razorpay, Tazapay) now set `status: "paid"` + `paidAt` timestamp on successful payment (was `"submitted"`)
+- Backend (`server.py`): new `paid_to_pending_review_loop()` background task — every 60 s promotes applications where `status == "paid"` and `paidAt < now - 1 hour` to `"pending_review"` automatically
+- Frontend `AdminPanel.jsx`: updated `ALLOWED_TRANSITIONS` map (`paid → pending_review → submitted → processed → approved/rejected`); `getStatusBadge` includes `pending_review`; stats cards updated (Paid, Pending Review, Submitted, Processed, Approved, Rejected); filter dropdown and super_admin select updated; labels formatted correctly
+- Frontend `MyApplications.jsx`: `statusConfig` and `WORKFLOW_STEPS` updated to new order (Paid → Pending Review → Submitted → Processed → Approved); legacy `pending` status mapped to `pending_review` in stepper
+
+
 - `with_discount` display mode now shows `our_fee - discount_amount` everywhere (was `full_total - discount` or `price - discount`)
 - Strikethrough "original price" now shows `our_fee` (not the full total / visa price)
 - Affected files: `Home.jsx` (visa cards), `VisaDetail.jsx` (pricing sidebar), `Step10Payment.jsx` (fee breakdown)

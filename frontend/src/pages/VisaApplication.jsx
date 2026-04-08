@@ -124,10 +124,10 @@ const VisaApplication = () => {
             const passportName = location.state?.passportName || selectedVisaOption?.country_name || '';
             setFormData(prev => ({ ...prev, visaId, selectedVisaOption, passportName }));
           } else {
-            // No drafts at all — fresh start
+            // No drafts at all — fresh start; clear any stale applicationId from state
             const selectedVisaOption = await fetchVisaOption(visaId);
             const passportName = location.state?.passportName || selectedVisaOption?.country_name || '';
-            setFormData(prev => ({ ...prev, visaId, selectedVisaOption, passportName }));
+            setFormData(prev => ({ ...prev, visaId, selectedVisaOption, passportName, applicationId: undefined }));
           }
         }
       } catch (err) {
@@ -231,7 +231,8 @@ const VisaApplication = () => {
         try {
           const res = await fetch(`${BACKEND_URL}/api/applications/assign-id`, {
             method: 'POST',
-            headers: getAuthHeaders()
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ visaId: updatedData.visaId || visaId })
           });
           if (res.ok) {
             const { applicationId } = await res.json();
