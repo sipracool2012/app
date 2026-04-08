@@ -177,11 +177,12 @@ const VisaDetail = () => {
   const description = VISA_DESCRIPTION(visaOption, countryDemonym || passportName);
   const discount = parseFloat(visaOption.discount_amount) || 0;
   const basePrice = visaOption.price;
+  const ourFeeUnit = parseFloat(visaOption.our_fee) || 0;
   const displayedUnitPrice =
     feeDisplayMode === 'our_fee_only'
-      ? parseFloat(visaOption.our_fee) || 0
+      ? ourFeeUnit
       : feeDisplayMode === 'with_discount'
-      ? Math.max(0, basePrice - discount)
+      ? Math.max(0, ourFeeUnit - discount)
       : basePrice;
   const totalPrice = displayedUnitPrice * travellers;
   const totalGovtFee = visaOption.govt_fee * travellers;
@@ -346,7 +347,7 @@ const VisaDetail = () => {
                 {feeDisplayMode === 'with_discount' && discount > 0 && (
                   <div className="flex items-center justify-between text-sm text-gray-400">
                     <span>Original price</span>
-                    <span className="line-through">${(basePrice * travellers).toFixed(2)}</span>
+                    <span className="line-through">${(ourFeeUnit * travellers).toFixed(2)}</span>
                   </div>
                 )}
                 <div className="flex items-center justify-between">

@@ -3,8 +3,12 @@
 All notable changes to the Clear eVisa project are documented in this file.
 
 Format: `## [Date] - Description`
-
 ---
+
+## [2026-04-08] - with_discount mode now uses our_fee − discount_amount
+- `with_discount` display mode now shows `our_fee - discount_amount` everywhere (was `full_total - discount` or `price - discount`)
+- Strikethrough "original price" now shows `our_fee` (not the full total / visa price)
+- Affected files: `Home.jsx` (visa cards), `VisaDetail.jsx` (pricing sidebar), `Step10Payment.jsx` (fee breakdown)
 
 ## [2026-04-08] - User Management: show only admins, add promote-by-email form
 - Backend: `GET /api/auth/users` now returns only `admin` and `super_admin` users (excludes regular users)
