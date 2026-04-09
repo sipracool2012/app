@@ -26,12 +26,14 @@ import RefundPolicy from "./pages/RefundPolicy";
 import VisaDetail from "./pages/VisaDetail";
 import Requirements from "./pages/Requirements";
 import { Toaster } from "./components/ui/toaster";
+import { ScrollToTopOnNav, ScrollToTopButton } from "./components/ScrollToTop";
 
 function App() {
   return (
     <AuthProvider>
       <div className="App">
         <BrowserRouter>
+          <ScrollToTopOnNav />
           <Header />
           <Routes>
             <Route path="/" element={<Home />} />
@@ -91,6 +93,7 @@ function App() {
             <Route path="/refund-policy" element={<RefundPolicy />} />
           </Routes>
           <Footer />
+          <ScrollToTopButton />
           <Toaster />
         </BrowserRouter>
       </div>
