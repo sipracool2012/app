@@ -5,29 +5,33 @@ All notable changes to the Clear eVisa project are documented in this file.
 Format: `## [Date] - Description`
 ---
 
-## [2026-04-08] - Fix: duplicate APP IDs assigned to draft applications
+## [2026-04-08] - Feature: multiple draft applications per visa (family members)
 
-Three root-cause bugs fixed:
+Users can now have multiple draft applications for the same visa (e.g. for family members travelling together).
 
-1. **`assign-id` not scoped by `visaId`** (`backend/routes/applications.py`)
-   - `find_one({"userId": ..., "status": "draft"})` could find the wrong draft when a user had multiple concurrent drafts
-   - Fixed: endpoint now accepts `visaId` in the JSON body and scopes the query to `{"userId", "visaId", "status": "draft"}`
+### What changed
 
-2. **Timestamp collision in `generate_application_id()`** (`backend/routes/applications.py`)
-   - `APP{YYYYMMDDHHMMSS}` had second-granularity — two calls in the same second produced identical IDs
-   - Fixed: ID format changed to `APP{YYYYMMDDHHMMSS}{6-char-hex}` (e.g. `APP20260408201007A3F9C1`)
-   - Added uniqueness loop: retries up to 10 times checking `$exists` in DB before committing
+**Backend (`backend/routes/applications.py`)**
+- `PATCH /api/applications/draft` — reworked upsert logic:
+  - If `__draftId` (MongoDB `_id` string) is present in the payload, the specific draft is updated
+  - If not, a **new draft is always created** (no more one-per-visa deduplication)
+  - Existing APP/TEMP ID preservation and security checks still apply
+- `GET /api/applications/drafts` — now includes each draft's `_id` as an `id` field in the response (was excluded); results sorted newest-first
+- `POST /api/applications/assign-id` — now accepts `draftId` in the body to scope the lookup to the exact draft; falls back to `userId+visaId` when omitted
 
-3. **`save_draft` trusted `applicationId` from the payload** (`backend/routes/applications.py`)
-   - A stale APP ID carried in `formData` (from a previous session or paid application) would be written to a new draft, creating two documents with the same ID
-   - Fixed: if the incoming `applicationId` is a real APP ID (not TEMP) and it already belongs to a non-draft document, it is stripped before the upsert
+**Frontend (`frontend/src/pages/VisaApplication.jsx`)**
+- Added `draftIdRef` (`useRef`) to track the active draft's MongoDB `_id` throughout the session
+- `loadDraft` logic rewritten:
+  - If `location.state.draftId` is set (navigating from My Applications "Continue") → directly loads that specific draft, no popup
+  - If same-visa drafts exist (and no specific draftId in nav state) → shows a **"Continue existing application?" popup** listing all drafts with applicant name, step progress, and last-saved date; plus a "Start New Application" button
+  - If no drafts for this visa → fresh start with no popup (other-visa drafts are now silently ignored; old "conflict modal" removed)
+- `saveDraft` — injects `__draftId` into every payload save so the backend updates the correct document; captures the returned `draftId` from the first new-draft creation response
+- `assign-id` call — passes `draftId: draftIdRef.current` alongside `visaId` so the upload folder is associated with the correct draft
 
-4. **Frontend: `assign-id` call did not include `visaId`** (`frontend/src/pages/VisaApplication.jsx`)
-   - Now sends `{ visaId }` in the POST body so the backend finds the correct draft
-   - Fresh starts (no draft) clear any stale `applicationId` from formData
+**Frontend (`frontend/src/pages/MyApplications.jsx`)**
+- "Continue" button now navigates with `state: { draftId: app.id }` so `VisaApplication` can load the exact draft directly without showing the popup
 
 
-- **New status flow:** `draft` → `paid` (payment success) → `pending_review` (auto after 1 hr) → `submitted` (admin) → `processed` (admin) → `approved`/`rejected` (admin)
 - Backend: all 3 payment gateways (PayPal, Razorpay, Tazapay) now set `status: "paid"` + `paidAt` timestamp on successful payment (was `"submitted"`)
 - Backend (`server.py`): new `paid_to_pending_review_loop()` background task — every 60 s promotes applications where `status == "paid"` and `paidAt < now - 1 hour` to `"pending_review"` automatically
 - Frontend `AdminPanel.jsx`: updated `ALLOWED_TRANSITIONS` map (`paid → pending_review → submitted → processed → approved/rejected`); `getStatusBadge` includes `pending_review`; stats cards updated (Paid, Pending Review, Submitted, Processed, Approved, Rejected); filter dropdown and super_admin select updated; labels formatted correctly

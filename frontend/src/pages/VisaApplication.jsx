@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, ChevronRight, Check, Save, AlertCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Save, FileText } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { useToast } from '../hooks/use-toast';
@@ -46,9 +46,10 @@ const VisaApplication = () => {
   const [draftLoaded, setDraftLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
-  const [conflictDrafts, setConflictDrafts] = useState([]);
-  const [showConflict, setShowConflict] = useState(false);
+  const [sameVisaDrafts, setSameVisaDrafts] = useState([]);
+  const [showSameVisaModal, setShowSameVisaModal] = useState(false);
   const saveTimeoutRef = useRef(null);
+  const draftIdRef = useRef(null);
 
   const fetchVisaOption = async (vId) => {
     const code = vId.split('-')[0].toUpperCase();
@@ -76,58 +77,50 @@ const VisaApplication = () => {
         if (res.ok) {
           const data = await res.json();
           const allDrafts = data.drafts || [];
+          const specificDraftId = location.state?.draftId;
 
-          // Draft for the exact visa the user is currently applying for
-          const currentDraft = allDrafts.find(d => d.visaId === visaId);
-          // Drafts for other visa options
-          const otherDrafts = allDrafts
-            .filter(d => d.visaId !== visaId)
-            .sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
-
-          if (currentDraft) {
-            // Load this draft — if coming via "Yes, continue" from conflict popup, start from step 1
-            const draft = { ...currentDraft };
-            const forceStep1 = location.state?.startFromStep1;
-            const savedStep = forceStep1 ? 1 : (draft.currentStep || 1);
-            delete draft.userId;
-            delete draft.status;
-            delete draft.createdAt;
-            delete draft.updatedAt;
-            delete draft.currentStep;
-
-            let selectedVisaOption = draft.selectedVisaOption || null;
-            if (!selectedVisaOption) {
-              selectedVisaOption = await fetchVisaOption(visaId);
+          if (specificDraftId) {
+            // Coming from My Applications "Continue" — load the exact draft by its ID
+            const targetDraft = allDrafts.find(d => d.id === specificDraftId);
+            if (targetDraft) {
+              const draft = { ...targetDraft };
+              const savedStep = draft.currentStep || 1;
+              draftIdRef.current = draft.id;
+              delete draft.id;
+              delete draft.userId;
+              delete draft.status;
+              delete draft.createdAt;
+              delete draft.updatedAt;
+              delete draft.currentStep;
+              let selectedVisaOption = draft.selectedVisaOption || null;
+              if (!selectedVisaOption) selectedVisaOption = await fetchVisaOption(visaId);
+              const passportName = location.state?.passportName || draft.passportName || selectedVisaOption?.country_name || '';
+              const passportDemonym = location.state?.passportDemonym || draft.passportDemonym || '';
+              setFormData(prev => ({ ...prev, ...draft, visaId, selectedVisaOption, passportName, passportDemonym }));
+              setCurrentStep(savedStep);
+              toast({ title: t('application.draftLoaded'), description: t('application.draftLoadedDesc', { step: savedStep }) });
+            } else {
+              // Target draft not found (expired/deleted) — fresh start
+              const selectedVisaOption = await fetchVisaOption(visaId);
+              const passportName = location.state?.passportName || selectedVisaOption?.country_name || '';
+              setFormData(prev => ({ ...prev, visaId, selectedVisaOption, passportName, applicationId: undefined }));
             }
-
-            // Prefer passportName from nav state; fall back to draft value or country_name on visa option
-            const passportName = location.state?.passportName
-              || draft.passportName
-              || selectedVisaOption?.country_name
-              || '';
-            const passportDemonym = location.state?.passportDemonym
-              || draft.passportDemonym
-              || '';
-
-            setFormData(prev => ({ ...prev, ...draft, visaId, selectedVisaOption, passportName, passportDemonym }));
-            setCurrentStep(savedStep);
-            toast({
-              title: t('application.draftLoaded'),
-              description: t('application.draftLoadedDesc', { step: savedStep }),
-            });
-          } else if (otherDrafts.length > 0) {
-            // User has draft(s) for different visa(s) — show conflict modal
-            setConflictDrafts(otherDrafts);
-            setShowConflict(true);
-            // Prepare fresh form for the new visa in the background
-            const selectedVisaOption = await fetchVisaOption(visaId);
-            const passportName = location.state?.passportName || selectedVisaOption?.country_name || '';
-            setFormData(prev => ({ ...prev, visaId, selectedVisaOption, passportName }));
           } else {
-            // No drafts at all — fresh start; clear any stale applicationId from state
-            const selectedVisaOption = await fetchVisaOption(visaId);
-            const passportName = location.state?.passportName || selectedVisaOption?.country_name || '';
-            setFormData(prev => ({ ...prev, visaId, selectedVisaOption, passportName, applicationId: undefined }));
+            // Find all drafts for the current visa
+            const sameDrafts = allDrafts.filter(d => d.visaId === visaId);
+            if (sameDrafts.length > 0) {
+              // Prepare fresh form state and show the "continue or start new" popup
+              const selectedVisaOption = await fetchVisaOption(visaId);
+              const passportName = location.state?.passportName || selectedVisaOption?.country_name || '';
+              setFormData(prev => ({ ...prev, visaId, selectedVisaOption, passportName, applicationId: undefined }));
+              setSameVisaDrafts(sameDrafts);
+              setShowSameVisaModal(true);
+            } else {
+              // No drafts for this visa — fresh start (other-visa drafts are ignored)
+              const selectedVisaOption = await fetchVisaOption(visaId);
+              const passportName = location.state?.passportName || selectedVisaOption?.country_name || '';
+              setFormData(prev => ({ ...prev, visaId, selectedVisaOption, passportName, applicationId: undefined }));
+            }
           }
         }
       } catch (err) {
@@ -159,6 +152,10 @@ const VisaApplication = () => {
         currentStep: step,
         email: data.email || userEmail
       };
+      // Attach the draft reference so backend updates the correct document
+      if (draftIdRef.current) {
+        payload.__draftId = draftIdRef.current;
+      }
       // Remove undefined/null values
       Object.keys(payload).forEach(key => {
         if (payload[key] === undefined || payload[key] === null) {
@@ -172,6 +169,11 @@ const VisaApplication = () => {
         body: JSON.stringify(payload)
       });
       if (res.ok) {
+        const result = await res.json();
+        // Capture the draftId returned by the server (set on first new-draft creation)
+        if (!draftIdRef.current && result.draftId) {
+          draftIdRef.current = result.draftId;
+        }
         setLastSaved(new Date());
       }
     } catch (err) {
@@ -232,7 +234,7 @@ const VisaApplication = () => {
           const res = await fetch(`${BACKEND_URL}/api/applications/assign-id`, {
             method: 'POST',
             headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
-            body: JSON.stringify({ visaId: updatedData.visaId || visaId })
+            body: JSON.stringify({ visaId: updatedData.visaId || visaId, draftId: draftIdRef.current })
           });
           if (res.ok) {
             const { applicationId } = await res.json();
@@ -274,50 +276,69 @@ const VisaApplication = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      {/* Conflict Modal — existing drafts for different visa options */}
-      {showConflict && (
+      {/* Same-visa drafts modal — continue an existing draft or start a new application */}
+      {showSameVisaModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <div className="bg-white rounded-xl shadow-xl p-6 max-w-md w-full">
             <div className="flex items-start gap-3 mb-4">
-              <div className="p-2 bg-amber-100 rounded-lg shrink-0">
-                <AlertCircle className="w-5 h-5 text-amber-600" />
+              <div className="p-2 bg-blue-100 rounded-lg shrink-0">
+                <FileText className="w-5 h-5 text-blue-600" />
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900 text-base">
-                  You have existing draft {conflictDrafts.length === 1 ? 'application' : 'applications'}
+                  Continue existing application?
                 </h3>
                 <p className="text-gray-500 text-sm mt-1">
-                  Would you like to continue one of them, or start a new application?
+                  You have {sameVisaDrafts.length} saved draft{sameVisaDrafts.length !== 1 ? 's' : ''} for this visa. Continue one or start fresh for another applicant.
                 </p>
               </div>
             </div>
 
-            <div className="space-y-2 mb-5">
-              {conflictDrafts.map((draft, idx) => (
-                <button
-                  key={idx}
-                  className="w-full text-left border border-blue-200 bg-blue-50 hover:bg-blue-100 rounded-lg p-3 transition-colors"
-                  onClick={() => {
-                    setShowConflict(false);
-                    navigate(`/apply/${draft.visaId}`, { state: { startFromStep1: true } });
-                  }}
-                >
-                  <div className="font-medium text-blue-800 text-sm">
-                    {draft.selectedVisaOption?.name || draft.visaId}
-                  </div>
-                  <div className="text-xs text-blue-500 mt-0.5">
-                    Step {draft.currentStep || 1} of {steps.length} saved — click to continue from Step 1
-                  </div>
-                </button>
-              ))}
+            <div className="space-y-2 mb-5 max-h-60 overflow-y-auto">
+              {sameVisaDrafts.map((draft) => {
+                const name = [draft.givenNames, draft.surname].filter(Boolean).join(' ') || 'Unnamed applicant';
+                const step = draft.currentStep || 1;
+                const savedDate = draft.updatedAt ? new Date(draft.updatedAt).toLocaleDateString() : '';
+                return (
+                  <button
+                    key={draft.id}
+                    className="w-full text-left border border-blue-200 bg-blue-50 hover:bg-blue-100 rounded-lg p-3 transition-colors"
+                    onClick={async () => {
+                      setShowSameVisaModal(false);
+                      const d = { ...draft };
+                      draftIdRef.current = d.id || null;
+                      delete d.id;
+                      delete d.userId;
+                      delete d.status;
+                      delete d.createdAt;
+                      delete d.updatedAt;
+                      delete d.currentStep;
+                      let selectedVisaOption = d.selectedVisaOption || null;
+                      if (!selectedVisaOption) selectedVisaOption = await fetchVisaOption(visaId);
+                      const passportName = location.state?.passportName || d.passportName || selectedVisaOption?.country_name || '';
+                      const passportDemonym = location.state?.passportDemonym || d.passportDemonym || '';
+                      setFormData(prev => ({ ...prev, ...d, visaId, selectedVisaOption, passportName, passportDemonym }));
+                      setCurrentStep(step);
+                      toast({ title: t('application.draftLoaded'), description: t('application.draftLoadedDesc', { step }) });
+                    }}
+                  >
+                    <div className="font-medium text-blue-800 text-sm">{name}</div>
+                    <div className="text-xs text-blue-500 mt-0.5">
+                      Step {step} of {steps.length} · Last saved {savedDate}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
 
             <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => setShowConflict(false)}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={() => {
+                setShowSameVisaModal(false);
+                draftIdRef.current = null;
+              }}
             >
-              No, Start New Application
+              + Start New Application
             </Button>
           </div>
         </div>

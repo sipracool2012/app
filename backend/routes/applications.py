@@ -60,10 +60,15 @@ async def save_draft(
     draft_data: dict,
     user_id: str = Depends(get_current_user)
 ):
-    """Save or update a draft application. One draft per user per visa (upsert).
+    """Save or update a draft application. Supports multiple drafts per user per visa (family members).
+    If __draftId is present in the payload, update that specific draft.
+    If not, always create a new draft (no per-visa deduplication).
     Also assigns a TEMP ID on first save and resets/extends expiresAt on every save."""
     now = datetime.utcnow()
-    
+
+    # Extract the target draft ID (if updating an existing draft)
+    draft_id_str = draft_data.pop("__draftId", None)
+
     # Remove any _id field from incoming data
     draft_data.pop("_id", None)
     draft_data.pop("id", None)
@@ -74,12 +79,10 @@ async def save_draft(
     # don't accidentally duplicate IDs across documents.
     incoming_app_id = draft_data.get("applicationId", "")
     if incoming_app_id and not incoming_app_id.startswith("TEMP"):
-        # Check whether this ID already belongs to a non-draft document
         existing_app = await db.applications.find_one(
             {"applicationId": incoming_app_id, "status": {"$ne": "draft"}}
         )
         if existing_app:
-            # Strip the stale APP ID — assign-id will re-assign if needed
             draft_data.pop("applicationId", None)
 
     expiry_delta = await get_expiry_delta()
@@ -91,30 +94,37 @@ async def save_draft(
         "updatedAt": now,
         "expiresAt": expires_at,
     })
-    
-    visa_id = draft_data.get("visaId")
-    draft_query = {"userId": user_id, "status": "draft"}
-    if visa_id:
-        draft_query["visaId"] = visa_id
-    existing = await db.applications.find_one(draft_query)
-    
-    if existing:
-        # Never overwrite a legitimate APP ID on an existing draft with a stripped/missing one
+
+    if draft_id_str:
+        # Update the specific draft referenced by draftId
+        try:
+            target_oid = ObjectId(draft_id_str)
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid draftId format")
+
+        existing = await db.applications.find_one(
+            {"_id": target_oid, "userId": user_id, "status": "draft"}
+        )
+        if not existing:
+            raise HTTPException(status_code=404, detail="Draft not found")
+
+        # Preserve existing APP ID if payload doesn't carry one
         if not draft_data.get("applicationId") and existing.get("applicationId"):
             draft_data["applicationId"] = existing["applicationId"]
+
         await db.applications.update_one(
-            {"_id": existing["_id"]},
+            {"_id": target_oid},
             {"$set": draft_data}
         )
         return {
             "message": "Draft updated",
-            "draftId": str(existing["_id"]),
-            "tempId": existing.get("applicationId", ""),
+            "draftId": draft_id_str,
+            "tempId": draft_data.get("applicationId", existing.get("applicationId", "")),
             "expiresAt": expires_at.isoformat(),
         }
     else:
+        # Create a new draft — multiple drafts per visa are supported (e.g. family members)
         draft_data["createdAt"] = now
-        # Assign TEMP ID only if not already present
         if not draft_data.get("applicationId"):
             draft_data["applicationId"] = generate_temp_id()
         result = await db.applications.insert_one(draft_data)
@@ -140,12 +150,15 @@ async def get_draft(user_id: str = Depends(get_current_user)):
 
 @router.get("/drafts", response_model=dict)
 async def get_all_drafts(user_id: str = Depends(get_current_user)):
-    """Get all draft applications for the logged-in user."""
+    """Get all draft applications for the logged-in user, newest first."""
     cursor = db.applications.find(
-        {"userId": user_id, "status": "draft"},
-        {"_id": 0}
-    )
-    drafts = await cursor.to_list(length=100)
+        {"userId": user_id, "status": "draft"}
+    ).sort("updatedAt", -1)
+    raw = await cursor.to_list(length=100)
+    drafts = []
+    for doc in raw:
+        doc["id"] = str(doc.pop("_id"))
+        drafts.append(doc)
     return {"drafts": drafts}
 
 
@@ -225,16 +238,26 @@ async def assign_application_id(
     """
     Generate a permanent APP ID for the user's draft and create the upload folder.
     Replaces any existing TEMP ID. Called when the user reaches the Document Upload step.
-    Requires visaId in the request body to scope the lookup to the correct draft.
+    Accepts draftId (MongoDB _id string) to scope the lookup to the exact draft,
+    falling back to userId+visaId if not provided.
     """
     from bson import ObjectId
     now = datetime.utcnow()
     visa_id = body.get("visaId") if body else None
+    draft_id_str = body.get("draftId") if body else None
 
     # Build query scoped to the correct draft
-    draft_query: dict = {"userId": user_id, "status": "draft"}
-    if visa_id:
-        draft_query["visaId"] = visa_id
+    if draft_id_str:
+        try:
+            draft_query: dict = {"_id": ObjectId(draft_id_str), "userId": user_id, "status": "draft"}
+        except Exception:
+            draft_query = {"userId": user_id, "status": "draft"}
+            if visa_id:
+                draft_query["visaId"] = visa_id
+    else:
+        draft_query = {"userId": user_id, "status": "draft"}
+        if visa_id:
+            draft_query["visaId"] = visa_id
 
     existing = await db.applications.find_one(draft_query)
     existing_id = existing.get("applicationId", "") if existing else ""

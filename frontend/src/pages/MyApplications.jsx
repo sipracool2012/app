@@ -153,7 +153,7 @@ const MyApplications = () => {
       toast({ title: 'Cannot resume', description: 'Visa info missing. Please start a new application.', variant: 'destructive' });
       return;
     }
-    navigate(`/apply/${app.visaId}`);
+    navigate(`/apply/${app.visaId}`, { state: { draftId: app.id } });
   };
 
   const formatDate = (dateStr) => {
