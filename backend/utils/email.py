@@ -60,6 +60,50 @@ async def send_otp_email(to_email: str, otp: str, full_name: str) -> bool:
     return await send_email(to_email, subject, html_content)
 
 
+async def send_password_reset_email(to_email: str, reset_link: str, full_name: str) -> bool:
+    """
+    Send a password reset email containing a one-time reset link.
+    The link expires after 1 hour.
+    """
+    subject = "Reset Your Clear eVisa Password"
+    html_content = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background-color: #2563eb; padding: 20px; text-align: center;">
+                <h1 style="color: white; margin: 0;">Clear eVisa&deg;</h1>
+            </div>
+            <div style="padding: 30px; background-color: #f9fafb;">
+                <h2 style="color: #1f2937;">Password Reset Request</h2>
+                <p style="color: #4b5563; font-size: 16px;">Dear {full_name},</p>
+                <p style="color: #4b5563; font-size: 16px;">
+                    We received a request to reset the password for your Clear eVisa account.
+                    Click the button below to create a new password. This link expires in <strong>1 hour</strong>.
+                </p>
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="{reset_link}" style="background-color: #2563eb; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">
+                        Reset My Password
+                    </a>
+                </div>
+                <p style="color: #6b7280; font-size: 13px;">
+                    If the button above doesn&apos;t work, copy and paste this link into your browser:
+                </p>
+                <p style="color: #2563eb; font-size: 13px; word-break: break-all;">{reset_link}</p>
+                <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">
+                    If you did not request a password reset, you can safely ignore this email.
+                    Your password will not be changed.
+                </p>
+            </div>
+            <div style="background-color: #1f2937; padding: 20px; text-align: center;">
+                <p style="color: #9ca3af; margin: 0; font-size: 12px;">
+                    &copy; 2026 Clear eVisa. All rights reserved.
+                </p>
+            </div>
+        </body>
+    </html>
+    """
+    return await send_email(to_email, subject, html_content)
+
+
 async def send_application_confirmation(to_email: str, application_id: str, applicant_name: str) -> bool:
     """
     Send application confirmation email

@@ -5,6 +5,26 @@ All notable changes to the Clear eVisa project are documented in this file.
 Format: `## [Date] - Description`
 ---
 
+## [2026-04-09] - Forgot Password flow; scroll-to-top on navigation + button
+
+### Added
+- **Forgot Password / Reset Password flow** (`backend/routes/auth.py`, `backend/models/user.py`, `backend/utils/email.py`, `frontend/src/pages/ForgotPassword.jsx`, `frontend/src/pages/ResetPassword.jsx`, `frontend/src/pages/SignIn.jsx`, `frontend/src/App.js`)
+  - New `POST /api/auth/forgot-password` endpoint — generates a `secrets.token_urlsafe(32)` reset token, stores it in a `password_reset_tokens` collection (1-hour expiry), and emails a reset link. Always returns 200 to prevent user enumeration.
+  - New `POST /api/auth/reset-password` endpoint — validates token (expiry + single-use flag), enforces 8-character minimum, hashes and saves the new password, marks the token used.
+  - `send_password_reset_email()` added to `backend/utils/email.py` with a styled HTML email matching the OTP template.
+  - `ForgotPasswordRequest` and `ResetPasswordRequest` Pydantic models added to `backend/models/user.py`.
+  - New `ForgotPassword.jsx` page at `/forgot-password` — email input form with success confirmation screen.
+  - New `ResetPassword.jsx` page at `/reset-password?token=…` — new password + confirm fields, success state, and invalid-token guard.
+  - "Forgot password?" link added below the Sign In button in `SignIn.jsx`.
+  - Both routes registered as public in `App.js`.
+  - Reset link domain controlled by `FRONTEND_URL` env variable (defaults to `https://clearevisa.com`).
+
+- **Scroll-to-top on navigation + floating button** (`frontend/src/components/ScrollToTop.jsx`, `frontend/src/App.js`)
+  - `ScrollToTopOnNav` — placed inside `<BrowserRouter>`, scrolls to top instantly on every route change so footer links always land at page top.
+  - `ScrollToTopButton` — fixed blue circle button (↑) in the bottom-right corner; appears after scrolling 300 px; smoothly returns to top on click.
+
+---
+
 ## [2026-04-08] - Feature: multiple draft applications per visa (family members)
 
 Users can now have multiple draft applications for the same visa (e.g. for family members travelling together).

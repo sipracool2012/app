@@ -53,6 +53,15 @@ class SignupOTPVerifyRequest(BaseModel):
     email: EmailStr
     otp: str
 
+class ForgotPasswordRequest(BaseModel):
+    """Request body for /api/auth/forgot-password."""
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    """Request body for /api/auth/reset-password."""
+    token: str
+    new_password: str
+
 class User(BaseModel):
     id: Optional[str] = Field(alias="_id", default=None)
     fullName: str

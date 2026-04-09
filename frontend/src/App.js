@@ -23,6 +23,8 @@ import FAQ from "./pages/FAQ";
 import TermsOfService from "./pages/TermsOfService";
 import CookiePolicy from "./pages/CookiePolicy";
 import RefundPolicy from "./pages/RefundPolicy";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import VisaDetail from "./pages/VisaDetail";
 import Requirements from "./pages/Requirements";
 import { Toaster } from "./components/ui/toaster";
@@ -39,6 +41,8 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route
               path="/apply/:visaId"
               element={

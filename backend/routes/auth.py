@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-from models.user import UserCreate, UserLogin, UserResponse, TokenResponse, User, UserRoleUpdate, UserEmailRoleUpdate, OTPVerifyRequest, LoginInitiateResponse, SignupOTPVerifyRequest
+from models.user import UserCreate, UserLogin, UserResponse, TokenResponse, User, UserRoleUpdate, UserEmailRoleUpdate, OTPVerifyRequest, LoginInitiateResponse, SignupOTPVerifyRequest, ForgotPasswordRequest, ResetPasswordRequest
 from utils.auth import get_password_hash, verify_password, create_access_token, get_current_user
 from datetime import datetime, timedelta
 from typing import List
@@ -306,6 +306,98 @@ async def verify_signup_otp(payload: SignupOTPVerifyRequest):
             role=record["role"],
         ),
     )
+
+
+# Password reset token validity (hours)
+RESET_TOKEN_EXPIRY_HOURS = 1
+
+
+@router.post("/forgot-password")
+async def forgot_password(payload: ForgotPasswordRequest):
+    """
+    Initiates a password reset.
+    Always returns the same success response to prevent user enumeration.
+    If the email exists, a reset link is emailed. If not, the request is silently dropped.
+    """
+    import os
+    frontend_url = os.environ.get("FRONTEND_URL", "https://clearevisa.com").rstrip("/")
+
+    user = await db.users.find_one({"email": payload.email})
+    if user:
+        token = secrets.token_urlsafe(32)
+        expires_at = datetime.utcnow() + timedelta(hours=RESET_TOKEN_EXPIRY_HOURS)
+
+        await db.password_reset_tokens.update_one(
+            {"email": payload.email},
+            {
+                "$set": {
+                    "email": payload.email,
+                    "token": token,
+                    "expires_at": expires_at,
+                    "used": False,
+                    "created_at": datetime.utcnow(),
+                }
+            },
+            upsert=True,
+        )
+
+        reset_link = f"{frontend_url}/reset-password?token={token}"
+        from utils.email import send_password_reset_email
+        sent = await send_password_reset_email(
+            to_email=payload.email,
+            reset_link=reset_link,
+            full_name=user.get("fullName", "User"),
+        )
+        if not sent:
+            logger.warning(f"[PASSWORD RESET FALLBACK] Reset link for {payload.email}: {reset_link}")
+
+    # Always return 200 to prevent user enumeration
+    return {"message": "If that email is registered, a password reset link has been sent."}
+
+
+@router.post("/reset-password")
+async def reset_password(payload: ResetPasswordRequest):
+    """
+    Completes a password reset.
+    Validates the token, updates the user's password, and invalidates the token.
+    """
+    invalid_exc = HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="This reset link is invalid or has expired. Please request a new one.",
+    )
+
+    record = await db.password_reset_tokens.find_one({"token": payload.token})
+    if not record:
+        raise invalid_exc
+    if record.get("used"):
+        raise invalid_exc
+    if datetime.utcnow() > record["expires_at"]:
+        raise invalid_exc
+
+    # Enforce minimum password length
+    if len(payload.new_password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be at least 8 characters.",
+        )
+
+    hashed = get_password_hash(payload.new_password)
+    result = await db.users.update_one(
+        {"email": record["email"]},
+        {"$set": {"password": hashed, "updatedAt": datetime.utcnow()}},
+    )
+
+    if result.matched_count == 0:
+        raise invalid_exc
+
+    # Invalidate token
+    await db.password_reset_tokens.update_one(
+        {"token": payload.token},
+        {"$set": {"used": True}},
+    )
+
+    logger.info(f"Password reset completed for {record['email']}")
+    return {"message": "Your password has been reset successfully. You can now sign in."}
 
 
 @router.get("/me", response_model=UserResponse)
