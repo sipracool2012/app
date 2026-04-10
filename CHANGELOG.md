@@ -5,6 +5,31 @@ All notable changes to the Clear eVisa project are documented in this file.
 Format: `## [Date] - Description`
 ---
 
+## [2026-04-10] - India Tourism landing page + default route change
+
+### Added
+- **India Tourism page** (`frontend/src/pages/IndiaTourism.jsx`) — new purely visual page accessible at `/india-tourism` and now the default root route (`/`)
+  - Full-screen hero with Unsplash imagery, headline "Discover the Soul of India", and dual CTAs
+  - Stats bar: 28+ States, 40 UNESCO Heritage Sites, 193+ Nationalities Welcome
+  - Destinations grid: 6 iconic locations (Taj Mahal, Kerala Backwaters, Rajasthan, Goa, Varanasi, Himachal Pradesh) with image cards and category tags
+  - "Why India" split section: 6 experience tiles (Cuisine, Heritage, Coastline, Wildlife, Festivals, Photography)
+  - Photo mosaic: 5-tile grid with hover zoom effects
+  - eVisa process steps band (4-step consultancy flow, dark blue background)
+  - Best time to visit: 3 seasonal cards (Peak/Summer/Monsoon)
+  - FAQ accordion: 5 India travel + eVisa questions
+  - Final full-bleed CTA section with Holi festival background image
+  - All "Get Your India eVisa" buttons navigate to `/home` (the visa application widget)
+  - No API calls or auth required — fully static/visual page
+
+### Changed
+- **App.js** (`frontend/src/App.js`)
+  - Root route `/` changed from `Home` to `IndiaTourism` — `clearevisa.com` now lands on the India Tourism page
+  - `Home` (visa application widget) moved to `/home`
+  - `IndiaTourism` retained as alias at `/india-tourism`
+  - `IndiaTourism` import added
+
+---
+
 ## [2026-04-10] - Legal/static pages: real business details + Indian eVisa consultancy positioning
 
 ### Changed

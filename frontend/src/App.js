@@ -27,6 +27,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import VisaDetail from "./pages/VisaDetail";
 import Requirements from "./pages/Requirements";
+import IndiaTourism from "./pages/IndiaTourism";
 import { Toaster } from "./components/ui/toaster";
 import { ScrollToTopOnNav, ScrollToTopButton } from "./components/ScrollToTop";
 
@@ -38,7 +39,8 @@ function App() {
           <ScrollToTopOnNav />
           <Header />
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<IndiaTourism />} />
+            <Route path="/home" element={<Home />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -95,6 +97,7 @@ function App() {
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/cookies" element={<CookiePolicy />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
+            <Route path="/india-tourism" element={<IndiaTourism />} />
           </Routes>
           <Footer />
           <ScrollToTopButton />
