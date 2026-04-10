@@ -680,22 +680,54 @@ const AdminPanel = () => {
                           </TableCell>
                         </TableRow>
                       ) : (
-                        filteredApps.map((app) => (
+                        filteredApps.map((app) => {
+                          // Friendly short visa type label
+                          const rawVisa = app.visaOptionName || app.visaService || '';
+                          let shortVisa = rawVisa;
+                          if (/tourist.*30|30.*tourist/i.test(rawVisa)) shortVisa = 'Tourist 30D';
+                          else if (/tourist.*(1\s*yr|1\s*year)/i.test(rawVisa)) shortVisa = 'Tourist 1Y';
+                          else if (/tourist.*(5\s*yr|5\s*year)/i.test(rawVisa)) shortVisa = 'Tourist 5Y';
+                          else if (/medical\s+attendant/i.test(rawVisa)) shortVisa = 'Med. Attendant';
+                          else if (/medical/i.test(rawVisa)) shortVisa = 'Medical';
+                          else if (/business/i.test(rawVisa)) shortVisa = 'Business';
+                          else if (/conference/i.test(rawVisa)) shortVisa = 'Conference';
+                          else if (/transit/i.test(rawVisa)) shortVisa = 'Transit';
+
+                          // Submitted date: use paidAt once payment confirmed, else submittedDate
+                          const PAID_STATUSES = ['paid', 'pending_review', 'submitted', 'processed', 'approved', 'rejected'];
+                          const dateToShow = PAID_STATUSES.includes(app.status) && app.paidAt && app.paidAt !== 'None' && app.paidAt !== ''
+                            ? app.paidAt
+                            : (app.submittedDate && app.submittedDate !== 'None' && app.submittedDate !== '' ? app.submittedDate : null);
+
+                          return (
                           <TableRow key={app.applicationId}>
                             <TableCell className="font-medium">
                               {app.applicationId
                                 ? app.applicationId
                                 : <span className="text-gray-400 italic">Not assigned</span>}
                             </TableCell>
-                            <TableCell>{app.surname || app.givenNames ? `${app.surname || ''} ${app.givenNames || ''}`.trim() : <span className="text-gray-400 italic">—</span>}</TableCell>
+                            <TableCell>{app.givenNames || app.surname ? `${app.givenNames || ''} ${app.surname || ''}`.trim() : <span className="text-gray-400 italic">—</span>}</TableCell>
                             <TableCell>{app.email || <span className="text-gray-400 italic">—</span>}</TableCell>
-                            <TableCell>{app.nationality || <span className="text-gray-400 italic">—</span>}</TableCell>
-                            <TableCell>{app.visaService || <span className="text-gray-400 italic">—</span>}</TableCell>
+                            <TableCell>
+                              {app.passportName || app.passportCountryCode ? (
+                                <div className="flex items-center gap-1.5">
+                                  {app.passportCountryCode && (
+                                    <FlagIcon code={app.passportCountryCode} width={20} height={15} />
+                                  )}
+                                  <span className="text-sm">{app.passportName || app.passportCountryCode}</span>
+                                </div>
+                              ) : <span className="text-gray-400 italic">—</span>}
+                            </TableCell>
+                            <TableCell>
+                              {shortVisa
+                                ? <span className="text-sm font-medium whitespace-nowrap">{shortVisa}</span>
+                                : <span className="text-gray-400 italic">—</span>}
+                            </TableCell>
                             <TableCell>{getStatusBadge(app.status)}</TableCell>
                             <TableCell>
-                              {app.submittedDate && app.submittedDate !== 'None' && app.submittedDate !== ''
-                                ? new Date(app.submittedDate).toLocaleDateString()
-                                : <span className="text-gray-400 italic">Not submitted</span>}
+                              {dateToShow
+                                ? new Date(dateToShow).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                                : <span className="text-gray-400 italic">—</span>}
                             </TableCell>
                             <TableCell>
                               <div className="flex space-x-2">
@@ -749,7 +781,8 @@ const AdminPanel = () => {
                               </div>
                             </TableCell>
                           </TableRow>
-                        ))
+                          );
+                        })
                       )}
                     </TableBody>
                   </Table>

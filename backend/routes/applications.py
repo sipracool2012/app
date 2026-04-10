@@ -211,10 +211,13 @@ async def get_my_applications(user_id: str = Depends(get_current_user)):
             "surname": app.get("surname", ""),
             "givenNames": app.get("givenNames", ""),
             "email": app.get("email", ""),
+            "nationality": app.get("nationality", ""),
+            "passportCountryCode": (visa_id.split("-")[0].upper() if visa_id else ""),
             "currentStep": app.get("currentStep", 1),
             "createdAt": app.get("createdAt", datetime.utcnow()).isoformat() if isinstance(app.get("createdAt"), datetime) else str(app.get("createdAt", "")),
             "updatedAt": app.get("updatedAt", datetime.utcnow()).isoformat() if isinstance(app.get("updatedAt"), datetime) else str(app.get("updatedAt", "")),
             "submittedDate": app.get("submittedDate", "").isoformat() if isinstance(app.get("submittedDate"), datetime) else str(app.get("submittedDate", "")),
+            "paidAt": app.get("paidAt", "").isoformat() if isinstance(app.get("paidAt"), datetime) else str(app.get("paidAt", "")),
             "expiresAt": app["expiresAt"].isoformat() if isinstance(app.get("expiresAt"), datetime) else str(app.get("expiresAt", "")),
         })
     
