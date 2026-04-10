@@ -78,7 +78,7 @@ const Header = () => {
 
           {/* Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-gray-700 hover:text-gray-900 font-medium transition-colors">
+            <Link to="/home" className="text-gray-700 hover:text-gray-900 font-medium transition-colors">
               {t('header.getVisa')}
             </Link>
             <Link to="/requirements" className="text-gray-700 hover:text-gray-900 font-medium transition-colors">
