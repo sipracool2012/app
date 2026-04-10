@@ -145,6 +145,24 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Re-check that the arrival date is still at least 4 days from today (IST)
+    if (data?.expectedArrivalDate) {
+      const now = new Date();
+      const istMs = now.getTime() + (5.5 * 60 * 60 * 1000);
+      const istDate = new Date(istMs);
+      istDate.setUTCDate(istDate.getUTCDate() + 4);
+      const minArrival = istDate.toISOString().split('T')[0];
+      if (data.expectedArrivalDate < minArrival) {
+        toast({
+          title: 'Expected arrival date is no longer valid',
+          description: 'Your selected arrival date is too soon. Please go back to Step 1 and choose a new date at least 4 days from today (IST).',
+          variant: 'destructive'
+        });
+        return;
+      }
+    }
+
     onNext(formData);
   };
 

@@ -5,6 +5,50 @@ All notable changes to the Clear eVisa project are documented in this file.
 Format: `## [Date] - Description`
 ---
 
+## [2026-04-10] - Steps 3–7 & 9 validation: inline errors on all required fields; Step 6 conditional previous-visit fields; Step 9 arrival date re-check
+
+### Changed
+- **Step 3 — Address Details** (`frontend/src/components/application-steps/Step3AddressDetails.jsx`)
+  - Added `errors` state and full `handleSubmit` validation; all `*` fields (house/street, town/city, country, state/province, postal code, phone number) now block Next with red border + "This field is required." inline message; errors clear on input
+
+- **Step 4 — Family Details** (`frontend/src/components/application-steps/Step4FamilyDetails.jsx`)
+  - Added `errors` state; father's name/nationality/place of birth/country of birth and mother's equivalent fields all required with inline errors; spouse fields (name, nationality, place of birth, country of birth) conditionally required when marital status = Married; Pakistan connection block preserved
+
+- **Step 5 — Professional Details** (`frontend/src/components/application-steps/Step5ProfessionalDetails.jsx`)
+  - Added `useToast` import, `errors` state and `handleSubmit` validation; Present Occupation (select), Employer Name, Employer Address are required with inline errors; red `SelectTrigger` border on unselected occupation
+
+- **Step 6 — Visa Details** (`frontend/src/components/application-steps/Step6VisaDetails.jsx`)
+  - Added `errors` state and full validation; Places to Visit always required
+  - **Previous visit conditional**: when "Have you visited India before?" = Yes, all 6 sub-fields become required — Previous Address, Cities Previously Visited, Last Indian Visa No, Old Visa Type (select), Old Visa Issue Place, Old Visa Issue Date; user must enter something (NA is acceptable)
+  - **Business visa**: Company name/address/phone and Indian firm name/address/phone required when visa type is business
+  - **Conference visa**: Conference name/start date/end date/address and organiser name/address/phone/email required when visa type is conference
+  - All conditional fields show red border + inline error message; clear on change
+
+- **Step 7 — References** (`frontend/src/components/application-steps/Step7References.jsx`)
+  - Added `errors` state and validation; India reference name/address/phone and home-country reference name/address/phone all required with inline errors
+
+- **Step 9 — Document Upload** (`frontend/src/components/application-steps/Step9DocumentUpload.jsx`)
+  - On Continue, re-checks `data.expectedArrivalDate` is still ≥ today +4 days IST (same rule as Step 1); if the date has become too soon since Step 1 was filled, a blocking toast fires directing the user back to Step 1 to choose a new arrival date
+
+- **Step 2 — Applicant Details** (`frontend/src/components/application-steps/Step2ApplicantDetails.jsx`)
+  - Added `errors` state; surname, given names, religion (select), educational qualification (select), qualification from all required with red border + inline error on submit; errors clear on change
+
+---
+
+## [2026-04-10] - Step 1 validation: IST arrival date, expiry cross-check, phone with country code, required field blocking
+
+### Changed
+- **Step 1 — Basic Info** (`frontend/src/components/application-steps/Step1BasicInfo.jsx`)
+  - **Port of Arrival**: already keyboard-searchable via `SearchableSelect`; added inline error if not selected on submit
+  - **Expected Date of Arrival**: fixed `getMinArrivalDateIST()` to use true IST (UTC+5:30) +4 days (was UTC +5, one day off); inline red error appears if selected date is too early; changing arrival date auto-clears expiry if it would become invalid
+  - **Date of Expiry**: dynamic `min` attribute set to arrival date + 6 months via `getMinExpiryDate()`; inline error fires in real-time on selection if under the 6-month threshold; hint text shown when arrival date is set
+  - **Phone Number (Additional Information section)**: split into country code prefix input (default `+91`, max 4 digits, digits-only enforcement) and phone number input; validates 5–15 digits on submit
+  - **Required field blocking**: replaced incomplete `handleSubmit` with full validation — blocks `onNext()` if any `*` field is empty/invalid (port of arrival, arrival date, expiry date, visa subtype, passport number, date of issue, conditional yoga/additional fields); toast shown listing errors; inline `errors` state drives per-field red messages
+  - Added `errors` state for per-field inline error display
+  - Added `yogaInstitutePhoneCode` field to `formData` (default `+91`)
+
+---
+
 ## [2026-04-10] - IST timezone throughout; Admin Panel table improvements; My Applications countdown + date fix
 
 ### Changed

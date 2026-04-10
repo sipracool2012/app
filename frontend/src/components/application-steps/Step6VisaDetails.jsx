@@ -52,6 +52,7 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
     organizerPhoneNumber: data?.organizerPhoneNumber || '',
     organizerEmail: data?.organizerEmail || ''
   });
+  const [errors, setErrors] = useState({});
 
   React.useEffect(() => {
     fetchPhoneCodes();
@@ -69,6 +70,43 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const newErrors = {};
+    if (!formData.placesToVisit.trim()) newErrors.placesToVisit = 'This field is required.';
+    if (formData.visitedIndiaBefore === 'Yes') {
+      if (!formData.previousAddress.trim()) newErrors.previousAddress = 'This field is required.';
+      if (!formData.citiesPreviouslyVisited.trim()) newErrors.citiesPreviouslyVisited = 'This field is required.';
+      if (!formData.lastIndianVisaNo.trim()) newErrors.lastIndianVisaNo = 'This field is required.';
+      if (!formData.oldVisaType) newErrors.oldVisaType = 'Please select an option.';
+      if (!formData.oldVisaIssuePlace.trim()) newErrors.oldVisaIssuePlace = 'This field is required.';
+      if (!formData.oldVisaIssueDate) newErrors.oldVisaIssueDate = 'This field is required.';
+    }
+    if (isBusinessVisa) {
+      if (!formData.companyName.trim()) newErrors.companyName = 'This field is required.';
+      if (!formData.companyAddress.trim()) newErrors.companyAddress = 'This field is required.';
+      if (!formData.companyPhoneNumber.trim()) newErrors.companyPhoneNumber = 'Phone number is required.';
+      if (!formData.indianFirmName.trim()) newErrors.indianFirmName = 'This field is required.';
+      if (!formData.indianFirmAddress.trim()) newErrors.indianFirmAddress = 'This field is required.';
+      if (!formData.indianFirmPhoneNumber.trim()) newErrors.indianFirmPhoneNumber = 'Phone number is required.';
+    }
+    if (isConferenceVisa) {
+      if (!formData.conferenceName.trim()) newErrors.conferenceName = 'This field is required.';
+      if (!formData.conferenceStartDate) newErrors.conferenceStartDate = 'This field is required.';
+      if (!formData.conferenceEndDate) newErrors.conferenceEndDate = 'This field is required.';
+      if (!formData.conferenceAddress.trim()) newErrors.conferenceAddress = 'This field is required.';
+      if (!formData.organizerName.trim()) newErrors.organizerName = 'This field is required.';
+      if (!formData.organizerAddress.trim()) newErrors.organizerAddress = 'This field is required.';
+      if (!formData.organizerPhoneNumber.trim()) newErrors.organizerPhoneNumber = 'Phone number is required.';
+      if (!formData.organizerEmail.trim()) newErrors.organizerEmail = 'This field is required.';
+    }
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      toast({
+        title: 'Please fix the errors below',
+        description: 'Some required fields are missing or contain invalid values.',
+        variant: 'destructive'
+      });
+      return;
+    }
     onNext(formData);
   };
 
@@ -91,9 +129,13 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
           <Input
             id="placesToVisit"
             value={formData.placesToVisit}
-            onChange={(e) => setFormData({ ...formData, placesToVisit: e.target.value })}
-            required
+            onChange={(e) => {
+              setFormData({ ...formData, placesToVisit: e.target.value });
+              setErrors(prev => ({ ...prev, placesToVisit: '' }));
+            }}
+            className={errors.placesToVisit ? 'border-red-500' : ''}
           />
+          {errors.placesToVisit && <p className="text-sm text-red-600">{errors.placesToVisit}</p>}
         </div>
 
         <div className="space-y-2 md:col-span-2">
@@ -153,49 +195,67 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
           <>
             <div className="space-y-2">
               <Label htmlFor="previousAddress">
-                Previous Address
+                Previous Address <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="previousAddress"
                 value={formData.previousAddress}
-                onChange={(e) => setFormData({ ...formData, previousAddress: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, previousAddress: e.target.value });
+                  setErrors(prev => ({ ...prev, previousAddress: '' }));
+                }}
                 placeholder="NA if not remember"
+                className={errors.previousAddress ? 'border-red-500' : ''}
               />
+              {errors.previousAddress && <p className="text-sm text-red-600">{errors.previousAddress}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="citiesPreviouslyVisited">
-                {t('forms.step6.citiesPreviouslyVisited')}
+                {t('forms.step6.citiesPreviouslyVisited')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="citiesPreviouslyVisited"
                 value={formData.citiesPreviouslyVisited}
-                onChange={(e) => setFormData({ ...formData, citiesPreviouslyVisited: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, citiesPreviouslyVisited: e.target.value });
+                  setErrors(prev => ({ ...prev, citiesPreviouslyVisited: '' }));
+                }}
                 placeholder="NA if not remember"
+                className={errors.citiesPreviouslyVisited ? 'border-red-500' : ''}
               />
+              {errors.citiesPreviouslyVisited && <p className="text-sm text-red-600">{errors.citiesPreviouslyVisited}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="lastIndianVisaNo">
-                Last Indian Visa No/Currently valid Indian Visa No
+                Last Indian Visa No/Currently valid Indian Visa No <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="lastIndianVisaNo"
                 value={formData.lastIndianVisaNo}
-                onChange={(e) => setFormData({ ...formData, lastIndianVisaNo: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, lastIndianVisaNo: e.target.value });
+                  setErrors(prev => ({ ...prev, lastIndianVisaNo: '' }));
+                }}
                 placeholder="NA if not remember"
+                className={errors.lastIndianVisaNo ? 'border-red-500' : ''}
               />
+              {errors.lastIndianVisaNo && <p className="text-sm text-red-600">{errors.lastIndianVisaNo}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="oldVisaType">
-                Old Visa Type
+                Old Visa Type <span className="text-red-500">*</span>
               </Label>
               <Select 
                 value={formData.oldVisaType} 
-                onValueChange={(value) => setFormData({ ...formData, oldVisaType: value })}
+                onValueChange={(value) => {
+                  setFormData({ ...formData, oldVisaType: value });
+                  setErrors(prev => ({ ...prev, oldVisaType: '' }));
+                }}
               >
-                <SelectTrigger>
+                <SelectTrigger className={errors.oldVisaType ? 'border-red-500' : ''}>
                   <SelectValue placeholder="Select old visa type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -222,31 +282,42 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
                   <SelectItem value="Visit Visa">{t('forms.step6.visitVisa')}</SelectItem>
                 </SelectContent>
               </Select>
+              {errors.oldVisaType && <p className="text-sm text-red-600">{errors.oldVisaType}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="oldVisaIssuePlace">
-                Old Visa Issue Place
+                Old Visa Issue Place <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="oldVisaIssuePlace"
                 value={formData.oldVisaIssuePlace}
-                onChange={(e) => setFormData({ ...formData, oldVisaIssuePlace: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, oldVisaIssuePlace: e.target.value });
+                  setErrors(prev => ({ ...prev, oldVisaIssuePlace: '' }));
+                }}
                 placeholder="online if not remember"
+                className={errors.oldVisaIssuePlace ? 'border-red-500' : ''}
               />
+              {errors.oldVisaIssuePlace && <p className="text-sm text-red-600">{errors.oldVisaIssuePlace}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="oldVisaIssueDate">
-                Old Visa Issue Date
+                Old Visa Issue Date <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="oldVisaIssueDate"
                 type="date"
                 value={formData.oldVisaIssueDate}
-                onChange={(e) => setFormData({ ...formData, oldVisaIssueDate: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, oldVisaIssueDate: e.target.value });
+                  setErrors(prev => ({ ...prev, oldVisaIssueDate: '' }));
+                }}
                 max={new Date().toISOString().split('T')[0]}
+                className={errors.oldVisaIssueDate ? 'border-red-500' : ''}
               />
+              {errors.oldVisaIssueDate && <p className="text-sm text-red-600">{errors.oldVisaIssueDate}</p>}
             </div>
           </>
         )}
@@ -300,9 +371,13 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
               <Input
                 id="companyName"
                 value={formData.companyName}
-                onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                required={isBusinessVisa}
+                onChange={(e) => {
+                  setFormData({ ...formData, companyName: e.target.value });
+                  setErrors(prev => ({ ...prev, companyName: '' }));
+                }}
+                className={errors.companyName ? 'border-red-500' : ''}
               />
+              {errors.companyName && <p className="text-sm text-red-600">{errors.companyName}</p>}
             </div>
 
             <div className="space-y-2 md:col-span-2">
@@ -312,9 +387,13 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
               <Input
                 id="companyAddress"
                 value={formData.companyAddress}
-                onChange={(e) => setFormData({ ...formData, companyAddress: e.target.value })}
-                required={isBusinessVisa}
+                onChange={(e) => {
+                  setFormData({ ...formData, companyAddress: e.target.value });
+                  setErrors(prev => ({ ...prev, companyAddress: '' }));
+                }}
+                className={errors.companyAddress ? 'border-red-500' : ''}
               />
+              {errors.companyAddress && <p className="text-sm text-red-600">{errors.companyAddress}</p>}
             </div>
 
             <div className="md:col-span-2">
@@ -323,10 +402,14 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
                 countryCode={formData.companyPhoneCountryCode}
                 phoneNumber={formData.companyPhoneNumber}
                 onCountryCodeChange={(value) => setFormData({ ...formData, companyPhoneCountryCode: value })}
-                onPhoneNumberChange={(value) => setFormData({ ...formData, companyPhoneNumber: value })}
+                onPhoneNumberChange={(value) => {
+                  setFormData({ ...formData, companyPhoneNumber: value });
+                  setErrors(prev => ({ ...prev, companyPhoneNumber: '' }));
+                }}
                 phoneCodes={phoneCodes}
                 required={isBusinessVisa}
               />
+              {errors.companyPhoneNumber && <p className="text-sm text-red-600 mt-1">{errors.companyPhoneNumber}</p>}
             </div>
 
             <div className="space-y-2">
@@ -353,9 +436,13 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
               <Input
                 id="indianFirmName"
                 value={formData.indianFirmName}
-                onChange={(e) => setFormData({ ...formData, indianFirmName: e.target.value })}
-                required={isBusinessVisa}
+                onChange={(e) => {
+                  setFormData({ ...formData, indianFirmName: e.target.value });
+                  setErrors(prev => ({ ...prev, indianFirmName: '' }));
+                }}
+                className={errors.indianFirmName ? 'border-red-500' : ''}
               />
+              {errors.indianFirmName && <p className="text-sm text-red-600">{errors.indianFirmName}</p>}
             </div>
 
             <div className="space-y-2 md:col-span-2">
@@ -365,9 +452,13 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
               <Input
                 id="indianFirmAddress"
                 value={formData.indianFirmAddress}
-                onChange={(e) => setFormData({ ...formData, indianFirmAddress: e.target.value })}
-                required={isBusinessVisa}
+                onChange={(e) => {
+                  setFormData({ ...formData, indianFirmAddress: e.target.value });
+                  setErrors(prev => ({ ...prev, indianFirmAddress: '' }));
+                }}
+                className={errors.indianFirmAddress ? 'border-red-500' : ''}
               />
+              {errors.indianFirmAddress && <p className="text-sm text-red-600">{errors.indianFirmAddress}</p>}
             </div>
 
             <div className="md:col-span-2">
@@ -376,10 +467,14 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
                 countryCode={formData.indianFirmPhoneCountryCode}
                 phoneNumber={formData.indianFirmPhoneNumber}
                 onCountryCodeChange={(value) => setFormData({ ...formData, indianFirmPhoneCountryCode: value })}
-                onPhoneNumberChange={(value) => setFormData({ ...formData, indianFirmPhoneNumber: value })}
+                onPhoneNumberChange={(value) => {
+                  setFormData({ ...formData, indianFirmPhoneNumber: value });
+                  setErrors(prev => ({ ...prev, indianFirmPhoneNumber: '' }));
+                }}
                 phoneCodes={phoneCodes}
                 required={isBusinessVisa}
               />
+              {errors.indianFirmPhoneNumber && <p className="text-sm text-red-600 mt-1">{errors.indianFirmPhoneNumber}</p>}
             </div>
 
             <div className="space-y-2">
@@ -411,9 +506,13 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
               <Input
                 id="conferenceName"
                 value={formData.conferenceName}
-                onChange={(e) => setFormData({ ...formData, conferenceName: e.target.value })}
-                required={isConferenceVisa}
+                onChange={(e) => {
+                  setFormData({ ...formData, conferenceName: e.target.value });
+                  setErrors(prev => ({ ...prev, conferenceName: '' }));
+                }}
+                className={errors.conferenceName ? 'border-red-500' : ''}
               />
+              {errors.conferenceName && <p className="text-sm text-red-600">{errors.conferenceName}</p>}
             </div>
 
             <div className="space-y-2">
@@ -424,9 +523,13 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
                 id="conferenceStartDate"
                 type="date"
                 value={formData.conferenceStartDate}
-                onChange={(e) => setFormData({ ...formData, conferenceStartDate: e.target.value })}
-                required={isConferenceVisa}
+                onChange={(e) => {
+                  setFormData({ ...formData, conferenceStartDate: e.target.value });
+                  setErrors(prev => ({ ...prev, conferenceStartDate: '' }));
+                }}
+                className={errors.conferenceStartDate ? 'border-red-500' : ''}
               />
+              {errors.conferenceStartDate && <p className="text-sm text-red-600">{errors.conferenceStartDate}</p>}
             </div>
 
             <div className="space-y-2">
@@ -437,10 +540,14 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
                 id="conferenceEndDate"
                 type="date"
                 value={formData.conferenceEndDate}
-                onChange={(e) => setFormData({ ...formData, conferenceEndDate: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, conferenceEndDate: e.target.value });
+                  setErrors(prev => ({ ...prev, conferenceEndDate: '' }));
+                }}
                 min={formData.conferenceStartDate}
-                required={isConferenceVisa}
+                className={errors.conferenceEndDate ? 'border-red-500' : ''}
               />
+              {errors.conferenceEndDate && <p className="text-sm text-red-600">{errors.conferenceEndDate}</p>}
             </div>
 
             <div className="space-y-2 md:col-span-2">
@@ -450,9 +557,13 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
               <Input
                 id="conferenceAddress"
                 value={formData.conferenceAddress}
-                onChange={(e) => setFormData({ ...formData, conferenceAddress: e.target.value })}
-                required={isConferenceVisa}
+                onChange={(e) => {
+                  setFormData({ ...formData, conferenceAddress: e.target.value });
+                  setErrors(prev => ({ ...prev, conferenceAddress: '' }));
+                }}
+                className={errors.conferenceAddress ? 'border-red-500' : ''}
               />
+              {errors.conferenceAddress && <p className="text-sm text-red-600">{errors.conferenceAddress}</p>}
             </div>
 
             <div className="md:col-span-2 border-t pt-4 mt-4">
@@ -466,9 +577,13 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
               <Input
                 id="organizerName"
                 value={formData.organizerName}
-                onChange={(e) => setFormData({ ...formData, organizerName: e.target.value })}
-                required={isConferenceVisa}
+                onChange={(e) => {
+                  setFormData({ ...formData, organizerName: e.target.value });
+                  setErrors(prev => ({ ...prev, organizerName: '' }));
+                }}
+                className={errors.organizerName ? 'border-red-500' : ''}
               />
+              {errors.organizerName && <p className="text-sm text-red-600">{errors.organizerName}</p>}
             </div>
 
             <div className="space-y-2 md:col-span-2">
@@ -478,9 +593,13 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
               <Input
                 id="organizerAddress"
                 value={formData.organizerAddress}
-                onChange={(e) => setFormData({ ...formData, organizerAddress: e.target.value })}
-                required={isConferenceVisa}
+                onChange={(e) => {
+                  setFormData({ ...formData, organizerAddress: e.target.value });
+                  setErrors(prev => ({ ...prev, organizerAddress: '' }));
+                }}
+                className={errors.organizerAddress ? 'border-red-500' : ''}
               />
+              {errors.organizerAddress && <p className="text-sm text-red-600">{errors.organizerAddress}</p>}
             </div>
 
             <div className="md:col-span-2">
@@ -489,10 +608,14 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
                 countryCode={formData.organizerPhoneCountryCode}
                 phoneNumber={formData.organizerPhoneNumber}
                 onCountryCodeChange={(value) => setFormData({ ...formData, organizerPhoneCountryCode: value })}
-                onPhoneNumberChange={(value) => setFormData({ ...formData, organizerPhoneNumber: value })}
+                onPhoneNumberChange={(value) => {
+                  setFormData({ ...formData, organizerPhoneNumber: value });
+                  setErrors(prev => ({ ...prev, organizerPhoneNumber: '' }));
+                }}
                 phoneCodes={phoneCodes}
                 required={isConferenceVisa}
               />
+              {errors.organizerPhoneNumber && <p className="text-sm text-red-600 mt-1">{errors.organizerPhoneNumber}</p>}
             </div>
 
             <div className="space-y-2">
@@ -503,9 +626,13 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
                 id="organizerEmail"
                 type="email"
                 value={formData.organizerEmail}
-                onChange={(e) => setFormData({ ...formData, organizerEmail: e.target.value })}
-                required={isConferenceVisa}
+                onChange={(e) => {
+                  setFormData({ ...formData, organizerEmail: e.target.value });
+                  setErrors(prev => ({ ...prev, organizerEmail: '' }));
+                }}
+                className={errors.organizerEmail ? 'border-red-500' : ''}
               />
+              {errors.organizerEmail && <p className="text-sm text-red-600">{errors.organizerEmail}</p>}
             </div>
           </>
         )}

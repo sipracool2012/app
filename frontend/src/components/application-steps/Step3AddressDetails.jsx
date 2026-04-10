@@ -26,6 +26,7 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
     phoneCountryCode: data?.phoneCountryCode || '+1',
     phoneNumber: data?.phoneNumber || ''
   });
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     fetchConstants();
@@ -51,6 +52,22 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const newErrors = {};
+    if (!formData.houseNoStreet.trim()) newErrors.houseNoStreet = 'This field is required.';
+    if (!formData.villageTownCity.trim()) newErrors.villageTownCity = 'This field is required.';
+    if (!formData.country) newErrors.country = 'Please select an option.';
+    if (!formData.stateProvince.trim()) newErrors.stateProvince = 'This field is required.';
+    if (!formData.postalCode.trim()) newErrors.postalCode = 'This field is required.';
+    if (!formData.phoneNumber.trim()) newErrors.phoneNumber = 'Phone number is required.';
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      toast({
+        title: 'Please fix the errors below',
+        description: 'Some required fields are missing or contain invalid values.',
+        variant: 'destructive'
+      });
+      return;
+    }
     onNext(formData);
   };
 
@@ -71,9 +88,13 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
           <Input
             id="houseNoStreet"
             value={formData.houseNoStreet}
-            onChange={(e) => setFormData({ ...formData, houseNoStreet: e.target.value })}
-            required
+            onChange={(e) => {
+              setFormData({ ...formData, houseNoStreet: e.target.value });
+              setErrors(prev => ({ ...prev, houseNoStreet: '' }));
+            }}
+            className={errors.houseNoStreet ? 'border-red-500' : ''}
           />
+          {errors.houseNoStreet && <p className="text-sm text-red-600">{errors.houseNoStreet}</p>}
         </div>
 
         {/* Village/Town/City */}
@@ -84,21 +105,31 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
           <Input
             id="villageTownCity"
             value={formData.villageTownCity}
-            onChange={(e) => setFormData({ ...formData, villageTownCity: e.target.value })}
-            required
+            onChange={(e) => {
+              setFormData({ ...formData, villageTownCity: e.target.value });
+              setErrors(prev => ({ ...prev, villageTownCity: '' }));
+            }}
+            className={errors.villageTownCity ? 'border-red-500' : ''}
           />
+          {errors.villageTownCity && <p className="text-sm text-red-600">{errors.villageTownCity}</p>}
         </div>
 
         {/* Country */}
-        <SearchableSelect
-          label={t('forms.step3.country')}
-          value={formData.country}
-          onValueChange={(value) => setFormData({ ...formData, country: value })}
-          options={countries}
-          placeholder={t('forms.step3.selectCountry')}
-          searchPlaceholder={t('forms.step3.searchCountries')}
-          required
-        />
+        <div>
+          <SearchableSelect
+            label={t('forms.step3.country')}
+            value={formData.country}
+            onValueChange={(value) => {
+              setFormData({ ...formData, country: value });
+              setErrors(prev => ({ ...prev, country: '' }));
+            }}
+            options={countries}
+            placeholder={t('forms.step3.selectCountry')}
+            searchPlaceholder={t('forms.step3.searchCountries')}
+            required
+          />
+          {errors.country && <p className="text-sm text-red-600 mt-1">{errors.country}</p>}
+        </div>
 
         {/* State/Province/District */}
         <div className="space-y-2">
@@ -108,9 +139,13 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
           <Input
             id="stateProvince"
             value={formData.stateProvince}
-            onChange={(e) => setFormData({ ...formData, stateProvince: e.target.value })}
-            required
+            onChange={(e) => {
+              setFormData({ ...formData, stateProvince: e.target.value });
+              setErrors(prev => ({ ...prev, stateProvince: '' }));
+            }}
+            className={errors.stateProvince ? 'border-red-500' : ''}
           />
+          {errors.stateProvince && <p className="text-sm text-red-600">{errors.stateProvince}</p>}
         </div>
 
         {/* Postal/Zip Code */}
@@ -121,9 +156,13 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
           <Input
             id="postalCode"
             value={formData.postalCode}
-            onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
-            required
+            onChange={(e) => {
+              setFormData({ ...formData, postalCode: e.target.value });
+              setErrors(prev => ({ ...prev, postalCode: '' }));
+            }}
+            className={errors.postalCode ? 'border-red-500' : ''}
           />
+          {errors.postalCode && <p className="text-sm text-red-600">{errors.postalCode}</p>}
         </div>
 
         {/* Phone Number with Country Code */}
@@ -133,10 +172,14 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
             countryCode={formData.phoneCountryCode}
             phoneNumber={formData.phoneNumber}
             onCountryCodeChange={(value) => setFormData({ ...formData, phoneCountryCode: value })}
-            onPhoneNumberChange={(value) => setFormData({ ...formData, phoneNumber: value })}
+            onPhoneNumberChange={(value) => {
+              setFormData({ ...formData, phoneNumber: value });
+              setErrors(prev => ({ ...prev, phoneNumber: '' }));
+            }}
             phoneCodes={phoneCodes}
             required
           />
+          {errors.phoneNumber && <p className="text-sm text-red-600 mt-1">{errors.phoneNumber}</p>}
         </div>
       </div>
 

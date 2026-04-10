@@ -28,8 +28,10 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
     otherPassportHeld: data?.otherPassportHeld || 'No',
     yogaInstituteName: data?.yogaInstituteName || '',
     yogaInstituteAddress: data?.yogaInstituteAddress || '',
+    yogaInstitutePhoneCode: data?.yogaInstitutePhoneCode || '+91',
     yogaInstitutePhone: data?.yogaInstitutePhone || ''
   });
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     fetchConstants();
@@ -112,10 +114,20 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
     }
   };
 
-  const getMinArrivalDate = () => {
-    const today = new Date();
-    today.setDate(today.getDate() + 5);
-    return today.toISOString().split('T')[0];
+  const getMinArrivalDateIST = () => {
+    // Compute today's date in IST (UTC+5:30), then add 4 days
+    const now = new Date();
+    const istMs = now.getTime() + (5.5 * 60 * 60 * 1000);
+    const istDate = new Date(istMs);
+    istDate.setUTCDate(istDate.getUTCDate() + 4);
+    return istDate.toISOString().split('T')[0];
+  };
+
+  const getMinExpiryDate = () => {
+    if (!formData.expectedArrivalDate) return '';
+    const arrival = new Date(formData.expectedArrivalDate);
+    arrival.setMonth(arrival.getMonth() + 6);
+    return arrival.toISOString().split('T')[0];
   };
 
   const showYogaFields = () => {
@@ -128,8 +140,9 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const newErrors = {};
 
-    // Validate Ordinary passport type
+    // Passport type check
     if (formData.passportType !== 'Ordinary') {
       toast({
         title: t('errors.invalidPassportType'),
@@ -139,16 +152,50 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
       return;
     }
 
-    // Validate arrival date
-    const minDate = new Date();
-    minDate.setDate(minDate.getDate() + 4);
-    const selectedDate = new Date(formData.expectedArrivalDate);
-    //alert(selectedDate);
-    //alert(minDate);
-    if (selectedDate < minDate) {
+    // Required field checks
+    if (!formData.portOfArrival) newErrors.portOfArrival = 'Port of arrival is required.';
+    if (!formData.visaServiceSubtype) newErrors.visaServiceSubtype = 'Visa subtype is required.';
+    if (!formData.passportNumber.trim()) newErrors.passportNumber = 'Passport number is required.';
+    if (!formData.dateOfIssue) newErrors.dateOfIssue = 'Date of issue is required.';
+
+    // Arrival date: required + must be >= today+4 IST
+    if (!formData.expectedArrivalDate) {
+      newErrors.expectedArrivalDate = 'Expected date of arrival is required.';
+    } else {
+      const minArrival = new Date(getMinArrivalDateIST());
+      const selectedArrival = new Date(formData.expectedArrivalDate);
+      if (selectedArrival < minArrival) {
+        newErrors.expectedArrivalDate = 'Arrival date must be at least 4 days from today (IST).';
+      }
+    }
+
+    // Expiry date: required + must be >= arrival + 6 months
+    if (!formData.dateOfExpiry) {
+      newErrors.dateOfExpiry = 'Date of expiry is required.';
+    } else if (formData.expectedArrivalDate) {
+      const minExpiry = new Date(formData.expectedArrivalDate);
+      minExpiry.setMonth(minExpiry.getMonth() + 6);
+      if (new Date(formData.dateOfExpiry) < minExpiry) {
+        newErrors.dateOfExpiry = 'Passport must be valid for at least 6 months from the arrival date.';
+      }
+    }
+
+    // Yoga / Additional Information fields
+    if (showYogaFields()) {
+      if (!formData.yogaInstituteName.trim()) newErrors.yogaInstituteName = 'This field is required.';
+      if (!formData.yogaInstituteAddress.trim()) newErrors.yogaInstituteAddress = 'Address is required.';
+      if (!formData.yogaInstitutePhone.trim()) {
+        newErrors.yogaInstitutePhone = 'Phone number is required.';
+      } else if (!/^\d{5,15}$/.test(formData.yogaInstitutePhone.replace(/[\s\-]/g, ''))) {
+        newErrors.yogaInstitutePhone = 'Enter a valid phone number (5–15 digits).';
+      }
+    }
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
       toast({
-        title: t('errors.invalidArrivalDate'),
-        description: t('errors.invalidArrivalDateDesc'),
+        title: 'Please fix the errors below',
+        description: 'Some required fields are missing or contain invalid values.',
         variant: 'destructive'
       });
       return;
@@ -192,15 +239,23 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
         </div>
 
         {/* Port of Arrival */}
-        <SearchableSelect
-          label={t('forms.step1.portOfArrival')}
-          value={formData.portOfArrival}
-          onValueChange={(value) => setFormData({ ...formData, portOfArrival: value })}
-          options={ports}
-          placeholder={t('forms.step1.selectPort')}
-          searchPlaceholder={t('forms.step1.searchPorts')}
-          required
-        />
+        <div>
+          <SearchableSelect
+            label={t('forms.step1.portOfArrival')}
+            value={formData.portOfArrival}
+            onValueChange={(value) => {
+              setFormData({ ...formData, portOfArrival: value });
+              setErrors(prev => ({ ...prev, portOfArrival: '' }));
+            }}
+            options={ports}
+            placeholder={t('forms.step1.selectPort')}
+            searchPlaceholder={t('forms.step1.searchPorts')}
+            required
+          />
+          {errors.portOfArrival && (
+            <p className="text-sm text-red-600 mt-1">{errors.portOfArrival}</p>
+          )}
+        </div>
 
         {/* Expected Date of Arrival */}
         <div className="space-y-2">
@@ -211,11 +266,28 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
             id="expectedArrivalDate"
             type="date"
             value={formData.expectedArrivalDate}
-            onChange={(e) => setFormData({ ...formData, expectedArrivalDate: e.target.value })}
-            min={getMinArrivalDate()}
+            onChange={(e) => {
+              const newDate = e.target.value;
+              setFormData(prev => {
+                // Clear expiry if it would become invalid (< 6 months from new arrival)
+                let newExpiry = prev.dateOfExpiry;
+                if (newDate && prev.dateOfExpiry) {
+                  const minExpiry = new Date(newDate);
+                  minExpiry.setMonth(minExpiry.getMonth() + 6);
+                  if (new Date(prev.dateOfExpiry) < minExpiry) newExpiry = '';
+                }
+                return { ...prev, expectedArrivalDate: newDate, dateOfExpiry: newExpiry };
+              });
+              setErrors(prev => ({ ...prev, expectedArrivalDate: '', dateOfExpiry: '' }));
+            }}
+            min={getMinArrivalDateIST()}
+            className={errors.expectedArrivalDate ? 'border-red-500' : ''}
             required
           />
-          <p className="text-xs text-gray-500">{t('forms.step1.arrivalDateHint')}</p>
+          {errors.expectedArrivalDate
+            ? <p className="text-sm text-red-600">{errors.expectedArrivalDate}</p>
+            : <p className="text-xs text-gray-500">{t('forms.step1.arrivalDateHint')}</p>
+          }
         </div>
 
         {/* Visa Service */}
@@ -239,9 +311,12 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
           </Label>
           <Select 
             value={formData.visaServiceSubtype} 
-            onValueChange={(value) => setFormData({ ...formData, visaServiceSubtype: value })}
+            onValueChange={(value) => {
+              setFormData({ ...formData, visaServiceSubtype: value });
+              setErrors(prev => ({ ...prev, visaServiceSubtype: '' }));
+            }}
           >
-            <SelectTrigger>
+            <SelectTrigger className={errors.visaServiceSubtype ? 'border-red-500' : ''}>
               <SelectValue placeholder={t('forms.step1.selectVisaSubtype')} />
             </SelectTrigger>
             <SelectContent>
@@ -252,6 +327,7 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
               ))}
             </SelectContent>
           </Select>
+          {errors.visaServiceSubtype && <p className="text-sm text-red-600">{errors.visaServiceSubtype}</p>}
         </div>
 
         {/* Passport Details Section */}
@@ -267,9 +343,13 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
           <Input
             id="passportNumber"
             value={formData.passportNumber}
-            onChange={(e) => setFormData({ ...formData, passportNumber: e.target.value.toUpperCase() })}
-            required
+            onChange={(e) => {
+              setFormData({ ...formData, passportNumber: e.target.value.toUpperCase() });
+              setErrors(prev => ({ ...prev, passportNumber: '' }));
+            }}
+            className={errors.passportNumber ? 'border-red-500' : ''}
           />
+          {errors.passportNumber && <p className="text-sm text-red-600">{errors.passportNumber}</p>}
         </div>
 
         {/* Date of Issue */}
@@ -281,10 +361,14 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
             id="dateOfIssue"
             type="date"
             value={formData.dateOfIssue}
-            onChange={(e) => setFormData({ ...formData, dateOfIssue: e.target.value })}
+            onChange={(e) => {
+              setFormData({ ...formData, dateOfIssue: e.target.value });
+              setErrors(prev => ({ ...prev, dateOfIssue: '' }));
+            }}
             max={new Date().toISOString().split('T')[0]}
-            required
+            className={errors.dateOfIssue ? 'border-red-500' : ''}
           />
+          {errors.dateOfIssue && <p className="text-sm text-red-600">{errors.dateOfIssue}</p>}
         </div>
 
         {/* Date of Expiry */}
@@ -296,10 +380,33 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
             id="dateOfExpiry"
             type="date"
             value={formData.dateOfExpiry}
-            onChange={(e) => setFormData({ ...formData, dateOfExpiry: e.target.value })}
-            min={new Date().toISOString().split('T')[0]}
+            onChange={(e) => {
+              const newExpiry = e.target.value;
+              setFormData(prev => ({ ...prev, dateOfExpiry: newExpiry }));
+              if (newExpiry && formData.expectedArrivalDate) {
+                const minExpiry = new Date(formData.expectedArrivalDate);
+                minExpiry.setMonth(minExpiry.getMonth() + 6);
+                if (new Date(newExpiry) < minExpiry) {
+                  setErrors(prev => ({ ...prev, dateOfExpiry: 'Passport must be valid for at least 6 months from the arrival date.' }));
+                } else {
+                  setErrors(prev => ({ ...prev, dateOfExpiry: '' }));
+                }
+              } else {
+                setErrors(prev => ({ ...prev, dateOfExpiry: '' }));
+              }
+            }}
+            min={getMinExpiryDate() || new Date().toISOString().split('T')[0]}
+            className={errors.dateOfExpiry ? 'border-red-500' : ''}
             required
           />
+          {errors.dateOfExpiry && (
+            <p className="text-sm text-red-600">{errors.dateOfExpiry}</p>
+          )}
+          {!errors.dateOfExpiry && formData.expectedArrivalDate && (
+            <p className="text-xs text-gray-500">
+              Must be valid at least 6 months after arrival date.
+            </p>
+          )}
         </div>
 
         {/* Other Passport Held */}
@@ -337,9 +444,13 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
               <Input
                 id="yogaInstituteName"
                 value={formData.yogaInstituteName}
-                onChange={(e) => setFormData({ ...formData, yogaInstituteName: e.target.value })}
-                required={showYogaFields()}
+                onChange={(e) => {
+                  setFormData({ ...formData, yogaInstituteName: e.target.value });
+                  setErrors(prev => ({ ...prev, yogaInstituteName: '' }));
+                }}
+                className={errors.yogaInstituteName ? 'border-red-500' : ''}
               />
+              {errors.yogaInstituteName && <p className="text-sm text-red-600">{errors.yogaInstituteName}</p>}
             </div>
 
             <div className="space-y-2">
@@ -349,22 +460,50 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
               <Input
                 id="yogaInstituteAddress"
                 value={formData.yogaInstituteAddress}
-                onChange={(e) => setFormData({ ...formData, yogaInstituteAddress: e.target.value })}
-                required={showYogaFields()}
+                onChange={(e) => {
+                  setFormData({ ...formData, yogaInstituteAddress: e.target.value });
+                  setErrors(prev => ({ ...prev, yogaInstituteAddress: '' }));
+                }}
+                className={errors.yogaInstituteAddress ? 'border-red-500' : ''}
               />
+              {errors.yogaInstituteAddress && <p className="text-sm text-red-600">{errors.yogaInstituteAddress}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="yogaInstitutePhone">
                 Phone Number <span className="text-red-500">*</span>
               </Label>
-              <Input
-                id="yogaInstitutePhone"
-                type="tel"
-                value={formData.yogaInstitutePhone}
-                onChange={(e) => setFormData({ ...formData, yogaInstitutePhone: e.target.value })}
-                required={showYogaFields()}
-              />
+              <div className="flex gap-2">
+                <Input
+                  id="yogaInstitutePhoneCode"
+                  value={formData.yogaInstitutePhoneCode}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (/^\+?\d{0,4}$/.test(val)) {
+                      setFormData(prev => ({ ...prev, yogaInstitutePhoneCode: val }));
+                    }
+                  }}
+                  placeholder="+91"
+                  className="w-24 shrink-0"
+                  aria-label="Country code"
+                />
+                <Input
+                  id="yogaInstitutePhone"
+                  type="tel"
+                  value={formData.yogaInstitutePhone}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, yogaInstitutePhone: e.target.value }));
+                    setErrors(prev => ({ ...prev, yogaInstitutePhone: '' }));
+                  }}
+                  placeholder="1234567890"
+                  required={showYogaFields()}
+                  className={errors.yogaInstitutePhone ? 'border-red-500' : ''}
+                />
+              </div>
+              {errors.yogaInstitutePhone && (
+                <p className="text-sm text-red-600">{errors.yogaInstitutePhone}</p>
+              )}
+              <p className="text-xs text-gray-500">Enter country code (e.g. +91) and phone number.</p>
             </div>
           </>
         )}
