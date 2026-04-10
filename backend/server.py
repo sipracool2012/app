@@ -7,6 +7,7 @@ import logging
 import asyncio
 from datetime import datetime, timedelta
 from pathlib import Path
+from utils.constants import now_ist
 
 # Import routes
 from routes import auth, applications, upload, countries, constants, payment_gateways, email_providers, utility
@@ -73,7 +74,7 @@ async def draft_expiry_cleanup_loop():
     """Background task: every 60 seconds delete expired draft applications."""
     while True:
         try:
-            now = datetime.utcnow()
+            now = now_ist()
             result = await db.applications.delete_many({
                 "status": "draft",
                 "expiresAt": {"$lt": now}
@@ -90,7 +91,7 @@ async def paid_to_pending_review_loop():
     once they have been in that state for at least 1 hour."""
     while True:
         try:
-            cutoff = datetime.utcnow() - timedelta(hours=1)
+            cutoff = now_ist() - timedelta(hours=1)
             result = await db.applications.update_many(
                 {
                     "status": "paid",
@@ -99,7 +100,7 @@ async def paid_to_pending_review_loop():
                 {
                     "$set": {
                         "status": "pending_review",
-                        "updatedAt": datetime.utcnow()
+                        "updatedAt": now_ist()
                     }
                 }
             )

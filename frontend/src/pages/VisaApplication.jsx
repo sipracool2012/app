@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, ChevronRight, Check, Save, FileText } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Save, FileText, Clock } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { useToast } from '../hooks/use-toast';
@@ -9,6 +9,39 @@ import { getAuthHeaders, getCurrentUser } from '../utils/auth';
 
 // Import step components
 import Step1BasicInfo from '../components/application-steps/Step1BasicInfo';
+
+/**
+ * Live IST clock banner — ticks every second.
+ */
+const ISTClock = () => {
+  const getTime = () => new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+  const getDate = () => new Date().toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  const [time, setTime] = useState(getTime);
+  const [date, setDate] = useState(getDate);
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      setTime(getTime());
+      setDate(getDate());
+    }, 1000);
+    return () => clearInterval(timerRef.current);
+  }, []);
+
+  return (
+    <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5 flex items-center gap-2.5 text-sm mb-4">
+      <Clock className="w-4 h-4 text-blue-500 flex-shrink-0" />
+      <span className="text-blue-700">
+        <span className="font-semibold">Time in India (UTC+05:30)</span>
+        {' — '}
+        <span className="font-mono">{time}</span>
+        {' · '}
+        <span>{date}</span>
+      </span>
+    </div>
+  );
+};
 import Step2ApplicantDetails from '../components/application-steps/Step2ApplicantDetails';
 import Step3AddressDetails from '../components/application-steps/Step3AddressDetails';
 import Step4FamilyDetails from '../components/application-steps/Step4FamilyDetails';
@@ -433,6 +466,9 @@ const VisaApplication = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* IST Clock Banner */}
+        <ISTClock />
 
         {/* Step Content */}
         <Card data-testid="step-content-card">

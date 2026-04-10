@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from models.user import UserCreate, UserLogin, UserResponse, TokenResponse, User, UserRoleUpdate, UserEmailRoleUpdate, OTPVerifyRequest, LoginInitiateResponse, SignupOTPVerifyRequest, ForgotPasswordRequest, ResetPasswordRequest
 from utils.auth import get_password_hash, verify_password, create_access_token, get_current_user
+from utils.constants import now_ist
 from datetime import datetime, timedelta
 from typing import List
 import secrets
@@ -61,7 +62,7 @@ async def register(user_data: UserCreate):
     if otp_signup_enabled:
         # Store pending registration + dispatch OTP
         otp = str(secrets.randbelow(900000) + 100000)
-        expires_at = datetime.utcnow() + timedelta(minutes=OTP_EXPIRY_MINUTES)
+        expires_at = now_ist() + timedelta(minutes=OTP_EXPIRY_MINUTES)
 
         await db.pending_registrations.update_one(
             {"email": user_data.email},
@@ -73,7 +74,7 @@ async def register(user_data: UserCreate):
                     "role": role,
                     "otp": otp,
                     "expires_at": expires_at,
-                    "created_at": datetime.utcnow(),
+                    "created_at": now_ist(),
                 }
             },
             upsert=True,
@@ -105,8 +106,8 @@ async def register(user_data: UserCreate):
         "email": user_data.email,
         "password": hashed_password,
         "role": role,
-        "createdAt": datetime.utcnow(),
-        "updatedAt": datetime.utcnow()
+        "createdAt": now_ist(),
+        "updatedAt": now_ist()
     }
 
     result = await db.users.insert_one(user_doc)
@@ -156,7 +157,7 @@ async def login(credentials: UserLogin):
 
     # OTP enabled — generate and dispatch
     otp = str(secrets.randbelow(900000) + 100000)
-    expires_at = datetime.utcnow() + timedelta(minutes=OTP_EXPIRY_MINUTES)
+    expires_at = now_ist() + timedelta(minutes=OTP_EXPIRY_MINUTES)
 
     # Upsert OTP record (one active OTP per email at a time)
     await db.otp_store.update_one(
@@ -167,7 +168,7 @@ async def login(credentials: UserLogin):
                 "otp": otp,
                 "expires_at": expires_at,
                 "used": False,
-                "created_at": datetime.utcnow(),
+                "created_at": now_ist(),
             }
         },
         upsert=True,
@@ -225,7 +226,7 @@ async def verify_otp(payload: OTPVerifyRequest):
         raise invalid_exc
     if record.get("used"):
         raise invalid_exc
-    if datetime.utcnow() > record["expires_at"]:
+    if now_ist() > record["expires_at"]:
         raise invalid_exc
     if record["otp"] != payload.otp:
         raise invalid_exc
@@ -267,7 +268,7 @@ async def verify_signup_otp(payload: SignupOTPVerifyRequest):
 
     if not record:
         raise invalid_exc
-    if datetime.utcnow() > record["expires_at"]:
+    if now_ist() > record["expires_at"]:
         # Clean up expired record
         await db.pending_registrations.delete_one({"email": payload.email})
         raise invalid_exc
@@ -286,8 +287,8 @@ async def verify_signup_otp(payload: SignupOTPVerifyRequest):
         "email": record["email"],
         "password": record["hashed_password"],
         "role": record["role"],
-        "createdAt": datetime.utcnow(),
-        "updatedAt": datetime.utcnow(),
+        "createdAt": now_ist(),
+        "updatedAt": now_ist(),
     }
     result = await db.users.insert_one(user_doc)
     user_id = str(result.inserted_id)
@@ -325,7 +326,7 @@ async def forgot_password(payload: ForgotPasswordRequest):
     user = await db.users.find_one({"email": payload.email})
     if user:
         token = secrets.token_urlsafe(32)
-        expires_at = datetime.utcnow() + timedelta(hours=RESET_TOKEN_EXPIRY_HOURS)
+        expires_at = now_ist() + timedelta(hours=RESET_TOKEN_EXPIRY_HOURS)
 
         await db.password_reset_tokens.update_one(
             {"email": payload.email},
@@ -335,7 +336,7 @@ async def forgot_password(payload: ForgotPasswordRequest):
                     "token": token,
                     "expires_at": expires_at,
                     "used": False,
-                    "created_at": datetime.utcnow(),
+                    "created_at": now_ist(),
                 }
             },
             upsert=True,
@@ -371,7 +372,7 @@ async def reset_password(payload: ResetPasswordRequest):
         raise invalid_exc
     if record.get("used"):
         raise invalid_exc
-    if datetime.utcnow() > record["expires_at"]:
+    if now_ist() > record["expires_at"]:
         raise invalid_exc
 
     # Enforce minimum password length
@@ -384,7 +385,7 @@ async def reset_password(payload: ResetPasswordRequest):
     hashed = get_password_hash(payload.new_password)
     result = await db.users.update_one(
         {"email": record["email"]},
-        {"$set": {"password": hashed, "updatedAt": datetime.utcnow()}},
+        {"$set": {"password": hashed, "updatedAt": now_ist()}},
     )
 
     if result.matched_count == 0:
@@ -480,7 +481,7 @@ async def update_user_role(
         {
             "$set": {
                 "role": role_update.role,
-                "updatedAt": datetime.utcnow()
+                "updatedAt": now_ist()
             }
         }
     )
@@ -533,7 +534,7 @@ async def promote_user_by_email(
 
     await db.users.update_one(
         {"_id": target_user["_id"]},
-        {"$set": {"role": data.role, "updatedAt": datetime.utcnow()}}
+        {"$set": {"role": data.role, "updatedAt": now_ist()}}
     )
 
     updated_user = await db.users.find_one({"_id": target_user["_id"]})

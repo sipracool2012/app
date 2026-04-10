@@ -5,6 +5,42 @@ All notable changes to the Clear eVisa project are documented in this file.
 Format: `## [Date] - Description`
 ---
 
+## [2026-04-10] - IST timezone throughout; Admin Panel table improvements; My Applications countdown + date fix
+
+### Changed
+- **IST timezone — all backend timestamps** (`backend/utils/constants.py`, `backend/routes/applications.py`, `backend/routes/auth.py`, `backend/routes/payment_gateways.py`, `backend/server.py`)
+  - Added `now_ist()` helper in `backend/utils/constants.py` — returns current naive datetime in IST (UTC+05:30) using `datetime.now(timezone(timedelta(hours=5, minutes=30))).replace(tzinfo=None)`
+  - Replaced every `datetime.utcnow()` call across all backend route files and background tasks with `now_ist()`
+  - Affected: OTP expiry, password reset token expiry, draft creation/update/expiry, application submission timestamps, `paidAt`, `updatedAt`, `createdAt`, background cleanup loop comparisons
+
+- **IST timezone — all frontend date displays** (`frontend/src/pages/MyApplications.jsx`, `frontend/src/pages/AdminPanel.jsx`)
+  - `formatDate()` in `MyApplications.jsx` updated to use `timeZone: 'Asia/Kolkata'` with `en-IN` locale → displays as `10 Apr 2026, 10:15 PM`
+  - Admin Panel Submitted column updated to `toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', ... })` including time with AM/PM
+
+- **Admin Panel — Applications table** (`frontend/src/pages/AdminPanel.jsx`, `backend/routes/applications.py`)
+  - **Name column**: now shows `GivenNames Surname` (first name first) instead of reversed order
+  - **Nationality column**: shows flag icon (via `FlagIcon` component) + passport country name side by side
+  - **Visa Type column**: replaced raw visa string with short labels — `Tourist 30D`, `Tourist 1Y`, `Tourist 5Y`, `Business`, `Medical`, `Med. Attendant`, `Conference`, `Transit`
+  - **Submitted column**: shows `paidAt` (IST) for any status in paid/pending_review/submitted/processed/approved/rejected; falls back to `submittedDate` otherwise; formatted with time
+  - Backend `my-applications` response now includes `nationality`, `passportCountryCode` (derived from visaId prefix), and `paidAt` fields
+
+### Added
+- **Live IST clock banner** (`frontend/src/pages/MyApplications.jsx`, `frontend/src/pages/VisaApplication.jsx`)
+  - `ISTClock` component renders a blue info banner on the My Applications page and on every step of the visa application form (between the progress stepper and the step content card)
+  - Ticks every second using `setInterval`
+  - Displays: `Time in India (UTC+05:30) — 10:15:30 PM · Friday, 10 April 2026`
+
+- **Expiry countdown timer on draft cards** (`frontend/src/pages/MyApplications.jsx`)
+  - `ExpiryCountdown` component shows remaining time until draft expires below the status badge
+  - Format: `2d 3h 14m remaining` / `5h 22m 10s remaining` / `14m 30s remaining`
+  - Colour: grey (> 24h), orange (< 24h), red (< 1h), red "Expired" when time is up
+  - Live ticking via `setInterval`, cleans up on unmount
+
+- **Submitted date fix** (`frontend/src/pages/MyApplications.jsx`)
+  - For paid/processed/approved/rejected statuses, shows `paidAt` (actual payment timestamp) instead of the previously empty `submittedDate`
+
+---
+
 ## [2026-04-10] - India Tourism landing page + default route change
 
 ### Added

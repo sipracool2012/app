@@ -3,6 +3,7 @@ from fastapi.responses import StreamingResponse
 from models.application import ApplicationCreate, Application, ApplicationStatusUpdate
 from utils.auth import get_current_user
 from utils.email import send_application_confirmation, send_application_status_update
+from utils.constants import now_ist
 from datetime import datetime, timedelta
 from typing import List, Optional
 from bson import ObjectId
@@ -35,7 +36,7 @@ db = get_db()
 
 def generate_temp_id() -> str:
     """Generate a temporary application ID: TEMP{DDMMYYYY}{HHMMSS}"""
-    now = datetime.utcnow()
+    now = now_ist()
     return f"TEMP{now.strftime('%d%m%Y%H%M%S')}"
 
 
@@ -64,7 +65,7 @@ async def save_draft(
     If __draftId is present in the payload, update that specific draft.
     If not, always create a new draft (no per-visa deduplication).
     Also assigns a TEMP ID on first save and resets/extends expiresAt on every save."""
-    now = datetime.utcnow()
+    now = now_ist()
 
     # Extract the target draft ID (if updating an existing draft)
     draft_id_str = draft_data.pop("__draftId", None)
@@ -214,8 +215,8 @@ async def get_my_applications(user_id: str = Depends(get_current_user)):
             "nationality": app.get("nationality", ""),
             "passportCountryCode": (visa_id.split("-")[0].upper() if visa_id else ""),
             "currentStep": app.get("currentStep", 1),
-            "createdAt": app.get("createdAt", datetime.utcnow()).isoformat() if isinstance(app.get("createdAt"), datetime) else str(app.get("createdAt", "")),
-            "updatedAt": app.get("updatedAt", datetime.utcnow()).isoformat() if isinstance(app.get("updatedAt"), datetime) else str(app.get("updatedAt", "")),
+            "createdAt": app.get("createdAt", now_ist()).isoformat() if isinstance(app.get("createdAt"), datetime) else str(app.get("createdAt", "")),
+            "updatedAt": app.get("updatedAt", now_ist()).isoformat() if isinstance(app.get("updatedAt"), datetime) else str(app.get("updatedAt", "")),
             "submittedDate": app.get("submittedDate", "").isoformat() if isinstance(app.get("submittedDate"), datetime) else str(app.get("submittedDate", "")),
             "paidAt": app.get("paidAt", "").isoformat() if isinstance(app.get("paidAt"), datetime) else str(app.get("paidAt", "")),
             "expiresAt": app["expiresAt"].isoformat() if isinstance(app.get("expiresAt"), datetime) else str(app.get("expiresAt", "")),
@@ -228,7 +229,7 @@ UPLOAD_DIR = BASE_DIR / "uploads"
 
 def generate_application_id() -> str:
     """Generate unique application ID: APP{timestamp}{6-char hex} to avoid timestamp collisions."""
-    timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+    timestamp = now_ist().strftime('%Y%m%d%H%M%S')
     suffix = secrets.token_hex(3).upper()  # 6 hex chars
     return f"APP{timestamp}{suffix}"
 
@@ -245,7 +246,7 @@ async def assign_application_id(
     falling back to userId+visaId if not provided.
     """
     from bson import ObjectId
-    now = datetime.utcnow()
+    now = now_ist()
     visa_id = body.get("visaId") if body else None
     draft_id_str = body.get("draftId") if body else None
 
@@ -369,9 +370,9 @@ async def create_application(
         "applicationId": application_id,
         "userId": user_id,
         "status": "pending",
-        "submittedDate": datetime.utcnow(),
-        "createdAt": datetime.utcnow(),
-        "updatedAt": datetime.utcnow()
+        "submittedDate": now_ist(),
+        "createdAt": now_ist(),
+        "updatedAt": now_ist()
     })
     
     # Insert into database
@@ -462,7 +463,7 @@ async def update_application_status(
         {
             "$set": {
                 "status": status_update.status,
-                "updatedAt": datetime.utcnow()
+                "updatedAt": now_ist()
             }
         }
     )
@@ -604,7 +605,7 @@ async def export_applications(
     
     # Create response
     output.seek(0)
-    filename = f"visa_applications_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+    filename = f"visa_applications_{now_ist().strftime('%Y%m%d_%H%M%S')}.csv"
     
     return StreamingResponse(
         iter([output.getvalue()]),
