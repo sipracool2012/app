@@ -11,6 +11,8 @@ export default function ContactUs() {
     category: ''
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,15 +22,24 @@ export default function ContactUs() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission
-    console.log('Form submitted:', formData);
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
+    setSubmitting(true);
+    setSubmitError('');
+    try {
+      const res = await fetch('/api/utility/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) throw new Error('Failed to send message');
+      setSubmitted(true);
       setFormData({ name: '', email: '', subject: '', message: '', category: '' });
-    }, 3000);
+    } catch {
+      setSubmitError('Sorry, we could not send your message. Please email us directly at admin@clearevisa.com.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -50,28 +61,28 @@ export default function ContactUs() {
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-2">📧 Email</h3>
               <p className="text-gray-600 mb-1">General Inquiries</p>
-              <p className="text-blue-600 font-semibold">hello@clearevisa.com</p>
+              <p className="text-blue-600 font-semibold">admin@clearevisa.com</p>
               <p className="text-gray-600 mb-1 mt-3">Customer Support</p>
               <p className="text-blue-600 font-semibold">support@clearevisa.com</p>
-              <p className="text-gray-600 mb-1 mt-3">Press</p>
-              <p className="text-blue-600 font-semibold">press@clearevisa.com</p>
             </div>
 
-            {/* Phone 
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-3">📱 Phone</h3>
               <p className="text-gray-700">
-                <strong>+1 (555) 123-4567</strong>
+                <strong>+91-9474475384</strong>
               </p>
-              <p className="text-gray-600 text-sm mt-2">Available 24/7</p>
-            </div>*/}
+              <p className="text-gray-600 text-sm mt-2">Mon – Fri: 9AM – 6PM IST</p>
+            </div>
 
             {/* Address */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-3">📍 Address</h3>
               <p className="text-gray-700">
-                B1109 - Graffiti Glover Commercial<br />
-                Pune, Maharashtra, 411036<br />
+                <strong>Clear eVisa Services</strong><br />
+                B1109, Venkatesh Graffiti Glover,<br />
+                Manjari Rd, Hanuman Nagar,<br />
+                Keshav Nagar, Mundhwa,<br />
+                Pune, Maharashtra 411036<br />
                 India
               </p>
             </div>
@@ -99,6 +110,12 @@ export default function ContactUs() {
                 <div className="mb-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700">
                   <p className="font-semibold">{t('pages.contact.messageSentTitle')}</p>
                   <p>{t('pages.contact.messageSentDesc')}</p>
+                </div>
+              )}
+
+              {submitError && (
+                <div className="mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-700">
+                  <p>{submitError}</p>
                 </div>
               )}
 
@@ -181,9 +198,10 @@ export default function ContactUs() {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                  disabled={submitting}
+                  className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {t('pages.contact.send')}
+                  {submitting ? 'Sending…' : t('pages.contact.send')}
                 </button>
               </form>
 

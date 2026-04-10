@@ -10,13 +10,13 @@ export default function FAQ() {
       id: 1,
       category: "General",
       question: "What is this platform?",
-      answer: "Our platform is a comprehensive visa application service that helps individuals navigate the complex visa application process. We provide step-by-step guidance, document verification, and support across 150+ countries."
+      answer: "Clear eVisa is a specialist Indian eVisa consultancy service. We verify all required documents and information for your India eVisa application, and prepare a complete, accurate documentation package — so you can submit on India's official portal with confidence, without errors that could lead to rejection or delay."
     },
     {
       id: 2,
       category: "General",
       question: "Is this service legal?",
-      answer: "Yes, our service is completely legal. We are a registered company operating in compliance with all applicable laws and regulations. We do not provide legal advice; instead, we help you organize and submit your application accurately."
+      answer: "Yes, our service is completely legal. Clear eVisa Services is a registered consultancy operating in full compliance with applicable laws. We do not provide immigration legal advice. Instead, we review your documents and information against India's eVisa requirements and prepare accurate documentation to help you submit correctly on the official Government portal."
     },
     {
       id: 3,
@@ -33,20 +33,20 @@ export default function FAQ() {
     {
       id: 5,
       category: "Applications",
-      question: "Can I apply for multiple visas simultaneously?",
-      answer: "Yes, you can submit applications for multiple countries at the same time. Each application is independent and processed separately according to that country's requirements."
+      question: "Can I get assistance for multiple family members?",
+      answer: "Yes, we can assist multiple travellers — such as family members travelling together. Each person's documents and information are verified and prepared independently. Each traveller will need their own application submission on the official portal."
     },
     {
       id: 6,
       category: "Applications",
-      question: "What visa types do you support?",
-      answer: "We support tourist visas, business visas, student visas, work visas, family reunion visas, and healthcare visas across our 150+ supported countries. Check the visa finder to see what's available for your destination."
+      question: "What India eVisa types do you support?",
+      answer: "We specialise exclusively in India eVisa. We support all five India eVisa types: Tourist (30-day, 1-year, and 5-year), Business, Medical, Medical Attendant, and Conference eVisas — for eligible passport holders from 193+ nationalities."
     },
     {
       id: 7,
       category: "Documents",
       question: "What documents will I need?",
-      answer: "Required documents vary by country and visa type. Our platform provides a personalized document checklist based on your specific application. You'll receive this list when you start your application."
+      answer: "Required documents vary by India eVisa type. Our platform provides a personalised document checklist based on your nationality and the visa type you are applying for. Common requirements include a digital passport photo, passport scan, and supporting documents such as a business letter or medical certificate depending on the visa category."
     },
     {
       id: 8,
@@ -58,7 +58,7 @@ export default function FAQ() {
       id: 9,
       category: "Payment",
       question: "What is the total cost?",
-      answer: "Costs vary depending on the destination country and visa type. Our platform fee is transparent and clearly displayed before you complete payment. We also break down any government fees and service charges separately."
+      answer: "Our consultancy fee covers thorough document verification, expert review of your information against India's eVisa requirements, and preparation of your complete documentation package. Government eVisa fees are paid directly by you at the time of submission on India's official portal. All fees are clearly displayed before payment."
     },
     {
       id: 10,
@@ -70,7 +70,7 @@ export default function FAQ() {
       id: 11,
       category: "Processing",
       question: "How long does visa processing take?",
-      answer: "Processing times vary significantly by country, ranging from 5 to 30 days. We provide estimated timelines based on historical data when you start your application."
+      answer: "India eVisa processing by the Indian Government typically takes 3–5 business days after you submit on the official portal. Our consultancy ensures your documents are verified and correctly prepared before you submit, reducing the risk of delays caused by errors or missing information."
     },
     {
       id: 12,
@@ -82,7 +82,7 @@ export default function FAQ() {
       id: 13,
       category: "Refunds & Cancellation",
       question: "What's your refund policy?",
-      answer: "Refund policies depend on the visa type and stage of your application. Generally, we can offer refunds if your application hasn't been submitted to the government yet. Contact our support team for specific details."
+      answer: "Our consultancy fee covers document verification, information review, and preparation of your documentation. It does not cover the Government of India eVisa fee, which you pay separately when submitting on the official portal. Once our document review and preparation is complete, our service fee is non-refundable. See our Refund Policy for full details."
     },
     {
       id: 14,

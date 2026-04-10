@@ -13,14 +13,14 @@ export default function RefundPolicy() {
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Overview</h2>
             <p className="mb-4">
-              You can get a full refund for an incomplete application. We can consider a partial return of funds to your
-              Bank or Card contingent upon the stage that your application is at. We incur fees from the Government
-              Department, Vendor, and Payment Gateway that are not refundable for us — this fixed cost cannot be
-              refunded if your application has already been lodged with the relevant Government department.
+              You can get a full refund if our document review and preparation work has not yet commenced. Once work
+              has begun, we can consider a partial return of funds depending on the stage reached. We incur costs from
+              our review team, third-party vendors, and payment gateways that cannot be recovered once committed.
             </p>
             <p>
-              The Government Levy cannot be returned once the application has been formally submitted on the relevant
-              immigration authority site, regardless of the outcome of your eVisa application.
+              The Government of India eVisa fee is paid directly by you on the official portal at the time of your
+              own submission. This fee is entirely outside our control and cannot be refunded once your application
+              has been formally lodged with the Indian immigration authority.
             </p>
           </section>
 
@@ -30,9 +30,8 @@ export default function RefundPolicy() {
 
             <h3 className="text-xl font-semibold text-gray-900 mb-3">1.1 Full Refund</h3>
             <p className="mb-4">
-              A full refund is available if your application has not yet been submitted to the Government immigration
-              portal. This includes applications that are incomplete, have not been reviewed by our team, or where
-              payment was made in error before any processing began.
+              A full refund is available if you cancel before our document review and preparation work has begun
+              and before you have submitted your application on India's official eVisa portal.
             </p>
 
             <h3 className="text-xl font-semibold text-gray-900 mb-3">1.2 Partial Refund</h3>
@@ -46,7 +45,7 @@ export default function RefundPolicy() {
               <li>Payment Gateway transaction charges</li>
             </ul>
             <p>
-              These costs are fixed and cannot be recovered by us once they have been committed on your behalf.
+              These costs are fixed and cannot be recovered by us once they have been committed.
             </p>
 
             <h3 className="text-xl font-semibold text-gray-900 mb-3">1.3 No Refund</h3>
@@ -54,10 +53,10 @@ export default function RefundPolicy() {
               No refund of any kind is available in the following circumstances:
             </p>
             <ul className="list-disc list-inside space-y-2">
-              <li>Your application has been formally lodged with the relevant immigration authority</li>
-              <li>Your eVisa application has been approved, denied, or cancelled after formal submission</li>
-              <li>The Government Levy has already been forwarded to the immigration authority</li>
-              <li>You voluntarily chose to withdraw your application after Government submission</li>
+              <li>Our document review and preparation work has been fully completed</li>
+              <li>You have formally submitted your application on India's official eVisa portal</li>
+              <li>Your eVisa application has been approved, denied, or cancelled after your submission</li>
+              <li>You voluntarily chose to withdraw your application after submission</li>
             </ul>
           </section>
 
@@ -65,13 +64,14 @@ export default function RefundPolicy() {
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">2. Application Fee</h2>
             <p className="mb-4">
-              The application fee covers the administrative processing costs incurred by our team, including document
-              review, expert review of your submission, translation services where applicable, and liaison with the
-              relevant Government immigration department.
+              The consultancy fee covers the costs incurred by our team, including document verification, expert
+              review of your information against India's eVisa requirements, preparation of a complete documentation
+              package, and translation services where applicable.
             </p>
             <p>
-              This fee cannot be returned if your application has been rejected or if it has already been submitted
-              on the Government website, as the processing costs have already been incurred at that point.
+              This fee cannot be returned once our review and preparation work is complete. If you have already
+              submitted your application on the official portal, our work has been completed and the fee is
+              non-refundable regardless of the outcome of your eVisa application.
             </p>
           </section>
 
@@ -79,10 +79,10 @@ export default function RefundPolicy() {
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">3. Government Levy</h2>
             <p>
-              The Government Levy is a mandatory fee charged by the relevant immigration authority as part of the
-              eVisa application process. This levy is forwarded directly to the Government on your behalf and is
-              entirely outside our control. It cannot be returned under any circumstances once your application has
-              been formally lodged, irrespective of the outcome of that application.
+              The Government of India eVisa fee is a mandatory charge set by the Indian immigration authority.
+              This fee is paid directly by you when you submit your application on the official portal
+              (indianvisaonline.gov.in). It is entirely outside our control and cannot be returned under any
+              circumstances once your application has been formally lodged, irrespective of the outcome.
             </p>
           </section>
 
@@ -90,14 +90,15 @@ export default function RefundPolicy() {
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">4. Our Services</h2>
             <p className="mb-4">
-              We provide administrative assistance and expert review services. Our team helps you prepare, complete,
-              and submit your eVisa application accurately. We also offer translation services to convert supporting
-              documents from other languages into English where required.
+              Clear eVisa Services provides Indian eVisa consultancy. Our team verifies all your required documents
+              and information against India's eVisa requirements and prepares a complete, accurate documentation
+              package. We also offer translation services where required. You are responsible for submitting your
+              own application on India's official portal (indianvisaonline.gov.in).
             </p>
             <p className="mb-4">
-              We do not provide immigration counsel, legal immigration advice, or migration advisory services.
-              The final decision on any eVisa application rests entirely with the relevant Government immigration
-              authority. We have no influence over approval or rejection decisions.
+              We do not submit applications on your behalf. We do not provide immigration counsel, legal immigration
+              advice, or migration advisory services. The final decision on any eVisa application rests entirely with
+              the Government of India. We have no influence over approval or rejection decisions.
             </p>
             <p>
               Our service fee is charged for the administrative work performed by our team and is not contingent on

@@ -14,7 +14,7 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Introduction</h2>
             <p className="mb-4">
-              Welcome to our Visa Application Platform ("we," "us," "our," or "Company"). 
+              Welcome to Clear eVisa Services ("we," "us," "our," or "Company"). 
               We are committed to protecting your privacy and ensuring you have a positive experience on our platform.
             </p>
             <p>
@@ -192,10 +192,10 @@ export default function PrivacyPolicy() {
               If you have questions about this Privacy Policy or our privacy practices, please contact us at:
             </p>
             <div className="bg-gray-100 p-4 rounded">
-              <p><strong>Visa Application Platform</strong></p>
-              <p>Email: privacy@clearevisa.com</p>
-              <p>Address: B1109 - Graffiti Glover Commercial, Pune, Maharashtra, 411036, India</p>
-              {/* <p>Phone: [Your Phone Number]</p> */}
+              <p><strong>Clear eVisa Services</strong></p>
+              <p>Email: admin@clearevisa.com</p>
+              <p>Phone: +91-9474475384</p>
+              <p>Address: B1109, Venkatesh Graffiti Glover, Manjari Rd, Hanuman Nagar, Keshav Nagar, Mundhwa, Pune, Maharashtra 411036, India</p>
             </div>
           </section>
 

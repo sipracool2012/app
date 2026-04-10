@@ -36,18 +36,18 @@ export default function HelpCenter() {
     'application': [
       {
         id: 4,
-        question: "How long does the application process take?",
-        answer: "The application process typically takes 20-30 minutes to complete, depending on the visa type and amount of information required. You can save and return to your application at any time."
+        question: "How long does the consultancy process take?",
+        answer: "The document verification and preparation process typically takes 1–2 business days after you submit all required information and documents to us. Once your documentation package is ready, you can submit on India's official eVisa portal yourself. The Indian Government's eVisa processing then typically takes a further 3–5 business days."
       },
       {
         id: 5,
-        question: "Which visa types do you support?",
-        answer: "We support applications for tourist, business, student, work, family reunion, and healthcare visas across 150+ countries. You can filter by your destination country to see available visa types."
+        question: "Which India eVisa types do you support?",
+        answer: "We specialise exclusively in India eVisa. We support all five types: Tourist (30-day, 1-year, and 5-year), Business, Medical, Medical Attendant, and Conference eVisas — for passport holders from 193+ eligible nationalities."
       },
       {
         id: 6,
-        question: "Can I apply for multiple visas at once?",
-        answer: "Yes, you can submit applications for different countries simultaneously. Each application is processed independently according to that country's requirements."
+        question: "Can you assist multiple family members travelling together?",
+        answer: "Yes. We can verify and prepare documentation for multiple travellers in the same family group. Each person's documents are reviewed independently. Each traveller must submit their own application on the official portal."
       }
     ],
     'documents': [
@@ -80,8 +80,8 @@ export default function HelpCenter() {
       },
       {
         id: 12,
-        question: "What's included in the application fee?",
-        answer: "Our application fee includes platform access, document verification, personalized guidance, and customer support. We clearly break down all fees before you complete your payment."
+        question: "What's included in the consultancy fee?",
+        answer: "Our consultancy fee covers: thorough verification of all your documents against India's eVisa requirements, expert review of your information to catch errors before submission, preparation of a complete documentation package, and customer support throughout the process. Government eVisa fees are paid separately by you on the official portal."
       }
     ],
     'tracking': [
@@ -97,8 +97,8 @@ export default function HelpCenter() {
       },
       {
         id: 15,
-        question: "How long does processing typically take?",
-        answer: "Processing times vary by country and visa type, ranging from 5-30 days. We provide estimated timelines during the application process based on historical data."
+        question: "How long does India eVisa processing take?",
+        answer: "The Indian Government typically processes eVisa applications within 3–5 business days of submission. Our consultancy ensures your documents are verified and error-free before you submit, minimising the risk of processing delays or rejection."
       }
     ],
     'technical': [

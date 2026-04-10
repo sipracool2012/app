@@ -195,3 +195,35 @@ async def send_application_status_update(to_email: str, application_id: str, app
     </html>
     """
     return await send_email(to_email, subject, html_content)
+
+
+async def send_contact_form_email(name: str, email: str, category: str, subject_line: str, message: str) -> bool:
+    """
+    Forward a contact form submission to the support inbox.
+    """
+    subject = f"[Contact Form] {subject_line or 'New Enquiry'} — {name}"
+    html_content = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background-color: #2563eb; padding: 20px; text-align: center;">
+                <h1 style="color: white; margin: 0;">Clear eVisa &mdash; Contact Form</h1>
+            </div>
+            <div style="padding: 30px; background-color: #f9fafb;">
+                <table style="width:100%; border-collapse:collapse; font-size:15px; color:#1f2937;">
+                    <tr><td style="padding:8px 0; font-weight:bold; width:120px;">From</td><td>{name}</td></tr>
+                    <tr><td style="padding:8px 0; font-weight:bold;">Email</td><td><a href="mailto:{email}" style="color:#2563eb;">{email}</a></td></tr>
+                    <tr><td style="padding:8px 0; font-weight:bold;">Category</td><td>{category or '(none)'}</td></tr>
+                    <tr><td style="padding:8px 0; font-weight:bold;">Subject</td><td>{subject_line or '(none)'}</td></tr>
+                </table>
+                <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0;" />
+                <p style="color:#1f2937; font-size:15px; white-space:pre-wrap;">{message}</p>
+            </div>
+            <div style="background-color: #1f2937; padding: 20px; text-align: center;">
+                <p style="color: #9ca3af; margin: 0; font-size: 12px;">
+                    &copy; 2026 Clear eVisa Services. All rights reserved.
+                </p>
+            </div>
+        </body>
+    </html>
+    """
+    return await send_email("support@clearevisa.com", subject, html_content)

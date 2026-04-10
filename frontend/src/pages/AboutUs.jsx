@@ -19,13 +19,14 @@ export default function AboutUs() {
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 mb-6">{t('pages.about.mission')}</h2>
           <p className="text-lg text-gray-700 mb-4">
-            We are dedicated to revolutionizing the visa application process by providing a seamless, user-friendly platform 
-            that simplifies international travel. Our mission is to remove barriers and complexities in visa applications, 
-            making it easier for people around the world to pursue their dreams.
+            Clear eVisa Services is a specialist Indian eVisa consultancy. Our mission is to ensure every traveller has
+            correctly verified documents and a complete, accurate documentation package before they reach the official
+            submission portal — eliminating the errors that cause delays and rejections.
           </p>
           <p className="text-lg text-gray-700">
-            By combining technology, expertise, and a commitment to excellence, we empower individuals and families to 
-            navigate the visa application process with confidence and clarity.
+            We don't submit applications on your behalf. Instead, we meticulously review every document and piece of
+            information against India's eVisa requirements and prepare proper documentation so that when you submit
+            on India's official portal, everything is in order the first time.
           </p>
         </section>
 
@@ -33,9 +34,10 @@ export default function AboutUs() {
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 mb-6">{t('pages.about.vision')}</h2>
           <p className="text-lg text-gray-700">
-            To create a world where visa applications are no longer a burden, but a straightforward step toward achieving 
-            your goals. We envision a future where technology and human expertise work together to make international mobility 
-            accessible to everyone.
+            To be India's most trusted eVisa consultancy — where every traveller, regardless of their nationality,
+            receives expert document verification and preparation that gives them the best chance of a successful
+            India eVisa approval. We believe that with the right guidance, no application should be rejected due
+            to avoidable documentation errors.
           </p>
         </section>
 
@@ -87,23 +89,23 @@ export default function AboutUs() {
 
         {/* Stats Section */}
         <section className="mb-16 bg-blue-50 rounded-lg p-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">{t('pages.about.byTheNumbers')}</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Clear eVisa by the Numbers</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             <div>
               <div className="text-4xl font-bold text-blue-600 mb-2">50K+</div>
-              <p className="text-gray-700">{t('pages.about.applicationsProcessed')}</p>
+              <p className="text-gray-700">Clients Assisted</p>
             </div>
             <div>
-              <div className="text-4xl font-bold text-blue-600 mb-2">150+</div>
-              <p className="text-gray-700">{t('pages.about.countriesSupported')}</p>
+              <div className="text-4xl font-bold text-blue-600 mb-2">193+</div>
+              <p className="text-gray-700">Passport Nationalities Served</p>
             </div>
             <div>
-              <div className="text-4xl font-bold text-blue-600 mb-2">98%</div>
-              <p className="text-gray-700">{t('pages.about.successRate')}</p>
+              <div className="text-4xl font-bold text-blue-600 mb-2">India</div>
+              <p className="text-gray-700">eVisa Specialist</p>
             </div>
             <div>
               <div className="text-4xl font-bold text-blue-600 mb-2">24/7</div>
-              <p className="text-gray-700">{t('pages.about.customerSupport')}</p>
+              <p className="text-gray-700">Customer Support</p>
             </div>
           </div>
         </section>
@@ -111,29 +113,25 @@ export default function AboutUs() {
         {/* Team Section */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 mb-8">{t('pages.about.ourTeam')}</h2>
-          <p className="text-lg text-gray-700 mb-8">
-            Our team consists of experienced immigration professionals, software engineers, designers, and customer support specialists 
-            working together to provide you with the best visa application experience possible.
-          </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white rounded-lg shadow-md p-6 text-center">
-              <div className="w-24 h-24 bg-gray-300 rounded-full mx-auto mb-4"></div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">John Smith</h3>
-              <p className="text-blue-600 font-semibold mb-2">Founder & CEO</p>
-              <p className="text-gray-700 text-sm">20+ years in immigration services</p>
+              <div className="w-24 h-24 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <span className="text-3xl text-blue-600 font-bold">SS</span>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Sipra Satpathi</h3>
+              <p className="text-blue-600 font-semibold mb-2">Sole Proprietor</p>
             </div>
-            <div className="bg-white rounded-lg shadow-md p-6 text-center">
-              <div className="w-24 h-24 bg-gray-300 rounded-full mx-auto mb-4"></div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Sarah Johnson</h3>
-              <p className="text-blue-600 font-semibold mb-2">Chief Technology Officer</p>
-              <p className="text-gray-700 text-sm">Fintech & SaaS technology expert</p>
-            </div>
-            <div className="bg-white rounded-lg shadow-md p-6 text-center">
-              <div className="w-24 h-24 bg-gray-300 rounded-full mx-auto mb-4"></div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Michael Chen</h3>
-              <p className="text-blue-600 font-semibold mb-2">Head of Operations</p>
-              <p className="text-gray-700 text-sm">Global operations and compliance</p>
-            </div>
+          </div>
+        </section>
+
+        {/* Legal Information */}
+        <section className="mb-16 bg-gray-100 rounded-lg p-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Legal Information</h2>
+          <div className="space-y-2 text-gray-700">
+            <p><strong>Legal Entity Name:</strong> Clear eVisa Services</p>
+            <p><strong>Registered Address:</strong> B1109, Venkatesh Graffiti Glover, Manjari Rd, Hanuman Nagar, Keshav Nagar, Mundhwa, Pune, Maharashtra 411036, India</p>
+            <p><strong>Contact:</strong> +91-9474475384</p>
+            <p><strong>Email:</strong> admin@clearevisa.com</p>
           </div>
         </section>
 

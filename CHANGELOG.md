@@ -5,6 +5,49 @@ All notable changes to the Clear eVisa project are documented in this file.
 Format: `## [Date] - Description`
 ---
 
+## [2026-04-10] - Legal/static pages: real business details + Indian eVisa consultancy positioning
+
+### Changed
+- **About Us** (`frontend/src/pages/AboutUs.jsx`)
+  - Mission and Vision rewritten to describe Indian eVisa document verification & preparation consultancy (not an application submission service)
+  - Stats updated: `50K+ Clients Assisted`, `193+ Passport Nationalities Served`, `India eVisa Specialist`, `24/7 Support`
+  - Fake placeholder team (John Smith, Sarah Johnson, Michael Chen) replaced with real team member: **Sipra Satpathi — Sole Proprietor**
+  - Added **Legal Information** section: entity name `Clear eVisa Services`, registered address, phone `+91-9474475384`, email `admin@clearevisa.com`
+
+- **Contact Us** (`frontend/src/pages/ContactUs.jsx`)
+  - Legal entity name and full registered address updated
+  - Phone number `+91-9474475384` added (was commented out)
+  - General email updated to `admin@clearevisa.com`
+  - Contact form now submits to `POST /api/utility/contact` (real email delivery to support@clearevisa.com) instead of silently resetting; includes loading state and error fallback
+
+- **Privacy Policy** (`frontend/src/pages/PrivacyPolicy.jsx`)
+  - Section 12 Contact: replaced generic "Visa Application Platform" with real entity name, email, and phone
+
+- **Terms of Service** (`frontend/src/pages/TermsOfService.jsx`)
+  - Section 4 Service Description: rewritten to describe document verification + preparation; customer submits on official portal themselves; added no-Government-affiliation disclaimer
+  - Section 5 Visa Application Process: removed "we submit on your behalf"; added "you submit on indianvisaonline.gov.in"
+  - Section 7 Refund Policy: tied to work commenced/completed, not Government submission
+  - Section 16 Contact: updated with real entity name, email, and phone
+
+- **Refund Policy** (`frontend/src/pages/RefundPolicy.jsx`)
+  - All "submitted on your behalf" / "forwarded to Government on your behalf" language removed
+  - Government fee clarified as paid directly by the customer on the official portal
+  - Section 4 Our Services: explicitly states we don't submit on behalf of customers
+
+- **FAQ** (`frontend/src/pages/FAQ.jsx`)
+  - 7 answers rewritten: platform description, legality, service scope (India eVisa only, 5 visa types, 193+ nationalities), document checklist, fee breakdown, processing time, refunds
+
+- **Help Center** (`frontend/src/pages/HelpCenter.jsx`)
+  - 3 articles rewritten: application process, consultancy fee description, processing timeline
+
+### Added
+- **`POST /api/utility/contact`** (`backend/routes/utility.py`, `backend/utils/email.py`)
+  - New public endpoint that forwards contact form submissions to `support@clearevisa.com` via the existing email provider chain
+  - `send_contact_form_email()` helper added to `backend/utils/email.py`
+  - `ContactFormRequest` Pydantic model (name, EmailStr, category, subject, message)
+
+---
+
 ## [2026-04-09] - Forgot Password flow; scroll-to-top on navigation + button
 
 ### Added

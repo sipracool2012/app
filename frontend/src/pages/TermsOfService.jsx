@@ -60,18 +60,22 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">4. Service Description</h2>
             <p className="mb-4">
-              Our Service provides a platform to help you organize, prepare, and submit visa applications. We offer:
+              Clear eVisa Services is an Indian eVisa consultancy. Our Service provides expert verification of your
+              documents and information, and prepares a complete, accurate documentation package for your India eVisa
+              application. We offer:
             </p>
             <ul className="list-disc list-inside space-y-2 mb-4">
-              <li>Application guidance and step-by-step instructions</li>
-              <li>Document organization and verification tools</li>
+              <li>Review and verification of your documents against India eVisa requirements</li>
+              <li>Expert checking that all information is complete and accurate</li>
+              <li>Preparation of a proper documentation package to minimise rejection risk</li>
               <li>Application status tracking</li>
-              <li>Customer support services</li>
+              <li>Customer support throughout the process</li>
             </ul>
             <p>
-              <strong>Important Disclaimer:</strong> We are not a law firm and do not provide legal advice. Our Service is 
-              designed to help you organize and prepare your visa application, but it does not replace professional legal counsel. 
-              For legal advice, please consult a qualified immigration attorney.
+              <strong>Important Disclaimer:</strong> We are not a law firm and do not provide legal immigration advice.
+              Our Service verifies and prepares your documentation, but it does not replace professional legal counsel.
+              The final submission of your India eVisa application is made by you directly on the official Government
+              portal. Clear eVisa Services has no affiliation with the Government of India or its immigration authorities.
             </p>
           </section>
 
@@ -79,15 +83,16 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">5. Visa Application Process</h2>
             <p className="mb-4">
-              By using our Service to submit a visa application, you acknowledge and agree that:
+              By using our Service for India eVisa consultancy, you acknowledge and agree that:
             </p>
             <ul className="list-disc list-inside space-y-2 mb-4">
-              <li>All information provided is accurate, complete, and truthful</li>
-              <li>You have the legal right to apply for the visa</li>
-              <li>You understand the visa requirements and your eligibility</li>
-              <li>We submit your application to the relevant government authority on your behalf</li>
-              <li>The decision to grant or deny your visa rests solely with the government authority</li>
-              <li>We do not guarantee approval of your visa application</li>
+              <li>All information you provide to us is accurate, complete, and truthful</li>
+              <li>You have the legal right to apply for an India eVisa</li>
+              <li>You understand the eVisa requirements and your eligibility</li>
+              <li>You are responsible for submitting your own application on India's official portal (indianvisaonline.gov.in)</li>
+              <li>The decision to grant or deny your eVisa rests solely with the Government of India</li>
+              <li>We do not guarantee approval of your eVisa application</li>
+              <li>We are not affiliated with the Government of India or any immigration authority</li>
             </ul>
           </section>
 
@@ -114,11 +119,12 @@ export default function TermsOfService() {
               Refunds are available under the following conditions:
             </p>
             <ul className="list-disc list-inside space-y-2 mb-4">
-              <li>If you request a refund before submitting your application to government authorities, you may be eligible for a partial or full refund</li>
+              <li>If you request a refund before our document review and preparation work has begun, you are eligible for a full refund</li>
+              <li>Once document review and preparation has commenced, a partial refund may be considered</li>
+              <li>No refund is available once preparation is complete or once you have submitted your application on the official Government portal</li>
               <li>Refund requests must be submitted within 14 days of payment</li>
-              <li>Government fees and certain service charges may be non-refundable</li>
-              <li>We reserve the right to deny refunds for applications submitted with inaccurate information</li>
             </ul>
+            <p>See our <a href="/refund-policy" className="text-blue-600 hover:underline">Refund Policy</a> page for full details.</p>
           </section>
 
           {/* Disclaimer of Warranties */}
@@ -235,10 +241,10 @@ export default function TermsOfService() {
               If you have any questions about these Terms of Service, please contact us at:
             </p>
             <div className="bg-gray-100 p-4 rounded mt-4">
-              <p><strong>Visa Application Platform</strong></p>
-              <p>Email: legal@clearevisa.com</p>
-              <p>Address: B1109 - Graffiti Glover Commercial, Pune, Maharashtra, 411036, India</p>
-              {/* <p>Phone: [Your Phone Number]</p> */}
+              <p><strong>Clear eVisa Services</strong></p>
+              <p>Email: admin@clearevisa.com</p>
+              <p>Phone: +91-9474475384</p>
+              <p>Address: B1109, Venkatesh Graffiti Glover, Manjari Rd, Hanuman Nagar, Keshav Nagar, Mundhwa, Pune, Maharashtra 411036, India</p>
             </div>
           </section>
         </div>
