@@ -270,7 +270,7 @@ const AdminPanel = () => {
 
   const downloadCSV = async (application) => {
     try {
-      const url = `${BACKEND_URL}/api/applications/export?ids=${application.applicationId}`;
+      const url = `${BACKEND_URL}/api/applications/${application.applicationId}/etourist-csv`;
       
       const response = await fetch(url, {
         headers: {

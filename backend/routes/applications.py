@@ -4,6 +4,7 @@ from models.application import ApplicationCreate, Application, ApplicationStatus
 from utils.auth import get_current_user
 from utils.email import send_application_confirmation, send_application_status_update
 from utils.constants import now_ist
+from utils.etourist_csv import save_etourist_csv
 from datetime import datetime, timedelta
 from typing import List, Optional
 from bson import ObjectId
@@ -318,7 +319,7 @@ async def generate_application_csv(
     user_id: str = Depends(get_current_user)
 ):
     """
-    Generate a transposed CSV file with all application data and save it to the
+    Generate an eTourist-format CSV fill-in sheet and save it to the
     uploads/{applicationId}/ folder. Called when user clicks Pay.
     """
     application_id = application_data.get("applicationId")
@@ -328,24 +329,8 @@ async def generate_application_csv(
             detail="applicationId is required"
         )
 
-    app_folder = UPLOAD_DIR / application_id
-    os.makedirs(app_folder, exist_ok=True)
-
-    csv_path = app_folder / f"{application_id}_application.csv"
-
-    # Write transposed CSV: one row per field (Field, Value)
-    skip_fields = {"_id", "userId", "passportDocument", "photoDocument",
-                   "businessLetter", "businessCard", "organizerInvitation",
-                   "meaPoliticalClearance", "mhaEventClearance",
-                   "medicalInvitationLetter", "confirmedTravelTicket",
-                   "destinationVisaOrPassport"}
-
-    with open(csv_path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow(["Field", "Value"])
-        for key, value in application_data.items():
-            if key not in skip_fields:
-                writer.writerow([key, value if value is not None else ""])
+    csv_path = UPLOAD_DIR / application_id / f"{application_id}_application.csv"
+    save_etourist_csv(application_data, csv_path)
 
     return {"success": True, "csvFile": f"{application_id}_application.csv"}
 
@@ -495,6 +480,36 @@ async def update_application_status(
         "id": application_id,
         "status": status_update.status
     }
+
+@router.get("/{application_id}/etourist-csv")
+async def download_etourist_csv(
+    application_id: str,
+    user_id: str = Depends(get_current_user)
+):
+    """
+    Generate and stream an eTourist-format fill-in CSV for a single application.
+    Always re-generates from the latest DB data so edits are reflected immediately.
+    """
+    from utils.etourist_csv import generate_etourist_csv
+
+    application = await db.applications.find_one({"applicationId": application_id})
+    if not application:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Application not found"
+        )
+
+    # Remove MongoDB internals before passing to the CSV generator
+    application.pop("_id", None)
+
+    csv_content = generate_etourist_csv(application)
+    filename = f"{application_id}_application.csv"
+
+    return StreamingResponse(
+        iter([csv_content]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
 
 @router.get("/export")
 async def export_applications(

@@ -5,6 +5,65 @@ All notable changes to the Clear eVisa project are documented in this file.
 Format: `## [Date] - Description`
 ---
 
+## [2026-04-11] - eTourist CSV: visa-type-specific middle section (Business / Conference / Transit)
+
+### Changed
+- **`backend/utils/etourist_csv.py`**
+  - Middle section of the CSV (between VISA SOUGHT and PREVIOUS VISA) is now chosen automatically based on visa type:
+    | Visa type | Section rendered |
+    |---|---|
+    | Tourist / Medical / Medical Attendant | MEETINGS FRIENDS/RELATIVES/YOGA (unchanged) |
+    | Business | BUSINESS DETAILS (applicant company + Indian firm) |
+    | Conference | CONFERENCE DETAILS (conference name/dates/venue/organizer) |
+    | Transit | TRANSIT TRAVEL DETAILS (destination country + visa-on-arrival) |
+  - `_flatten()` now derives `visa_category` from `visaService` string or `selectedVisaOption.purpose` (case-insensitive match on "business", "conference", "transit"; everything else → "tourist")
+  - Template uses a `__VISA_TYPE_SECTION__` sentinel that `generate_etourist_rows()` replaces at runtime with the correct section
+  - Added 4 section constants: `_SECTION_YOGA`, `_SECTION_BUSINESS`, `_SECTION_CONFERENCE`, `_SECTION_TRANSIT`
+  - Business fields covered: `companyName`, `companyAddress+companyPhoneCountryCode+companyPhoneNumber`, `companyWebsite`, `indianFirmName`, `indianFirmAddress+indianFirmPhoneCountryCode+indianFirmPhoneNumber`, `indianFirmWebsite`
+  - Conference fields covered: `conferenceName`, `conferenceStartDate`, `conferenceEndDate`, `conferenceAddress`, `organizerName`, `organizerAddress`, `organizerPhoneCountryCode+organizerPhoneNumber`, `organizerEmail`
+  - Transit fields covered: `destinationVisaOrPassport`, `VisaOnArrival`
+
+---
+
+## [2026-04-11] - Admin panel per-application Download uses eTourist CSV format
+
+### Added
+- **`GET /api/applications/{application_id}/etourist-csv`** (`backend/routes/applications.py`)
+  - New endpoint that fetches the application from MongoDB and streams a freshly generated eTourist-format fill-in CSV
+  - Always re-generates from latest DB data so any admin edits are reflected immediately (no stale cached file)
+
+### Changed
+- **Admin panel per-application Download button** (`frontend/src/pages/AdminPanel.jsx`)
+  - `downloadCSV()` now calls `/api/applications/{applicationId}/etourist-csv` instead of the old `/export?ids=…` flat-dump endpoint
+  - "Download All" button is unchanged (still uses the flat `/export` endpoint — eTourist format is per-applicant only)
+
+---
+
+## [2026-04-11] - eTourist CSV module: portal fill-in sheet replaces generic CSV export
+
+### Added
+- **`backend/utils/etourist_csv.py`** — new reusable module that generates an eTourist-format 4-column CSV fill-in sheet
+  - `generate_etourist_rows(data)` → list of `[Label, Value, Notes, Extra]` rows matching the Indian eVisa online portal field order
+  - `generate_etourist_csv(data)` → returns CSV as a UTF-8 string (for streaming / email attachment)
+  - `save_etourist_csv(data, path)` → writes directly to a `Path` (for on-disk storage)
+  - **Field resolution logic:**
+    - `<<Check passport>>` and `<…>` instructions → kept verbatim for the operator to check manually
+    - Static literals (`NA`, `Yes`, `NO`, `Tick it`, `e-Visa`, `<BLANK>`, etc.) → copied as-is
+    - `fieldA+fieldB` concatenation specs → joined with a space (handles all phone number combos)
+    - camelCase/snake_case identifier → looked up in flattened form data
+    - Nested `selectedVisaOption` → automatically flattened: `duration` ← `stay_duration`, `entries`, `visa_type` ← `name`
+  - **Conditional rows:** spouse fields (`spouseName`, `spouseNationality`, `spousePreviousNationality`, `spousePlaceOfBirth`, `spouseCountryOfBirth`) output blank unless `maritalStatus == 'Married'`
+  - **Additional questions:** `spec_c` column holds the reason field name; resolved value written in col-C of output (e.g. `arrestedConvictedReason`)
+  - Complete 130+ row template covering all portal sections: First Page → Applicant Details → Passport Details → Address → Family → Professional → Visa Sought → Meetings/Yoga → Previous Visa → Other Info → SAARC → References → Additional Questions
+
+### Changed
+- **`POST /api/applications/generate-csv`** (`backend/routes/applications.py`)
+  - Replaced generic `Field, Value` transposed dump with `save_etourist_csv()` call
+  - Output file `{APP_ID}_application.csv` now follows the eTourist portal column order (Label / Value / Notes / Extra)
+  - This file is used by admin panel "Download" button (unchanged) and auto-created on payment
+
+---
+
 ## [2026-04-11] - Redesigned application form progress stepper to match campaign-style UI
 
 ### Changed
