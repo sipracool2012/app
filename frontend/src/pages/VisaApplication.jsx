@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, ChevronRight, Check, Save, FileText, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Save, FileText, Clock, MoreHorizontal } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { useToast } from '../hooks/use-toast';
@@ -411,16 +411,16 @@ const VisaApplication = () => {
             <div className="relative mt-2">
               {/* Full background line */}
               <div
-                className="absolute h-0.5 bg-gray-200"
-                style={{ top: '14px', left: '14px', right: '14px' }}
+                className="absolute h-1 bg-gray-200 rounded-full"
+                style={{ top: '14px', left: '16px', right: '16px' }}
               />
               {/* Green progress line */}
               <div
-                className="absolute h-0.5 bg-green-500 transition-all duration-300"
+                className="absolute h-1 bg-green-500 rounded-full transition-all duration-300"
                 style={{
                   top: '14px',
-                  left: '14px',
-                  width: `calc((100% - 28px) * ${(currentStep - 1) / (steps.length - 1)})`
+                  left: '16px',
+                  width: `calc((100% - 32px) * ${(currentStep - 1) / (steps.length - 1)})`
                 }}
               />
               {/* Dots + labels */}
@@ -441,19 +441,29 @@ const VisaApplication = () => {
                       }}
                     >
                       <div
-                        className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold relative z-10 transition-colors ${
+                        className={`w-8 h-8 rounded-full flex items-center justify-center relative z-10 transition-colors ring-2 ring-white ${
                           isCompleted
                             ? 'bg-green-500 text-white hover:bg-green-600'
                             : isActive
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-200 text-gray-500'
+                            ? 'bg-green-500 text-white'
+                            : 'bg-gray-200 text-gray-400'
                         }`}
                       >
-                        {isCompleted ? <Check className="w-3.5 h-3.5" /> : step.id}
+                        {isCompleted ? (
+                          <Check className="w-3.5 h-3.5" />
+                        ) : isActive ? (
+                          <MoreHorizontal className="w-4 h-4" />
+                        ) : (
+                          <span className="text-xs font-semibold">{step.id}</span>
+                        )}
                       </div>
                       <span
                         className={`text-xs mt-1 text-center leading-tight hidden sm:block ${
-                          isVisited ? 'text-gray-700' : 'text-gray-400'
+                          isActive
+                            ? 'text-green-700 font-semibold'
+                            : isCompleted
+                            ? 'text-gray-700'
+                            : 'text-gray-400'
                         }`}
                         style={{ maxWidth: '52px' }}
                       >

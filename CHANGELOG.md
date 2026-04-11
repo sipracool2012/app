@@ -5,6 +5,20 @@ All notable changes to the Clear eVisa project are documented in this file.
 Format: `## [Date] - Description`
 ---
 
+## [2026-04-11] - Redesigned application form progress stepper to match campaign-style UI
+
+### Changed
+- **Progress stepper** (`frontend/src/pages/VisaApplication.jsx`)
+  - Circles enlarged from `w-7 h-7` to `w-8 h-8` with a `ring-2 ring-white` border for a cleaner look.
+  - Completed steps: green filled circle with white ✓ checkmark (unchanged).
+  - **Active/current step**: changed from blue filled circle with step number → **green filled circle with `⋯` (MoreHorizontal) icon**, matching the campaign-style stepper in the screenshot.
+  - Future steps: light gray circle showing step number (text-xs font-semibold).
+  - Active step label now renders in `text-green-700 font-semibold`; completed labels in `text-gray-700`; future labels in `text-gray-400`.
+  - Connector line top offset updated from `14px` → `16px` to align with the larger circles.
+  - Added `MoreHorizontal` to the Lucide icon imports.
+
+---
+
 ## [2026-04-10] - Steps 3–7 & 9 validation: inline errors on all required fields; Step 6 conditional previous-visit fields; Step 9 arrival date re-check
 
 ### Changed
