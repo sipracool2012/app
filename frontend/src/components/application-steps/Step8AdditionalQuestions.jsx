@@ -4,10 +4,13 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { ChevronLeft } from 'lucide-react';
+import { useToast } from '../../hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 
 const Step8AdditionalQuestions = ({ data, onNext, onBack }) => {
+  const { toast } = useToast();
   const { t } = useTranslation();
+  const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
     arrestedConvicted: data?.arrestedConvicted || 'No',
     arrestedConvictedReason: data?.arrestedConvictedReason || '',
@@ -25,6 +28,25 @@ const Step8AdditionalQuestions = ({ data, onNext, onBack }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const newErrors = {};
+    questions.forEach((q) => {
+      if (formData[q.key] === 'Yes' && !formData[q.reasonKey].trim()) {
+        newErrors[q.reasonKey] = 'Please provide a reason.';
+      }
+    });
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      toast({
+        title: 'Please fix the errors below',
+        description: 'A reason is required for every "Yes" answer.',
+        variant: 'destructive'
+      });
+      setTimeout(() => {
+        const firstError = document.querySelector('.border-red-500');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
+      return;
+    }
     onNext(formData);
   };
 
@@ -100,10 +122,16 @@ const Step8AdditionalQuestions = ({ data, onNext, onBack }) => {
                 <Input
                   id={question.reasonKey}
                   value={formData[question.reasonKey]}
-                  onChange={(e) => setFormData({ ...formData, [question.reasonKey]: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, [question.reasonKey]: e.target.value });
+                    setErrors(prev => ({ ...prev, [question.reasonKey]: '' }));
+                  }}
                   placeholder={t('forms.step8.reasonPlaceholder')}
-                  required={formData[question.key] === 'Yes'}
+                  className={errors[question.reasonKey] ? 'border-red-500' : ''}
                 />
+                {errors[question.reasonKey] && (
+                  <p className="text-sm text-red-600">{errors[question.reasonKey]}</p>
+                )}
               </div>
             )}
           </div>

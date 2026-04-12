@@ -193,7 +193,7 @@ const PaymentReturn = () => {
                 <CheckCircle className="w-5 h-5 text-green-600 mt-1 mr-3 shrink-0" />
                 <div>
                   <h3 className="font-semibold text-gray-900">What happens next?</h3>
-                  <p className="text-gray-600">Our team will review your application within 5 business days.</p>
+                  <p className="text-gray-600">Our team will review your application within 1 business day.</p>
                 </div>
               </div>
               <div className="flex items-start">

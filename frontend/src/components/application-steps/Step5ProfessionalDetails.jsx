@@ -35,6 +35,10 @@ const Step5ProfessionalDetails = ({ data, onNext, onBack }) => {
         description: 'Some required fields are missing or contain invalid values.',
         variant: 'destructive'
       });
+      setTimeout(() => {
+        const firstError = document.querySelector('.border-red-500');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
       return;
     }
     onNext(formData);
@@ -125,7 +129,7 @@ const Step5ProfessionalDetails = ({ data, onNext, onBack }) => {
 
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="militaryService">{t('forms.step5.militaryService')} *</Label>
-          <Select value={formData.militaryService} onValueChange={(value) => setFormData({ ...formData, militaryService: value })} required>
+          <Select value={formData.militaryService} onValueChange={(value) => setFormData({ ...formData, militaryService: value })}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>

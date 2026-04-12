@@ -64,6 +64,10 @@ const Step7References = ({ data, onNext, onBack }) => {
         description: 'Some required fields are missing or contain invalid values.',
         variant: 'destructive'
       });
+      setTimeout(() => {
+        const firstError = document.querySelector('.border-red-500');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
       return;
     }
     onNext(formData);
@@ -126,6 +130,7 @@ const Step7References = ({ data, onNext, onBack }) => {
                   setErrors(prev => ({ ...prev, indiaReferencePhoneNumber: '' }));
                 }}
                 phoneCodes={phoneCodes}
+                error={!!errors.indiaReferencePhoneNumber}
                 required
               />
               {errors.indiaReferencePhoneNumber && <p className="text-sm text-red-600 mt-1">{errors.indiaReferencePhoneNumber}</p>}
@@ -181,6 +186,7 @@ const Step7References = ({ data, onNext, onBack }) => {
                   setErrors(prev => ({ ...prev, homeReferencePhoneNumber: '' }));
                 }}
                 phoneCodes={phoneCodes}
+                error={!!errors.homeReferencePhoneNumber}
                 required
               />
               {errors.homeReferencePhoneNumber && <p className="text-sm text-red-600 mt-1">{errors.homeReferencePhoneNumber}</p>}

@@ -66,6 +66,10 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
         description: 'Some required fields are missing or contain invalid values.',
         variant: 'destructive'
       });
+      setTimeout(() => {
+        const firstError = document.querySelector('.border-red-500');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
       return;
     }
     onNext(formData);
@@ -126,6 +130,7 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
             options={countries}
             placeholder={t('forms.step3.selectCountry')}
             searchPlaceholder={t('forms.step3.searchCountries')}
+            error={!!errors.country}
             required
           />
           {errors.country && <p className="text-sm text-red-600 mt-1">{errors.country}</p>}
@@ -177,6 +182,7 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
               setErrors(prev => ({ ...prev, phoneNumber: '' }));
             }}
             phoneCodes={phoneCodes}
+            error={!!errors.phoneNumber}
             required
           />
           {errors.phoneNumber && <p className="text-sm text-red-600 mt-1">{errors.phoneNumber}</p>}

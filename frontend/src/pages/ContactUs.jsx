@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Twitter, Facebook, Linkedin } from 'lucide-react';
 
 export default function ContactUs() {
   const { t } = useTranslation();
@@ -225,8 +226,37 @@ export default function ContactUs() {
               <p className="text-gray-700">Contact support directly through our mobile application.</p>
             </div>
             <div>
-              <h3 className="font-bold text-gray-900 mb-2">🐦 Social Media</h3>
-              <p className="text-gray-700">Follow us on Twitter, Facebook, and LinkedIn for updates and support.</p>
+              <h3 className="font-bold text-gray-900 mb-3">Social Media</h3>
+              <div className="flex gap-3">
+                <a
+                  href="https://twitter.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Twitter"
+                  className="flex items-center justify-center w-11 h-11 rounded-full bg-black text-white hover:opacity-80 transition-opacity shadow-md"
+                >
+                  <Twitter className="w-5 h-5" />
+                </a>
+                <a
+                  href="https://www.facebook.com/people/Clear-evisa-Services/61586266041354/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook"
+                  className="flex items-center justify-center w-11 h-11 rounded-full bg-[#1877F2] text-white hover:opacity-80 transition-opacity shadow-md"
+                >
+                  <Facebook className="w-5 h-5" />
+                </a>
+                <a
+                  href="https://linkedin.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn"
+                  className="flex items-center justify-center w-11 h-11 rounded-full bg-[#0A66C2] text-white hover:opacity-80 transition-opacity shadow-md"
+                >
+                  <Linkedin className="w-5 h-5" />
+                </a>
+              </div>
+              <p className="text-gray-600 text-sm mt-2">Follow us for updates and support.</p>
             </div>
           </div>
         </section>

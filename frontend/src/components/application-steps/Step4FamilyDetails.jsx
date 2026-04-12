@@ -82,6 +82,10 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
         description: 'Some required fields are missing or contain invalid values.',
         variant: 'destructive'
       });
+      setTimeout(() => {
+        const firstError = document.querySelector('.border-red-500');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
       return;
     }
     if (formData.pakistanConnection === 'Yes') {
@@ -138,6 +142,7 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
             options={countries}
             placeholder={t('forms.step4.selectNationality')}
             searchPlaceholder={t('forms.step4.searchCountries')}
+            error={!!errors.fatherNationality}
             required
           />
           {errors.fatherNationality && <p className="text-sm text-red-600 mt-1">{errors.fatherNationality}</p>}
@@ -179,6 +184,7 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
             options={countries}
             placeholder={t('forms.step3.selectCountry')}
             searchPlaceholder={t('forms.step4.searchCountries')}
+            error={!!errors.fatherCountryOfBirth}
             required
           />
           {errors.fatherCountryOfBirth && <p className="text-sm text-red-600 mt-1">{errors.fatherCountryOfBirth}</p>}
@@ -216,6 +222,7 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
             options={countries}
             placeholder={t('forms.step4.selectNationality')}
             searchPlaceholder={t('forms.step4.searchCountries')}
+            error={!!errors.motherNationality}
             required
           />
           {errors.motherNationality && <p className="text-sm text-red-600 mt-1">{errors.motherNationality}</p>}
@@ -257,6 +264,7 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
             options={countries}
             placeholder={t('forms.step3.selectCountry')}
             searchPlaceholder={t('forms.step4.searchCountries')}
+            error={!!errors.motherCountryOfBirth}
             required
           />
           {errors.motherCountryOfBirth && <p className="text-sm text-red-600 mt-1">{errors.motherCountryOfBirth}</p>}
@@ -274,7 +282,6 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
           <Select 
             value={formData.maritalStatus} 
             onValueChange={(value) => setFormData({ ...formData, maritalStatus: value })} 
-            required
           >
             <SelectTrigger>
               <SelectValue />
@@ -322,7 +329,8 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
                 options={countries}
                 placeholder={t('forms.step4.selectNationality')}
                 searchPlaceholder={t('forms.step4.searchCountries')}
-                required={showSpouseFields}
+                error={!!errors.spouseNationality}
+                required
               />
               {errors.spouseNationality && <p className="text-sm text-red-600 mt-1">{errors.spouseNationality}</p>}
             </div>
@@ -363,7 +371,8 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
                 options={countries}
                 placeholder={t('forms.step3.selectCountry')}
                 searchPlaceholder={t('forms.step4.searchCountries')}
-                required={showSpouseFields}
+                error={!!errors.spouseCountryOfBirth}
+                required
               />
               {errors.spouseCountryOfBirth && <p className="text-sm text-red-600 mt-1">{errors.spouseCountryOfBirth}</p>}
             </div>
@@ -379,7 +388,6 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
             <Select 
               value={formData.pakistanConnection} 
               onValueChange={(value) => setFormData({ ...formData, pakistanConnection: value })} 
-              required
             >
               <SelectTrigger>
                 <SelectValue />

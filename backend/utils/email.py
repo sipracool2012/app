@@ -127,7 +127,7 @@ async def send_application_confirmation(to_email: str, application_id: str, appl
                 </div>
                 <h3 style="color: #1f2937;">What happens next?</h3>
                 <ul style="color: #4b5563; line-height: 1.8;">
-                    <li>Our team will review your application within 5 business days</li>
+                    <li>Our team will review your application within 1 business day</li>
                     <li>You will receive an email notification once your application status changes</li>
                     <li>Once approved, your eVisa will be sent to your email address</li>
                 </ul>

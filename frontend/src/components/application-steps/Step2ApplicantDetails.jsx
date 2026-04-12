@@ -56,6 +56,7 @@ const Step2ApplicantDetails = ({ data, onNext, onBack }) => {
     if (!formData.surname.trim()) newErrors.surname = 'This field is required.';
     if (!formData.givenNames.trim()) newErrors.givenNames = 'This field is required.';
     if (!formData.religion) newErrors.religion = 'Please select an option.';
+    if (!formData.visibleMarks.trim()) newErrors.visibleMarks = 'This field is required.';
     if (!formData.educationalQualification) newErrors.educationalQualification = 'Please select an option.';
     if (!formData.qualificationFrom.trim()) newErrors.qualificationFrom = 'This field is required.';
 
@@ -66,9 +67,12 @@ const Step2ApplicantDetails = ({ data, onNext, onBack }) => {
         description: 'Some required fields are missing or contain invalid values.',
         variant: 'destructive'
       });
+      setTimeout(() => {
+        const firstError = document.querySelector('.border-red-500');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
       return;
     }
-
     onNext(formData);
   };
 
@@ -144,15 +148,20 @@ const Step2ApplicantDetails = ({ data, onNext, onBack }) => {
         {/* Visible Identification Marks */}
         <div className="space-y-2">
           <Label htmlFor="visibleMarks">
-            {t('forms.step2.visibleMarks')}
+            {t('forms.step2.visibleMarks')} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="visibleMarks"
             value={formData.visibleMarks}
-            onChange={(e) => setFormData({ ...formData, visibleMarks: e.target.value })}
+            onChange={(e) => {
+              setFormData({ ...formData, visibleMarks: e.target.value });
+              setErrors(prev => ({ ...prev, visibleMarks: '' }));
+            }}
             placeholder={t('forms.step2.visibleMarksHint')}
+            className={errors.visibleMarks ? 'border-red-500' : ''}
           />
-          <p className="text-xs text-gray-500">{t('forms.step2.visibleMarksHint')}</p>
+          {errors.visibleMarks && <p className="text-sm text-red-600">{errors.visibleMarks}</p>}
+          {!errors.visibleMarks && <p className="text-xs text-gray-500">{t('forms.step2.visibleMarksHint')}</p>}
         </div>
 
         {/* Educational Qualification */}
@@ -207,7 +216,6 @@ const Step2ApplicantDetails = ({ data, onNext, onBack }) => {
           <Select 
             value={formData.livedTwoYears} 
             onValueChange={(value) => setFormData({ ...formData, livedTwoYears: value })} 
-            required
           >
             <SelectTrigger>
               <SelectValue />

@@ -146,6 +146,36 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    // Check required documents
+    const missingDocs = [];
+    if (!formData.passportDocument) missingDocs.push('Passport copy');
+    if (!formData.photoDocument) missingDocs.push('Recent photograph');
+    if (isBusinessVisa) {
+      if (!formData.businessLetter) missingDocs.push('Indian firm invitation letter');
+      if (!formData.businessCard) missingDocs.push('Business card');
+    }
+    if (isConferenceVisa) {
+      if (!formData.organizerInvitation) missingDocs.push('Organizer invitation letter');
+      if (!formData.meaPoliticalClearance) missingDocs.push('MEA political clearance');
+      if (!formData.mhaEventClearance) missingDocs.push('MHA event clearance');
+    }
+    if (isMedicalVisa) {
+      if (!formData.medicalInvitationLetter) missingDocs.push('Medical invitation letter');
+    }
+    if (isTransitVisa) {
+      if (!formData.confirmedTravelTicket) missingDocs.push('Confirmed travel ticket');
+      if (!formData.destinationVisaOrPassport) missingDocs.push('Destination visa / passport');
+    }
+
+    if (missingDocs.length > 0) {
+      toast({
+        title: 'Required documents missing',
+        description: `Please upload: ${missingDocs.join(', ')}.`,
+        variant: 'destructive'
+      });
+      return;
+    }
+
     // Re-check that the arrival date is still at least 4 days from today (IST)
     if (data?.expectedArrivalDate) {
       const now = new Date();
@@ -189,7 +219,6 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
             accept=".jpg,.jpeg,.png,.pdf"
             onChange={(e) => handleFileUpload(e, fieldName)}
             className="hidden"
-            required={required}
           />
         </div>
       ) : (
@@ -305,7 +334,6 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
               fieldName="medicalDocument4"
               label={t('forms.step9.additionalDocLabel')}
               description={t('forms.step9.additionalDocHint')}
-              required={false}
             />
           </>
         )}

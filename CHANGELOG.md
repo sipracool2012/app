@@ -5,6 +5,86 @@ All notable changes to the Clear eVisa project are documented in this file.
 Format: `## [Date] - Description`
 ---
 
+## [2026-04-12] - Form validation hardening: asterisks, error borders, Step8 reasons, Step9 doc gate
+
+### Fixed / Added
+
+#### Step 1 — Basic Info
+- **Port of Arrival** `SearchableSelect`: added `required` prop → shows red `*` asterisk next to label
+
+#### Step 2 — Applicant Details
+- **Visible Identification Marks**: added `*` to label, wired `border-red-500`, added `errors.visibleMarks` validation (`'This field is required.'`), clear-on-change, error message display
+
+#### Step 3 — Address Details
+- **Country** `SearchableSelect`: added `required` → shows `*`
+- **Phone No.** `PhoneInput`: added `required` → shows `*`; `error` prop was already wired — confirmed working
+
+#### Step 4 — Family Details
+- All 6 `SearchableSelect` fields now show `*`: Father's Nationality, Father's Country of Birth, Mother's Nationality, Mother's Country of Birth, Spouse's Nationality, Spouse's Country of Birth
+
+#### Step 7 — References
+- Both **Phone No.** `PhoneInput` fields (India reference + home country reference): added `required` → shows `*`; added `error={!!errors.<field>}` for red border on validation failure
+
+#### Step 8 — Additional Questions
+- Added `useToast` import and `errors` state
+- `handleSubmit` now validates: for each of the 6 Yes/No questions, if **Yes** is selected the reason field must be non-empty → `errors[reasonKey] = 'Please provide a reason.'`
+- Toast shown listing the problem; scroll-to-first-error fires after state update
+- Each reason `<Input>` now has `border-red-500` bound to `errors[question.reasonKey]`, inline error message below, and `setErrors` clear-on-change
+
+#### Step 9 — Document Upload
+- `handleSubmit` now **blocks proceeding** if any required document is missing
+- Always required: Passport copy, Recent photograph
+- Business visa: Indian firm invitation letter, Business card
+- Conference visa: Organizer invitation, MEA political clearance, MHA event clearance
+- Medical visa: Medical invitation letter
+- Transit visa: Confirmed travel ticket, Destination visa/passport
+- Missing documents listed by name in the destructive toast message
+
+#### Social media icons — Footer & ContactUs
+- **`frontend/src/components/Footer.jsx`**: Replaced plain text Twitter/Facebook/LinkedIn links with branded circular icon buttons (black for X/Twitter, `#1877F2` for Facebook, `#0A66C2` for LinkedIn) using `lucide-react` icons
+- **`frontend/src/pages/ContactUs.jsx`**: Same branded icon buttons in the "Social Media" card of the Additional Ways to Connect section
+
+#### Build fixes (scroll-to-error multi-replace regressions)
+- **`Step2ApplicantDetails.jsx`**: Restored missing `onNext(formData);` and `if (loading)` guard that were consumed by a bad multi-replace context match
+- **`Step3AddressDetails.jsx`**: Same restoration
+- **`Step5ProfessionalDetails.jsx`**: Restored missing `onNext(formData); };` and `return (<form ...>` opening
+- **`Step6VisaDetails.jsx`**: Restored missing `onNext(formData); };`, visa-type const declarations, and `return (<form ...>` opening
+
+---
+
+## [2026-04-12] - SearchableSelect error border fix + scroll-to-first-error on all steps
+
+### Fixed
+- **`frontend/src/components/ui/phone-input.jsx`**: Added `error` prop (default `false`). When truthy, applies `border-red-500` to the phone number `<Input>` (number field only, not the country code selector).
+- **`frontend/src/components/application-steps/Step1BasicInfo.jsx`**: Added `error={!!errors.portOfArrival}` to the Port of Arrival `SearchableSelect` — now turns red on validation failure.
+- **`frontend/src/components/application-steps/Step3AddressDetails.jsx`**: Added `error={!!errors.country}` to the Country `SearchableSelect` and `error={!!errors.phoneNumber}` to the `PhoneInput` — both turn red on validation failure.
+- **Scroll-to-first-error** added to `handleSubmit` in all 7 steps with validation (Steps 1–7). After validation fires and errors are set, the page smoothly scrolls to the first `.border-red-500` element so users aren't left looking at the Continue button while errors are off-screen.
+
+---
+
+## [2026-04-12] - SearchableSelect error border + Countries multi-select tags
+
+### Fixed
+- **`frontend/src/components/ui/searchable-select.jsx`**: Added `error` prop (default `false`). When truthy, applies `border-red-500` to the trigger button, so the dropdown goes red on validation failure just like plain `<Input>` fields.
+- **`frontend/src/components/application-steps/Step4FamilyDetails.jsx`**: Passed `error={!!errors.<field>}` to all 6 `SearchableSelect` fields that have validation (`fatherNationality`, `fatherCountryOfBirth`, `motherNationality`, `motherCountryOfBirth`, `spouseNationality`, `spouseCountryOfBirth`). Red border now appears correctly when users skip these fields.
+
+### Added
+- **`frontend/src/components/ui/multi-select-countries.jsx`**: New `MultiSelectCountries` component. Shows a searchable dropdown of countries; selected items render as removable tag chips. Stores the value as a comma-separated string for backend compatibility.
+- **`frontend/src/components/application-steps/Step6VisaDetails.jsx`**: Replaced the plain text `<Input>` for "Countries Visited in Last 10 years" with the new `MultiSelectCountries` component. Step6 now fetches the country list from `/api/constants/countries` on mount.
+
+---
+
+## [2026-04-12] - Consistent error styling: remove native browser validation from Steps 1–9
+
+### Fixed
+- **Browser native "Please fill out this field." tooltip suppressed across all active steps**
+  - Root cause: HTML `required` attribute on `<input>`, `<select>`, and `<PhoneInput>` elements causes the browser to run its own validation and show a native tooltip *before* the React `handleSubmit` logic fires, bypassing the custom red-border + red-text error pattern.
+  - **`frontend/src/components/ui/phone-input.jsx`**: Removed `required={required}` from the native `<input type="tel">` element. The `required` prop is still accepted by the component and controls the `*` asterisk label only.
+  - **Steps 1–9** (`Step1BasicInfo`, `Step2ApplicantDetails`, `Step3AddressDetails`, `Step4FamilyDetails`, `Step5ProfessionalDetails`, `Step6VisaDetails`, `Step7References`, `Step8AdditionalQuestions`, `Step9DocumentUpload`): Removed all HTML `required` / `required={expr}` attributes from every `<input>`, `<select>`, `<Select>`, `<SearchableSelect>`, and `<PhoneInput>` element (25 removals total).
+  - All validation is now 100% JS-driven via each step's `handleSubmit` → `errors` state → `border-red-500` input highlight + `text-sm text-red-600` inline message — consistent throughout the entire form.
+
+---
+
 ## [2026-04-11] - eTourist CSV: visa-type-specific middle section (Business / Conference / Transit)
 
 ### Changed

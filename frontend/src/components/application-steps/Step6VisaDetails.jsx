@@ -4,6 +4,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { PhoneInput } from '../ui/phone-input';
+import { MultiSelectCountries } from '../ui/multi-select-countries';
 import { ChevronLeft } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +15,7 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [phoneCodes, setPhoneCodes] = useState([]);
+  const [countries, setCountries] = useState([]);
 
   const [formData, setFormData] = useState({
     placesToVisit: data?.placesToVisit || '',
@@ -56,7 +58,18 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
 
   React.useEffect(() => {
     fetchPhoneCodes();
+    fetchCountries();
   }, []);
+
+  const fetchCountries = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/constants/countries`);
+      const data = await response.json();
+      setCountries(data.countries || []);
+    } catch (error) {
+      console.error('Failed to fetch countries:', error);
+    }
+  };
 
   const fetchPhoneCodes = async () => {
     try {
@@ -105,6 +118,10 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
         description: 'Some required fields are missing or contain invalid values.',
         variant: 'destructive'
       });
+      setTimeout(() => {
+        const firstError = document.querySelector('.border-red-500');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
       return;
     }
     onNext(formData);
@@ -327,15 +344,14 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
           <h4 className="text-lg font-semibold text-gray-900 mb-4">{t('forms.step6.otherInfo')}</h4>
         </div>
 
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="countriesVisitedLast10Years">
-            Countries Visited in Last 10 years (Optional)
-          </Label>
-          <Input
-            id="countriesVisitedLast10Years"
+        <div className="md:col-span-2">
+          <MultiSelectCountries
+            label="Countries Visited in Last 10 years (Optional)"
             value={formData.countriesVisitedLast10Years}
-            onChange={(e) => setFormData({ ...formData, countriesVisitedLast10Years: e.target.value })}
-            placeholder="List countries separated by commas"
+            onChange={(val) => setFormData({ ...formData, countriesVisitedLast10Years: val })}
+            options={countries}
+            placeholder="Select countries visited..."
+            searchPlaceholder="Search countries..."
           />
         </div>
 
@@ -407,7 +423,6 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
                   setErrors(prev => ({ ...prev, companyPhoneNumber: '' }));
                 }}
                 phoneCodes={phoneCodes}
-                required={isBusinessVisa}
               />
               {errors.companyPhoneNumber && <p className="text-sm text-red-600 mt-1">{errors.companyPhoneNumber}</p>}
             </div>
@@ -472,7 +487,6 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
                   setErrors(prev => ({ ...prev, indianFirmPhoneNumber: '' }));
                 }}
                 phoneCodes={phoneCodes}
-                required={isBusinessVisa}
               />
               {errors.indianFirmPhoneNumber && <p className="text-sm text-red-600 mt-1">{errors.indianFirmPhoneNumber}</p>}
             </div>
@@ -613,7 +627,6 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
                   setErrors(prev => ({ ...prev, organizerPhoneNumber: '' }));
                 }}
                 phoneCodes={phoneCodes}
-                required={isConferenceVisa}
               />
               {errors.organizerPhoneNumber && <p className="text-sm text-red-600 mt-1">{errors.organizerPhoneNumber}</p>}
             </div>

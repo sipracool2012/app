@@ -198,6 +198,10 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
         description: 'Some required fields are missing or contain invalid values.',
         variant: 'destructive'
       });
+      setTimeout(() => {
+        const firstError = document.querySelector('.border-red-500');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
       return;
     }
 
@@ -250,6 +254,7 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
             options={ports}
             placeholder={t('forms.step1.selectPort')}
             searchPlaceholder={t('forms.step1.searchPorts')}
+            error={!!errors.portOfArrival}
             required
           />
           {errors.portOfArrival && (
@@ -282,7 +287,6 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
             }}
             min={getMinArrivalDateIST()}
             className={errors.expectedArrivalDate ? 'border-red-500' : ''}
-            required
           />
           {errors.expectedArrivalDate
             ? <p className="text-sm text-red-600">{errors.expectedArrivalDate}</p>
@@ -397,7 +401,6 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
             }}
             min={getMinExpiryDate() || new Date().toISOString().split('T')[0]}
             className={errors.dateOfExpiry ? 'border-red-500' : ''}
-            required
           />
           {errors.dateOfExpiry && (
             <p className="text-sm text-red-600">{errors.dateOfExpiry}</p>
@@ -439,7 +442,16 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
 
             <div className="space-y-2">
               <Label htmlFor="yogaInstituteName">
-                Name of Yoga Institute/Friend or Relative <span className="text-red-500">*</span>
+                {formData.visaServiceSubtype === 'Meeting Friends/Relatives'
+                  ? 'Name of Friend or Relative'
+                  : formData.visaServiceSubtype === 'Short Term Yoga Program'
+                  ? 'Name of the Yoga Institute'
+                  : formData.visaServiceSubtype?.startsWith('SHORT TERM COURSES')
+                  ? 'Name of the Course Provider'
+                  : formData.visaServiceSubtype === 'Voluntary Work of Short Duration'
+                  ? 'Name of the Company'
+                  : 'Name of Yoga Institute/Friend or Relative'}{' '}
+                <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="yogaInstituteName"
@@ -496,7 +508,6 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
                     setErrors(prev => ({ ...prev, yogaInstitutePhone: '' }));
                   }}
                   placeholder="1234567890"
-                  required={showYogaFields()}
                   className={errors.yogaInstitutePhone ? 'border-red-500' : ''}
                 />
               </div>
