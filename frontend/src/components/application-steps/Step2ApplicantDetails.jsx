@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-const Step2ApplicantDetails = ({ data, onNext, onBack }) => {
+const Step2ApplicantDetails = ({ data, onNext, onBack, onDataChange }) => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [religions, setReligions] = useState([]);
@@ -25,6 +25,8 @@ const Step2ApplicantDetails = ({ data, onNext, onBack }) => {
     qualificationFrom: data?.qualificationFrom || '',
     livedTwoYears: data?.livedTwoYears || 'Yes'
   });
+  // Report local changes to parent so jumping away via stepper saves latest data
+  useEffect(() => { onDataChange?.(formData); }, [formData]); // eslint-disable-line react-hooks/exhaustive-deps
   const [errors, setErrors] = useState({});
 
   useEffect(() => {

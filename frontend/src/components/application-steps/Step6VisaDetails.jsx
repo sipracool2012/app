@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-const Step6VisaDetails = ({ data, onNext, onBack }) => {
+const Step6VisaDetails = ({ data, onNext, onBack, onDataChange }) => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [phoneCodes, setPhoneCodes] = useState([]);
@@ -54,6 +54,8 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
     organizerPhoneNumber: data?.organizerPhoneNumber || '',
     organizerEmail: data?.organizerEmail || ''
   });
+  // Report local changes to parent so jumping away via stepper saves latest data
+  useEffect(() => { onDataChange?.(formData); }, [formData]); // eslint-disable-line react-hooks/exhaustive-deps
   const [errors, setErrors] = useState({});
 
   React.useEffect(() => {

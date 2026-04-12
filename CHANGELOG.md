@@ -5,6 +5,25 @@ All notable changes to the Clear eVisa project are documented in this file.
 Format: `## [Date] - Description`
 ---
 
+## [2026-04-12] - Stepper: jump to any visited step, save live data on jump, persist maxVisitedStep
+
+### Changed
+
+#### `frontend/src/pages/VisaApplication.jsx`
+- **`maxVisitedStep` state + `maxVisitedStepRef`**: tracks the furthest step ever reached so the stepper can unlock forward navigation after going back. A ref mirror allows `saveDraft` (stable `useCallback`) to always read the current value without stale closures.
+- **`_maxVisitedStep` persisted in every draft save**: the furthest step is now stored in the backend draft document so forward navigation is fully restored on page reload / draft resume.
+- **Draft load restores `_maxVisitedStep`**: both the specific-draftId path and the same-visa modal click now read `draft._maxVisitedStep` (falling back to `savedStep`) and call `updateMaxVisitedStep()`.
+- **`jumpToStep(stepId)`**: saves any unsaved changes from the current step (merges `currentStepDataRef`) before navigating; works for both backward and forward jumps within `maxVisitedStep`.
+- **`handleBack` fixed**: previously saved the draft with `prevStep` which caused the draft's `currentStep` to decrease on every Back press — breaking forward navigation from the stepper on the next load. Now saves at `currentStep` and merges `currentStepDataRef.current` before switching, so live edits are not lost on Back either.
+- **Stepper dot 4-state coloring**: completed (solid green ✓), active (green `⋯`), visited-ahead / user went back (white with green border + green number — clickable), not yet reached (gray — disabled). Green connector line extends to `maxVisitedStep`.
+
+#### `frontend/src/components/application-steps/Step{1-9}*.jsx` (all 9 active form steps)
+- Added `onDataChange` prop to each component signature.
+- Added `useEffect(() => { onDataChange?.(formData); }, [formData])` — fires on every local field change, keeping `currentStepDataRef` in the parent up to date so `jumpToStep` and `handleBack` always have the latest unsaved values.
+- Steps 5, 6, 8, 9 had `useEffect` added to their React import (previously only had `useState`).
+
+---
+
 ## [2026-04-12] - Form validation hardening: asterisks, error borders, Step8 reasons, Step9 doc gate
 
 ### Fixed / Added

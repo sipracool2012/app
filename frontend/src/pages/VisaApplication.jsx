@@ -55,16 +55,16 @@ import Step10Payment from '../components/application-steps/Step10Payment';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const steps = [
-  { id: 1, nameKey: 'steps.basicInfo', component: Step1BasicInfo },
-  { id: 2, nameKey: 'steps.applicantDetails', component: Step2ApplicantDetails },
-  { id: 3, nameKey: 'steps.addressDetails', component: Step3AddressDetails },
-  { id: 4, nameKey: 'steps.familyDetails', component: Step4FamilyDetails },
-  { id: 5, nameKey: 'steps.professionalDetails', component: Step5ProfessionalDetails },
-  { id: 6, nameKey: 'steps.visaDetails', component: Step6VisaDetails },
-  { id: 7, nameKey: 'steps.references', component: Step7References },
-  { id: 8, nameKey: 'steps.additionalQuestions', component: Step8AdditionalQuestions },
-  { id: 9, nameKey: 'steps.documents', component: Step9DocumentUpload },
-  { id: 10, nameKey: 'steps.payment', component: Step10Payment }
+  { id: 1, nameKey: 'steps.basicInfo', fullName: 'Basic Information', component: Step1BasicInfo },
+  { id: 2, nameKey: 'steps.applicantDetails', fullName: 'Applicant Details', component: Step2ApplicantDetails },
+  { id: 3, nameKey: 'steps.addressDetails', fullName: 'Address Details', component: Step3AddressDetails },
+  { id: 4, nameKey: 'steps.familyDetails', fullName: 'Family Details', component: Step4FamilyDetails },
+  { id: 5, nameKey: 'steps.professionalDetails', fullName: 'Professional Details', component: Step5ProfessionalDetails },
+  { id: 6, nameKey: 'steps.visaDetails', fullName: 'Visa Details', component: Step6VisaDetails },
+  { id: 7, nameKey: 'steps.references', fullName: 'References', component: Step7References },
+  { id: 8, nameKey: 'steps.additionalQuestions', fullName: 'Additional Questions', component: Step8AdditionalQuestions },
+  { id: 9, nameKey: 'steps.documents', fullName: 'Document Upload', component: Step9DocumentUpload },
+  { id: 10, nameKey: 'steps.payment', fullName: 'Payment', component: Step10Payment }
 ];
 
 const VisaApplication = () => {
@@ -81,8 +81,20 @@ const VisaApplication = () => {
   const [lastSaved, setLastSaved] = useState(null);
   const [sameVisaDrafts, setSameVisaDrafts] = useState([]);
   const [showSameVisaModal, setShowSameVisaModal] = useState(false);
+  // Track furthest step ever reached (enables forward navigation after going back)
+  const [maxVisitedStep, setMaxVisitedStep] = useState(1);
   const saveTimeoutRef = useRef(null);
   const draftIdRef = useRef(null);
+  // Holds the live unsaved data from the currently-rendered step component
+  const currentStepDataRef = useRef({});
+  // Ref mirror of maxVisitedStep so saveDraft (stable useCallback) can always read the current value
+  const maxVisitedStepRef = useRef(1);
+
+  // Update both state and ref together
+  const updateMaxVisitedStep = useCallback((n) => {
+    setMaxVisitedStep(n);
+    maxVisitedStepRef.current = n;
+  }, []);
 
   const fetchVisaOption = async (vId) => {
     const code = vId.split('-')[0].toUpperCase();
@@ -118,6 +130,7 @@ const VisaApplication = () => {
             if (targetDraft) {
               const draft = { ...targetDraft };
               const savedStep = draft.currentStep || 1;
+              const savedMaxStep = draft._maxVisitedStep || savedStep;
               draftIdRef.current = draft.id;
               delete draft.id;
               delete draft.userId;
@@ -125,12 +138,14 @@ const VisaApplication = () => {
               delete draft.createdAt;
               delete draft.updatedAt;
               delete draft.currentStep;
+              delete draft._maxVisitedStep;
               let selectedVisaOption = draft.selectedVisaOption || null;
               if (!selectedVisaOption) selectedVisaOption = await fetchVisaOption(visaId);
               const passportName = location.state?.passportName || draft.passportName || selectedVisaOption?.country_name || '';
               const passportDemonym = location.state?.passportDemonym || draft.passportDemonym || '';
               setFormData(prev => ({ ...prev, ...draft, visaId, selectedVisaOption, passportName, passportDemonym }));
               setCurrentStep(savedStep);
+              updateMaxVisitedStep(savedMaxStep);
               toast({ title: t('application.draftLoaded'), description: t('application.draftLoadedDesc', { step: savedStep }) });
             } else {
               // Target draft not found (expired/deleted) — fresh start
@@ -183,6 +198,7 @@ const VisaApplication = () => {
       const payload = {
         ...data,
         currentStep: step,
+        _maxVisitedStep: maxVisitedStepRef.current,
         email: data.email || userEmail
       };
       // Attach the draft reference so backend updates the correct document
@@ -216,6 +232,11 @@ const VisaApplication = () => {
     }
   }, []);
 
+  // Called by the active step on every field change so we always have the latest data
+  const handleDataChange = useCallback((stepData) => {
+    currentStepDataRef.current = stepData;
+  }, []);
+
   // Debounced auto-save when step changes
   const triggerAutoSave = useCallback((data, step) => {
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
@@ -228,6 +249,8 @@ const VisaApplication = () => {
   const progress = (currentStep / steps.length) * 100;
 
   const handleNext = async (stepData) => {
+    // stepData already contains the latest values; clear the live ref
+    currentStepDataRef.current = {};
     const updatedData = { ...formData, ...stepData };
     setFormData(updatedData);
 
@@ -274,6 +297,7 @@ const VisaApplication = () => {
             const dataWithId = { ...updatedData, applicationId };
             setFormData(dataWithId);
             setCurrentStep(nextStep);
+            if (nextStep > maxVisitedStep) updateMaxVisitedStep(nextStep);
             triggerAutoSave(dataWithId, nextStep);
             return;
           }
@@ -283,6 +307,7 @@ const VisaApplication = () => {
       }
 
       setCurrentStep(nextStep);
+      if (nextStep > maxVisitedStep) updateMaxVisitedStep(nextStep);
       // Auto-save draft on step change
       triggerAutoSave(updatedData, nextStep);
     }
@@ -290,9 +315,25 @@ const VisaApplication = () => {
 
   const handleBack = () => {
     if (currentStep > 1) {
-      const prevStep = currentStep - 1;
-      setCurrentStep(prevStep);
-      triggerAutoSave(formData, prevStep);
+      // Merge any unsaved changes from the current step before navigating away
+      const latestData = { ...formData, ...currentStepDataRef.current };
+      currentStepDataRef.current = {};
+      setFormData(latestData);
+      // Save at currentStep (not prevStep) so _maxVisitedStep is preserved in the draft
+      triggerAutoSave(latestData, currentStep);
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  // Navigate to any step that has already been reached.
+  // Merges the live unsaved data from the current step before switching.
+  const jumpToStep = (stepId) => {
+    if (stepId !== currentStep && stepId <= maxVisitedStep) {
+      const latestData = { ...formData, ...currentStepDataRef.current };
+      currentStepDataRef.current = {};
+      setFormData(latestData);
+      triggerAutoSave(latestData, stepId);
+      setCurrentStep(stepId);
     }
   };
 
@@ -309,7 +350,7 @@ const VisaApplication = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      {/* Same-visa drafts modal — continue an existing draft or start a new application */}
+      {/* Same-visa drafts modal */}
       {showSameVisaModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <div className="bg-white rounded-xl shadow-xl p-6 max-w-md w-full">
@@ -318,15 +359,13 @@ const VisaApplication = () => {
                 <FileText className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 text-base">
-                  Continue existing application?
-                </h3>
+                <h3 className="font-semibold text-gray-900 text-base">Continue existing application?</h3>
                 <p className="text-gray-500 text-sm mt-1">
-                  You have {sameVisaDrafts.length} saved draft{sameVisaDrafts.length !== 1 ? 's' : ''} for this visa. Continue one or start fresh for another applicant.
+                  You have {sameVisaDrafts.length} saved draft{sameVisaDrafts.length !== 1 ? 's' : ''} for this visa.
+                  Continue one or start fresh for another applicant.
                 </p>
               </div>
             </div>
-
             <div className="space-y-2 mb-5 max-h-60 overflow-y-auto">
               {sameVisaDrafts.map((draft) => {
                 const name = [draft.givenNames, draft.surname].filter(Boolean).join(' ') || 'Unnamed applicant';
@@ -340,18 +379,17 @@ const VisaApplication = () => {
                       setShowSameVisaModal(false);
                       const d = { ...draft };
                       draftIdRef.current = d.id || null;
-                      delete d.id;
-                      delete d.userId;
-                      delete d.status;
-                      delete d.createdAt;
-                      delete d.updatedAt;
-                      delete d.currentStep;
+                      const savedMaxStep = d._maxVisitedStep || step;
+                      delete d.id; delete d.userId; delete d.status;
+                      delete d.createdAt; delete d.updatedAt; delete d.currentStep;
+                      delete d._maxVisitedStep;
                       let selectedVisaOption = d.selectedVisaOption || null;
                       if (!selectedVisaOption) selectedVisaOption = await fetchVisaOption(visaId);
                       const passportName = location.state?.passportName || d.passportName || selectedVisaOption?.country_name || '';
                       const passportDemonym = location.state?.passportDemonym || d.passportDemonym || '';
                       setFormData(prev => ({ ...prev, ...d, visaId, selectedVisaOption, passportName, passportDemonym }));
                       setCurrentStep(step);
+                      updateMaxVisitedStep(savedMaxStep);
                       toast({ title: t('application.draftLoaded'), description: t('application.draftLoadedDesc', { step }) });
                     }}
                   >
@@ -363,13 +401,9 @@ const VisaApplication = () => {
                 );
               })}
             </div>
-
             <Button
               className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              onClick={() => {
-                setShowSameVisaModal(false);
-                draftIdRef.current = null;
-              }}
+              onClick={() => { setShowSameVisaModal(false); draftIdRef.current = null; }}
             >
               + Start New Application
             </Button>
@@ -414,13 +448,13 @@ const VisaApplication = () => {
                 className="absolute h-1 bg-gray-200 rounded-full"
                 style={{ top: '14px', left: '16px', right: '16px' }}
               />
-              {/* Green progress line */}
+              {/* Green progress line — extends to furthest visited step */}
               <div
                 className="absolute h-1 bg-green-500 rounded-full transition-all duration-300"
                 style={{
                   top: '14px',
                   left: '16px',
-                  width: `calc((100% - 32px) * ${(currentStep - 1) / (steps.length - 1)})`
+                  width: `calc((100% - 32px) * ${(maxVisitedStep - 1) / (steps.length - 1)})`
                 }}
               />
               {/* Dots + labels */}
@@ -428,17 +462,16 @@ const VisaApplication = () => {
                 {steps.map((step) => {
                   const isCompleted = step.id < currentStep;
                   const isActive = step.id === currentStep;
-                  const isVisited = step.id <= currentStep;
+                  const isVisitedAhead = step.id > currentStep && step.id <= maxVisitedStep;
+                  const isClickable = (isCompleted || isVisitedAhead) && !isActive;
                   return (
                     <div
                       key={step.id}
-                      className={`flex flex-col items-center ${isVisited && !isActive ? 'cursor-pointer' : 'cursor-default'}`}
-                      onClick={() => {
-                        if (isVisited && !isActive) {
-                          setCurrentStep(step.id);
-                          triggerAutoSave(formData, step.id);
-                        }
-                      }}
+                      className={`flex flex-col items-center ${
+                        isClickable ? 'cursor-pointer' : 'cursor-default'
+                      }`}
+                      onClick={() => isClickable && jumpToStep(step.id)}
+                      title={isClickable ? `Go to ${step.fullName}` : undefined}
                     >
                       <div
                         className={`w-8 h-8 rounded-full flex items-center justify-center relative z-10 transition-colors ring-2 ring-white ${
@@ -446,6 +479,8 @@ const VisaApplication = () => {
                             ? 'bg-green-500 text-white hover:bg-green-600'
                             : isActive
                             ? 'bg-green-500 text-white'
+                            : isVisitedAhead
+                            ? 'bg-white border-2 border-green-500 text-green-600 hover:bg-green-50'
                             : 'bg-gray-200 text-gray-400'
                         }`}
                       >
@@ -463,6 +498,8 @@ const VisaApplication = () => {
                             ? 'text-green-700 font-semibold'
                             : isCompleted
                             ? 'text-gray-700'
+                            : isVisitedAhead
+                            ? 'text-green-600'
                             : 'text-gray-400'
                         }`}
                         style={{ maxWidth: '52px' }}
@@ -488,6 +525,7 @@ const VisaApplication = () => {
                 data={formData}
                 onNext={handleNext}
                 onBack={handleBack}
+                onDataChange={handleDataChange}
                 isFirstStep={currentStep === 1}
                 isLastStep={currentStep === steps.length}
               />

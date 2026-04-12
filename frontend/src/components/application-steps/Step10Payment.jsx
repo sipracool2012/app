@@ -35,7 +35,7 @@ const GatewayLogo = ({ id, name }) => {
   );
 };
 
-const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
+const Step10Payment = ({ data, onNext, onBack, isLastStep, onDataChange }) => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [paymentMethod, setPaymentMethod] = useState('');

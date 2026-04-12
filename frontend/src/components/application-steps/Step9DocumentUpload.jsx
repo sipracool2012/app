@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -9,7 +9,7 @@ import { getAuthHeaders } from '../../utils/auth';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-const Step9DocumentUpload = ({ data, onNext, onBack }) => {
+const Step9DocumentUpload = ({ data, onNext, onBack, onDataChange }) => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [uploading, setUploading] = useState(false);
@@ -31,6 +31,9 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
     confirmedTravelTicket: data?.confirmedTravelTicket || '',
     destinationVisaOrPassport: data?.destinationVisaOrPassport || ''
   });
+
+  // Report local changes to parent so jumping away via stepper saves latest data
+  useEffect(() => { onDataChange?.(formData); }, [formData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [fileNames, setFileNames] = useState({
     passportDocument: data?.passportDocument || '',

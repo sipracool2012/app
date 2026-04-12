@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-const Step4FamilyDetails = ({ data, onNext, onBack }) => {
+const Step4FamilyDetails = ({ data, onNext, onBack, onDataChange }) => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [countries, setCountries] = useState([]);
@@ -35,6 +35,8 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
     spouseCountryOfBirth: data?.spouseCountryOfBirth || '',
     pakistanConnection: data?.pakistanConnection || 'No'
   });
+  // Report local changes to parent so jumping away via stepper saves latest data
+  useEffect(() => { onDataChange?.(formData); }, [formData]); // eslint-disable-line react-hooks/exhaustive-deps
   const [errors, setErrors] = useState({});
 
   useEffect(() => {

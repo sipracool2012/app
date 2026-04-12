@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-const Step3AddressDetails = ({ data, onNext, onBack }) => {
+const Step3AddressDetails = ({ data, onNext, onBack, onDataChange }) => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [countries, setCountries] = useState([]);
@@ -26,6 +26,8 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
     phoneCountryCode: data?.phoneCountryCode || '+1',
     phoneNumber: data?.phoneNumber || ''
   });
+  // Report local changes to parent so jumping away via stepper saves latest data
+  useEffect(() => { onDataChange?.(formData); }, [formData]); // eslint-disable-line react-hooks/exhaustive-deps
   const [errors, setErrors] = useState({});
 
   useEffect(() => {

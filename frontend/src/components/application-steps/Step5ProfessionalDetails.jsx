@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -7,7 +7,7 @@ import { ChevronLeft } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 
-const Step5ProfessionalDetails = ({ data, onNext, onBack }) => {
+const Step5ProfessionalDetails = ({ data, onNext, onBack, onDataChange }) => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [formData, setFormData] = useState({
@@ -20,6 +20,8 @@ const Step5ProfessionalDetails = ({ data, onNext, onBack }) => {
     militaryService: data?.militaryService || 'No',
     pastOccupationIfAny: data?.pastOccupationIfAny || ''
   });
+  // Report local changes to parent so jumping away via stepper saves latest data
+  useEffect(() => { onDataChange?.(formData); }, [formData]); // eslint-disable-line react-hooks/exhaustive-deps
   const [errors, setErrors] = useState({});
 
   const handleSubmit = (e) => {

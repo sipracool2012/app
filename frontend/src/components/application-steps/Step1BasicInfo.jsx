@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
+const Step1BasicInfo = ({ data, onNext, isFirstStep, onDataChange }) => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [ports, setPorts] = useState([]);
@@ -31,6 +31,8 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep }) => {
     yogaInstitutePhoneCode: data?.yogaInstitutePhoneCode || '+91',
     yogaInstitutePhone: data?.yogaInstitutePhone || ''
   });
+  // Report local changes to parent so jumping away via stepper saves latest data
+  useEffect(() => { onDataChange?.(formData); }, [formData]); // eslint-disable-line react-hooks/exhaustive-deps
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
