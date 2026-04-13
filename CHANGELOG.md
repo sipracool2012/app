@@ -5,6 +5,28 @@ All notable changes to the Clear eVisa project are documented in this file.
 Format: `## [Date] - Description`
 ---
 
+## [2026-04-13] - Mobile-friendly header, admin tab icons-only on mobile, Step 8 blank page fix
+
+### Added
+- **Mobile hamburger menu** (`frontend/src/components/Header.jsx`)
+  - On screens narrower than `md` (768 px) the nav links and all auth buttons are hidden; a hamburger (☰ / ✕) toggle button appears in their place
+  - Tapping it opens a full-width dropdown beneath the logo bar containing: nav links, a 2-column language grid, and full-width auth buttons
+  - Navigating to any page or selecting a language automatically closes the menu
+  - Added `Menu` and `X` icons from `lucide-react`; added `isMobileMenuOpen` state; `onLogout` and `handleLanguageChange` both call `closeMobileMenu()`
+
+### Changed
+- **Admin panel tabs: icon-only on small screens** (`frontend/src/pages/AdminPanel.jsx`)
+  - All 7 tab trigger labels wrapped in `<span className="hidden sm:inline">` — on mobile only the icon is visible, eliminating the overlapping text
+  - Added `title` attribute to each trigger for tooltip on hover/long-press
+  - Removed `max-w-5xl` width cap from the `TabsList` so the 7-column grid fills the available container width at all breakpoints
+
+### Fixed
+- **Step 8 blank page on navigation from Step 7** (`frontend/src/components/application-steps/Step8AdditionalQuestions.jsx`)
+  - `useEffect(() => { onDataChange?.(formData); }, [formData])` was placed *before* the `useState` declaration for `formData`, causing a "Cannot access 'formData' before initialization" runtime error that rendered a blank page whenever Step 8 was mounted
+  - Moved the `useEffect` to after the `formData` `useState` declaration
+
+---
+
 ## [2026-04-12] - Stepper: jump to any visited step, save live data on jump, persist maxVisitedStep
 
 ### Changed

@@ -479,51 +479,51 @@ const AdminPanel = () => {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* Super Admin sees 5 tabs; regular Admin sees 1 tab (Applications only) */}
-          <TabsList className={`grid w-full ${currentUser?.role === 'super_admin' ? 'max-w-5xl grid-cols-7' : 'max-w-xs grid-cols-1'}`}>
-            <TabsTrigger value="applications" className="flex items-center gap-2">
+          <TabsList className={`grid w-full ${currentUser?.role === 'super_admin' ? 'grid-cols-7' : 'max-w-xs grid-cols-1'}`}>
+            <TabsTrigger value="applications" className="flex items-center gap-2" title="Applications">
               <Eye className="w-4 h-4" />
-              Applications
+              <span className="hidden sm:inline">Applications</span>
             </TabsTrigger>
             {/* Country Config — Super Admin only */}
             {currentUser?.role === 'super_admin' && (
-              <TabsTrigger value="countries" className="flex items-center gap-2">
+              <TabsTrigger value="countries" className="flex items-center gap-2" title="Country Config">
                 <Globe className="w-4 h-4" />
-                Country Config
+                <span className="hidden sm:inline">Country Config</span>
               </TabsTrigger>
             )}
             {/* Payment Gateways — Super Admin only */}
             {currentUser?.role === 'super_admin' && (
-              <TabsTrigger value="payment-gateways" className="flex items-center gap-2">
+              <TabsTrigger value="payment-gateways" className="flex items-center gap-2" title="Payment Gateways">
                 <CreditCard className="w-4 h-4" />
-                Payment Gateways
+                <span className="hidden sm:inline">Payment Gateways</span>
               </TabsTrigger>
             )}
             {/* Email Providers — Super Admin only */}
             {currentUser?.role === 'super_admin' && (
-              <TabsTrigger value="email-providers" className="flex items-center gap-2">
+              <TabsTrigger value="email-providers" className="flex items-center gap-2" title="Email Providers">
                 <Mail className="w-4 h-4" />
-                Email Providers
+                <span className="hidden sm:inline">Email Providers</span>
               </TabsTrigger>
             )}
             {/* User Management — Super Admin only */}
             {currentUser?.role === 'super_admin' && (
-              <TabsTrigger value="users" className="flex items-center gap-2">
+              <TabsTrigger value="users" className="flex items-center gap-2" title="User Management">
                 <Users className="w-4 h-4" />
-                User Management
+                <span className="hidden sm:inline">User Management</span>
               </TabsTrigger>
             )}
             {/* Utility — Super Admin only */}
             {currentUser?.role === 'super_admin' && (
-              <TabsTrigger value="utility" className="flex items-center gap-2">
+              <TabsTrigger value="utility" className="flex items-center gap-2" title="Utility">
                 <Wrench className="w-4 h-4" />
-                Utility
+                <span className="hidden sm:inline">Utility</span>
               </TabsTrigger>
             )}
             {/* Transactions — Super Admin only */}
             {currentUser?.role === 'super_admin' && (
-              <TabsTrigger value="transactions" className="flex items-center gap-2">
+              <TabsTrigger value="transactions" className="flex items-center gap-2" title="Transactions">
                 <Receipt className="w-4 h-4" />
-                Transactions
+                <span className="hidden sm:inline">Transactions</span>
               </TabsTrigger>
             )}
           </TabsList>

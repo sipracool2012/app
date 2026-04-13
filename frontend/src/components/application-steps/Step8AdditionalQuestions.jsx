@@ -10,8 +10,6 @@ import { useTranslation } from 'react-i18next';
 const Step8AdditionalQuestions = ({ data, onNext, onBack, onDataChange }) => {
   const { toast } = useToast();
   const { t } = useTranslation();
-  // Report local changes to parent so jumping away via stepper saves latest data
-  useEffect(() => { onDataChange?.(formData); }, [formData]); // eslint-disable-line react-hooks/exhaustive-deps
   const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
     arrestedConvicted: data?.arrestedConvicted || 'No',
@@ -27,6 +25,8 @@ const Step8AdditionalQuestions = ({ data, onNext, onBack, onDataChange }) => {
     asylumSought: data?.asylumSought || 'No',
     asylumSoughtReason: data?.asylumSoughtReason || ''
   });
+  // Report local changes to parent so jumping away via stepper saves latest data
+  useEffect(() => { onDataChange?.(formData); }, [formData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = (e) => {
     e.preventDefault();
