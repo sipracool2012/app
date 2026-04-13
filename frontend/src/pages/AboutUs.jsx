@@ -18,27 +18,14 @@ export default function AboutUs() {
         {/* Mission Section */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 mb-6">{t('pages.about.mission')}</h2>
-          <p className="text-lg text-gray-700 mb-4">
-            Clear eVisa Services is a specialist Indian eVisa consultancy. Our mission is to ensure every traveller has
-            correctly verified documents and a complete, accurate documentation package before they reach the official
-            submission portal — eliminating the errors that cause delays and rejections.
-          </p>
-          <p className="text-lg text-gray-700">
-            We don't submit applications on your behalf. Instead, we meticulously review every document and piece of
-            information against India's eVisa requirements and prepare proper documentation so that when you submit
-            on India's official portal, everything is in order the first time.
-          </p>
+          <p className="text-lg text-gray-700 mb-4">{t('pages.about.missionText1')}</p>
+          <p className="text-lg text-gray-700">{t('pages.about.missionText2')}</p>
         </section>
 
         {/* Vision Section */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 mb-6">{t('pages.about.vision')}</h2>
-          <p className="text-lg text-gray-700">
-            To be India's most trusted eVisa consultancy — where every traveller, regardless of their nationality,
-            receives expert document verification and preparation that gives them the best chance of a successful
-            India eVisa approval. We believe that with the right guidance, no application should be rejected due
-            to avoidable documentation errors.
-          </p>
+          <p className="text-lg text-gray-700">{t('pages.about.visionText')}</p>
         </section>
 
         {/* Values Section */}
@@ -47,65 +34,50 @@ export default function AboutUs() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-2xl font-bold text-blue-600 mb-3">{t('pages.about.transparency')}</h3>
-              <p className="text-gray-700">
-                We believe in clear communication. Our users always know what to expect, what information we need, 
-                and how we use their data.
-              </p>
+              <p className="text-gray-700">{t('pages.about.transparencyDesc')}</p>
             </div>
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-2xl font-bold text-blue-600 mb-3">{t('pages.about.excellence')}</h3>
-              <p className="text-gray-700">
-                We are committed to delivering the highest quality service, continuously improving our platform, 
-                and exceeding user expectations.
-              </p>
+              <p className="text-gray-700">{t('pages.about.excellenceDesc')}</p>
             </div>
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-2xl font-bold text-blue-600 mb-3">{t('pages.about.accessibility')}</h3>
-              <p className="text-gray-700">
-                We believe visa services should be available to everyone. Our platform is designed to be user-friendly, 
-                affordable, and inclusive.
-              </p>
+              <p className="text-gray-700">{t('pages.about.accessibilityDesc')}</p>
             </div>
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-2xl font-bold text-blue-600 mb-3">{t('pages.about.security')}</h3>
-              <p className="text-gray-700">
-                Your data is precious. We implement world-class security measures to protect your personal and sensitive information.
-              </p>
+              <p className="text-gray-700">{t('pages.about.securityDesc')}</p>
             </div>
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-2xl font-bold text-blue-600 mb-3">{t('pages.about.innovation')}</h3>
-              <p className="text-gray-700">
-                We continuously adopt cutting-edge technology and best practices to improve the visa application journey.
-              </p>
+              <p className="text-gray-700">{t('pages.about.innovationDesc')}</p>
             </div>
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-2xl font-bold text-blue-600 mb-3">{t('pages.about.customerFocus')}</h3>
-              <p className="text-gray-700">
-                Our users are at the heart of everything we do. We listen, learn, and evolve based on your feedback.
-              </p>
+              <p className="text-gray-700">{t('pages.about.customerFocusDesc')}</p>
             </div>
           </div>
         </section>
 
         {/* Stats Section */}
         <section className="mb-16 bg-blue-50 rounded-lg p-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Clear eVisa by the Numbers</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">{t('pages.about.byTheNumbers')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-4xl font-bold text-blue-600 mb-2">50K+</div>
-              <p className="text-gray-700">Clients Assisted</p>
+              <div className="text-4xl font-bold text-blue-600 mb-2">{t('pages.about.stat1Value')}</div>
+              <p className="text-gray-700">{t('pages.about.stat1Label')}</p>
             </div>
             <div>
-              <div className="text-4xl font-bold text-blue-600 mb-2">193+</div>
-              <p className="text-gray-700">Passport Nationalities Served</p>
+              <div className="text-4xl font-bold text-blue-600 mb-2">{t('pages.about.stat2Value')}</div>
+              <p className="text-gray-700">{t('pages.about.stat2Label')}</p>
             </div>
             <div>
-              <div className="text-4xl font-bold text-blue-600 mb-2">India</div>
-              <p className="text-gray-700">eVisa Specialist</p>
+              <div className="text-4xl font-bold text-blue-600 mb-2">{t('pages.about.stat3Value')}</div>
+              <p className="text-gray-700">{t('pages.about.stat3Label')}</p>
             </div>
             <div>
-              <div className="text-4xl font-bold text-blue-600 mb-2">24/7</div>
-              <p className="text-gray-700">Customer Support</p>
+              <div className="text-4xl font-bold text-blue-600 mb-2">{t('pages.about.stat4Value')}</div>
+              <p className="text-gray-700">{t('pages.about.stat4Label')}</p>
             </div>
           </div>
         </section>
@@ -119,19 +91,19 @@ export default function AboutUs() {
                 <span className="text-3xl text-blue-600 font-bold">SS</span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">Sipra Satpathi</h3>
-              <p className="text-blue-600 font-semibold mb-2">Sole Proprietor</p>
+              <p className="text-blue-600 font-semibold mb-2">{t('pages.about.teamMemberRole')}</p>
             </div>
           </div>
         </section>
 
         {/* Legal Information */}
         <section className="mb-16 bg-gray-100 rounded-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Legal Information</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('pages.about.legalTitle')}</h2>
           <div className="space-y-2 text-gray-700">
-            <p><strong>Legal Entity Name:</strong> Clear eVisa Services</p>
-            <p><strong>Registered Address:</strong> B1109, Venkatesh Graffiti Glover, Manjari Rd, Hanuman Nagar, Keshav Nagar, Mundhwa, Pune, Maharashtra 411036, India</p>
-            <p><strong>Contact:</strong> +91-9474475384</p>
-            <p><strong>Email:</strong> admin@clearevisa.com</p>
+            <p><strong>{t('pages.about.legalEntityLabel')}:</strong> {t('pages.about.legalEntityValue')}</p>
+            <p><strong>{t('pages.about.legalAddressLabel')}:</strong> {t('pages.about.legalAddressValue')}</p>
+            <p><strong>{t('pages.about.legalContactLabel')}:</strong> +91-9474475384</p>
+            <p><strong>{t('pages.about.legalEmailLabel')}:</strong> admin@clearevisa.com</p>
           </div>
         </section>
 

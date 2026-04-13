@@ -37,7 +37,7 @@ export default function ContactUs() {
       setSubmitted(true);
       setFormData({ name: '', email: '', subject: '', message: '', category: '' });
     } catch {
-      setSubmitError('Sorry, we could not send your message. Please email us directly at admin@clearevisa.com.');
+      setSubmitError(t('pages.contact.sendError2'));
     } finally {
       setSubmitting(false);
     }
@@ -60,24 +60,24 @@ export default function ContactUs() {
           <div className="md:col-span-1 space-y-8">
             {/* Email */}
             <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">📧 Email</h3>
-              <p className="text-gray-600 mb-1">General Inquiries</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">{t('pages.contact.emailSectionTitle')}</h3>
+              <p className="text-gray-600 mb-1">{t('pages.contact.generalInquiries')}</p>
               <p className="text-blue-600 font-semibold">admin@clearevisa.com</p>
-              <p className="text-gray-600 mb-1 mt-3">Customer Support</p>
+              <p className="text-gray-600 mb-1 mt-3">{t('pages.contact.customerSupport')}</p>
               <p className="text-blue-600 font-semibold">support@clearevisa.com</p>
             </div>
 
             <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-3">📱 Phone</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">{t('pages.contact.phoneSectionTitle')}</h3>
               <p className="text-gray-700">
                 <strong>+91-9474475384</strong>
               </p>
-              <p className="text-gray-600 text-sm mt-2">Mon – Fri: 9AM – 6PM IST</p>
+              <p className="text-gray-600 text-sm mt-2">{t('pages.contact.phoneHours')}</p>
             </div>
 
             {/* Address */}
             <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-3">📍 Address</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">{t('pages.contact.addressSectionTitle')}</h3>
               <p className="text-gray-700">
                 <strong>Clear eVisa Services</strong><br />
                 B1109, Venkatesh Graffiti Glover,<br />
@@ -90,14 +90,14 @@ export default function ContactUs() {
 
             {/* Hours */}
             <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-3">🕐 Hours</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">{t('pages.contact.hoursSectionTitle')}</h3>
               <p className="text-gray-700">
-                <strong>Customer Support</strong><br />
-                Available 24/7
+                <strong>{t('pages.contact.hoursCustomerLabel')}</strong><br />
+                {t('pages.contact.hoursCustomerValue')}
               </p>
               <p className="text-gray-700 mt-3">
-                <strong>Sales & Business</strong><br />
-                Mon - Fri: 9AM - 6PM PST
+                <strong>{t('pages.contact.hoursSalesLabel')}</strong><br />
+                {t('pages.contact.hoursSalesValue')}
               </p>
             </div>
           </div>
@@ -160,11 +160,11 @@ export default function ContactUs() {
                     className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-600"
                   >
                     <option value="">{t('pages.contact.selectCategory')}</option>
-                    <option value="support">Customer Support</option>
-                    <option value="sales">Sales Inquiry</option>
-                    <option value="partnership">Partnership</option>
-                    <option value="press">Press/Media</option>
-                    <option value="other">Other</option>
+                    <option value="support">{t('pages.contact.catSupport')}</option>
+                    <option value="sales">{t('pages.contact.catSales')}</option>
+                    <option value="partnership">{t('pages.contact.catPartnership')}</option>
+                    <option value="press">{t('pages.contact.catPress')}</option>
+                    <option value="other">{t('pages.contact.catOther')}</option>
                   </select>
                 </div>
 
@@ -202,13 +202,11 @@ export default function ContactUs() {
                   disabled={submitting}
                   className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {submitting ? 'Sending…' : t('pages.contact.send')}
+                  {submitting ? t('pages.contact.sending') : t('pages.contact.send')}
                 </button>
               </form>
 
-              <p className="text-sm text-gray-600 mt-4">
-                * Required fields. We'll respond to your inquiry within 24 hours.
-              </p>
+              <p className="text-sm text-gray-600 mt-4">{t('pages.contact.requiredFields')}</p>
             </div>
           </div>
         </div>
@@ -218,15 +216,15 @@ export default function ContactUs() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('pages.contact.otherWays')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <h3 className="font-bold text-gray-900 mb-2">💬 Live Chat(Coming Soon)</h3>
-              <p className="text-gray-700">Chat with our support team in real-time for immediate assistance.</p>
+              <h3 className="font-bold text-gray-900 mb-2">{t('pages.contact.liveChatTitle')}</h3>
+              <p className="text-gray-700">{t('pages.contact.liveChatDesc')}</p>
             </div>
             <div>
-              <h3 className="font-bold text-gray-900 mb-2">📱 Mobile App(Coming Soon)</h3>
-              <p className="text-gray-700">Contact support directly through our mobile application.</p>
+              <h3 className="font-bold text-gray-900 mb-2">{t('pages.contact.mobileAppTitle')}</h3>
+              <p className="text-gray-700">{t('pages.contact.mobileAppDesc')}</p>
             </div>
             <div>
-              <h3 className="font-bold text-gray-900 mb-3">Social Media</h3>
+              <h3 className="font-bold text-gray-900 mb-3">{t('pages.contact.socialTitle')}</h3>
               <div className="flex gap-3">
                 <a
                   href="https://twitter.com"
@@ -256,7 +254,7 @@ export default function ContactUs() {
                   <Linkedin className="w-5 h-5" />
                 </a>
               </div>
-              <p className="text-gray-600 text-sm mt-2">Follow us for updates and support.</p>
+              <p className="text-gray-600 text-sm mt-2">{t('pages.contact.socialFollow')}</p>
             </div>
           </div>
         </section>

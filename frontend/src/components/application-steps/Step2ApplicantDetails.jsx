@@ -55,18 +55,18 @@ const Step2ApplicantDetails = ({ data, onNext, onBack, onDataChange }) => {
     e.preventDefault();
     const newErrors = {};
 
-    if (!formData.surname.trim()) newErrors.surname = 'This field is required.';
-    if (!formData.givenNames.trim()) newErrors.givenNames = 'This field is required.';
-    if (!formData.religion) newErrors.religion = 'Please select an option.';
-    if (!formData.visibleMarks.trim()) newErrors.visibleMarks = 'This field is required.';
-    if (!formData.educationalQualification) newErrors.educationalQualification = 'Please select an option.';
-    if (!formData.qualificationFrom.trim()) newErrors.qualificationFrom = 'This field is required.';
+    if (!formData.surname.trim()) newErrors.surname = t('errors.fieldRequired');
+    if (!formData.givenNames.trim()) newErrors.givenNames = t('errors.fieldRequired');
+    if (!formData.religion) newErrors.religion = t('errors.selectOption');
+    if (!formData.visibleMarks.trim()) newErrors.visibleMarks = t('errors.fieldRequired');
+    if (!formData.educationalQualification) newErrors.educationalQualification = t('errors.selectOption');
+    if (!formData.qualificationFrom.trim()) newErrors.qualificationFrom = t('errors.fieldRequired');
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
       toast({
-        title: 'Please fix the errors below',
-        description: 'Some required fields are missing or contain invalid values.',
+        title: t('errors.fixErrors'),
+        description: t('errors.fixErrorsDesc'),
         variant: 'destructive'
       });
       setTimeout(() => {

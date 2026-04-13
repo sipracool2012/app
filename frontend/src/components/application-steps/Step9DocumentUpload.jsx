@@ -213,7 +213,7 @@ const Step9DocumentUpload = ({ data, onNext, onBack, onDataChange }) => {
             htmlFor={fieldName} 
             className="cursor-pointer text-blue-600 hover:text-blue-700"
           >
-            Click to upload
+            {t('forms.step9.clickToUpload')}
           </Label>
           <p className="text-xs text-gray-500 mt-1">JPG, PNG or PDF (max 5MB)</p>
           <Input

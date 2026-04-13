@@ -33,14 +33,14 @@ const Step8AdditionalQuestions = ({ data, onNext, onBack, onDataChange }) => {
     const newErrors = {};
     questions.forEach((q) => {
       if (formData[q.key] === 'Yes' && !formData[q.reasonKey].trim()) {
-        newErrors[q.reasonKey] = 'Please provide a reason.';
+        newErrors[q.reasonKey] = t('errors.reasonRequired');
       }
     });
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
       toast({
-        title: 'Please fix the errors below',
-        description: 'A reason is required for every "Yes" answer.',
+        title: t('errors.fixErrors'),
+        description: t('errors.reasonRequiredDesc'),
         variant: 'destructive'
       });
       setTimeout(() => {
@@ -56,32 +56,32 @@ const Step8AdditionalQuestions = ({ data, onNext, onBack, onDataChange }) => {
     {
       key: 'arrestedConvicted',
       reasonKey: 'arrestedConvictedReason',
-      text: 'Has any applicant been arrested/ prosecuted/ convicted by Court of Law of any country?'
+      textKey: 'forms.step8.question1'
     },
     {
       key: 'refusedEntry',
       reasonKey: 'refusedEntryReason',
-      text: 'Has any applicant been refused entry / deported by any country including India?'
+      textKey: 'forms.step8.question2'
     },
     {
       key: 'humanTrafficking',
       reasonKey: 'humanTraffickingReason',
-      text: 'Has any applicant been engaged in Human trafficking/ Drug trafficking/ Child abuse/ Crime against women/ Economic offense / Financial fraud?'
+      textKey: 'forms.step8.question3'
     },
     {
       key: 'cyberCrime',
       reasonKey: 'cyberCrimeReason',
-      text: 'Has any applicant been engaged in Cyber crime/ Fake Indian Currency Notes/ Hawala transactions/ IPR violations?'
+      textKey: 'forms.step8.question4'
     },
     {
       key: 'terroristViews',
       reasonKey: 'terroristViewsReason',
-      text: 'Has any applicant at any time been associated with any organization declared as terrorist organization by the Government of India OR by any country/ international organization?'
+      textKey: 'forms.step8.question5'
     },
     {
       key: 'asylumSought',
       reasonKey: 'asylumSoughtReason',
-      text: 'Has any applicant sought asylum (political or otherwise) in any country?'
+      textKey: 'forms.step8.question6'
     }
   ];
 
@@ -95,7 +95,7 @@ const Step8AdditionalQuestions = ({ data, onNext, onBack, onDataChange }) => {
           <div key={question.key} className="border rounded-lg p-4 space-y-4">
             <div className="space-y-2">
               <Label className="text-base font-medium">
-                {index + 1}. {question.text} <span className="text-red-500">*</span>
+                {index + 1}. {t(question.textKey)} <span className="text-red-500">*</span>
               </Label>
               <Select 
                 value={formData[question.key]} 

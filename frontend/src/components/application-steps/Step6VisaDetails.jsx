@@ -86,38 +86,38 @@ const Step6VisaDetails = ({ data, onNext, onBack, onDataChange }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const newErrors = {};
-    if (!formData.placesToVisit.trim()) newErrors.placesToVisit = 'This field is required.';
+    if (!formData.placesToVisit.trim()) newErrors.placesToVisit = t('errors.fieldRequired');
     if (formData.visitedIndiaBefore === 'Yes') {
-      if (!formData.previousAddress.trim()) newErrors.previousAddress = 'This field is required.';
-      if (!formData.citiesPreviouslyVisited.trim()) newErrors.citiesPreviouslyVisited = 'This field is required.';
-      if (!formData.lastIndianVisaNo.trim()) newErrors.lastIndianVisaNo = 'This field is required.';
-      if (!formData.oldVisaType) newErrors.oldVisaType = 'Please select an option.';
-      if (!formData.oldVisaIssuePlace.trim()) newErrors.oldVisaIssuePlace = 'This field is required.';
-      if (!formData.oldVisaIssueDate) newErrors.oldVisaIssueDate = 'This field is required.';
+      if (!formData.previousAddress.trim()) newErrors.previousAddress = t('errors.fieldRequired');
+      if (!formData.citiesPreviouslyVisited.trim()) newErrors.citiesPreviouslyVisited = t('errors.fieldRequired');
+      if (!formData.lastIndianVisaNo.trim()) newErrors.lastIndianVisaNo = t('errors.fieldRequired');
+      if (!formData.oldVisaType) newErrors.oldVisaType = t('errors.selectOption');
+      if (!formData.oldVisaIssuePlace.trim()) newErrors.oldVisaIssuePlace = t('errors.fieldRequired');
+      if (!formData.oldVisaIssueDate) newErrors.oldVisaIssueDate = t('errors.fieldRequired');
     }
     if (isBusinessVisa) {
-      if (!formData.companyName.trim()) newErrors.companyName = 'This field is required.';
-      if (!formData.companyAddress.trim()) newErrors.companyAddress = 'This field is required.';
-      if (!formData.companyPhoneNumber.trim()) newErrors.companyPhoneNumber = 'Phone number is required.';
-      if (!formData.indianFirmName.trim()) newErrors.indianFirmName = 'This field is required.';
-      if (!formData.indianFirmAddress.trim()) newErrors.indianFirmAddress = 'This field is required.';
-      if (!formData.indianFirmPhoneNumber.trim()) newErrors.indianFirmPhoneNumber = 'Phone number is required.';
+      if (!formData.companyName.trim()) newErrors.companyName = t('errors.fieldRequired');
+      if (!formData.companyAddress.trim()) newErrors.companyAddress = t('errors.fieldRequired');
+      if (!formData.companyPhoneNumber.trim()) newErrors.companyPhoneNumber = t('errors.phoneRequired');
+      if (!formData.indianFirmName.trim()) newErrors.indianFirmName = t('errors.fieldRequired');
+      if (!formData.indianFirmAddress.trim()) newErrors.indianFirmAddress = t('errors.fieldRequired');
+      if (!formData.indianFirmPhoneNumber.trim()) newErrors.indianFirmPhoneNumber = t('errors.phoneRequired');
     }
     if (isConferenceVisa) {
-      if (!formData.conferenceName.trim()) newErrors.conferenceName = 'This field is required.';
-      if (!formData.conferenceStartDate) newErrors.conferenceStartDate = 'This field is required.';
-      if (!formData.conferenceEndDate) newErrors.conferenceEndDate = 'This field is required.';
-      if (!formData.conferenceAddress.trim()) newErrors.conferenceAddress = 'This field is required.';
-      if (!formData.organizerName.trim()) newErrors.organizerName = 'This field is required.';
-      if (!formData.organizerAddress.trim()) newErrors.organizerAddress = 'This field is required.';
-      if (!formData.organizerPhoneNumber.trim()) newErrors.organizerPhoneNumber = 'Phone number is required.';
-      if (!formData.organizerEmail.trim()) newErrors.organizerEmail = 'This field is required.';
+      if (!formData.conferenceName.trim()) newErrors.conferenceName = t('errors.fieldRequired');
+      if (!formData.conferenceStartDate) newErrors.conferenceStartDate = t('errors.fieldRequired');
+      if (!formData.conferenceEndDate) newErrors.conferenceEndDate = t('errors.fieldRequired');
+      if (!formData.conferenceAddress.trim()) newErrors.conferenceAddress = t('errors.fieldRequired');
+      if (!formData.organizerName.trim()) newErrors.organizerName = t('errors.fieldRequired');
+      if (!formData.organizerAddress.trim()) newErrors.organizerAddress = t('errors.fieldRequired');
+      if (!formData.organizerPhoneNumber.trim()) newErrors.organizerPhoneNumber = t('errors.phoneRequired');
+      if (!formData.organizerEmail.trim()) newErrors.organizerEmail = t('errors.fieldRequired');
     }
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
       toast({
-        title: 'Please fix the errors below',
-        description: 'Some required fields are missing or contain invalid values.',
+        title: t('errors.fixErrors'),
+        description: t('errors.fixErrorsDesc'),
         variant: 'destructive'
       });
       setTimeout(() => {
@@ -214,7 +214,7 @@ const Step6VisaDetails = ({ data, onNext, onBack, onDataChange }) => {
           <>
             <div className="space-y-2">
               <Label htmlFor="previousAddress">
-                Previous Address <span className="text-red-500">*</span>
+                {t('forms.step6.previousAddress')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="previousAddress"
@@ -384,7 +384,7 @@ const Step6VisaDetails = ({ data, onNext, onBack, onDataChange }) => {
 
             <div className="space-y-2">
               <Label htmlFor="companyName">
-                Name <span className="text-red-500">*</span>
+                {t('forms.step6.companyName')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="companyName"
@@ -400,7 +400,7 @@ const Step6VisaDetails = ({ data, onNext, onBack, onDataChange }) => {
 
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="companyAddress">
-                Address <span className="text-red-500">*</span>
+                {t('forms.step6.companyAddress')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="companyAddress"
@@ -431,7 +431,7 @@ const Step6VisaDetails = ({ data, onNext, onBack, onDataChange }) => {
 
             <div className="space-y-2">
               <Label htmlFor="companyWebsite">
-                Website
+                {t('common.website')}
               </Label>
               <Input
                 id="companyWebsite"
@@ -448,7 +448,7 @@ const Step6VisaDetails = ({ data, onNext, onBack, onDataChange }) => {
 
             <div className="space-y-2">
               <Label htmlFor="indianFirmName">
-                Name <span className="text-red-500">*</span>
+                {t('forms.step6.indianFirmName')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="indianFirmName"
@@ -464,7 +464,7 @@ const Step6VisaDetails = ({ data, onNext, onBack, onDataChange }) => {
 
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="indianFirmAddress">
-                Address <span className="text-red-500">*</span>
+                {t('forms.step6.indianFirmAddress')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="indianFirmAddress"
@@ -495,7 +495,7 @@ const Step6VisaDetails = ({ data, onNext, onBack, onDataChange }) => {
 
             <div className="space-y-2">
               <Label htmlFor="indianFirmWebsite">
-                Website
+                {t('common.website')}
               </Label>
               <Input
                 id="indianFirmWebsite"
@@ -517,7 +517,7 @@ const Step6VisaDetails = ({ data, onNext, onBack, onDataChange }) => {
 
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="conferenceName">
-                Name/subject of conference <span className="text-red-500">*</span>
+                {t('forms.step6.conferenceSubject')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="conferenceName"
@@ -533,7 +533,7 @@ const Step6VisaDetails = ({ data, onNext, onBack, onDataChange }) => {
 
             <div className="space-y-2">
               <Label htmlFor="conferenceStartDate">
-                Start date <span className="text-red-500">*</span>
+                {t('forms.step6.startDate')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="conferenceStartDate"
@@ -550,7 +550,7 @@ const Step6VisaDetails = ({ data, onNext, onBack, onDataChange }) => {
 
             <div className="space-y-2">
               <Label htmlFor="conferenceEndDate">
-                End date <span className="text-red-500">*</span>
+                {t('forms.step6.endDate')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="conferenceEndDate"
@@ -568,7 +568,7 @@ const Step6VisaDetails = ({ data, onNext, onBack, onDataChange }) => {
 
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="conferenceAddress">
-                Full address <span className="text-red-500">*</span>
+                {t('common.address')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="conferenceAddress"
@@ -588,7 +588,7 @@ const Step6VisaDetails = ({ data, onNext, onBack, onDataChange }) => {
 
             <div className="space-y-2">
               <Label htmlFor="organizerName">
-                Name of organizer <span className="text-red-500">*</span>
+                {t('forms.step6.organizerName')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="organizerName"
@@ -604,7 +604,7 @@ const Step6VisaDetails = ({ data, onNext, onBack, onDataChange }) => {
 
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="organizerAddress">
-                Address <span className="text-red-500">*</span>
+                {t('forms.step6.organizerAddress')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="organizerAddress"
@@ -635,7 +635,7 @@ const Step6VisaDetails = ({ data, onNext, onBack, onDataChange }) => {
 
             <div className="space-y-2">
               <Label htmlFor="organizerEmail">
-                Email id <span className="text-red-500">*</span>
+                {t('forms.step6.emailId')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="organizerEmail"

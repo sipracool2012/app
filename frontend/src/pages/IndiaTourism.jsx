@@ -1,94 +1,58 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ArrowRight, MapPin, Sun, Utensils, Camera, Landmark, Waves, TreePine, ChevronDown, ChevronUp, Star } from 'lucide-react';
-
-const DESTINATIONS = [
-  {
-    name: 'Taj Mahal, Agra',
-    tag: 'UNESCO Heritage',
-    tagColor: 'bg-yellow-500',
-    img: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80',
-    desc: 'One of the Seven Wonders of the World — a breathtaking white-marble mausoleum on the banks of the Yamuna river.',
-  },
-  {
-    name: 'Kerala Backwaters',
-    tag: 'Nature',
-    tagColor: 'bg-green-500',
-    img: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800&q=80',
-    desc: 'Glide through emerald lagoons and palm-fringed canals on a traditional houseboat in God\'s Own Country.',
-  },
-  {
-    name: 'Rajasthan',
-    tag: 'Culture',
-    tagColor: 'bg-orange-500',
-    img: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?w=800&q=80',
-    desc: 'Majestic forts, vibrant bazaars and golden deserts — the Land of Kings is unlike anywhere else on Earth.',
-  },
-  {
-    name: 'Goa Beaches',
-    tag: 'Beach',
-    tagColor: 'bg-blue-500',
-    img: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&q=80',
-    desc: 'Sun-soaked shores, Portuguese architecture, fresh seafood and legendary sunsets along 100 km of coastline.',
-  },
-  {
-    name: 'Varanasi',
-    tag: 'Spiritual',
-    tagColor: 'bg-purple-500',
-    img: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=800&q=80',
-    desc: 'Witness the eternal Ganga Aarti on the ghats of the world\'s oldest continuously inhabited city.',
-  },
-  {
-    name: 'Himachal Pradesh',
-    tag: 'Adventure',
-    tagColor: 'bg-cyan-600',
-    img: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80',
-    desc: 'Snow-capped peaks, alpine meadows and hill stations nestled in the mighty Himalayas.',
-  },
-];
-
-const EXPERIENCES = [
-  { icon: <Utensils className="w-7 h-7" />, title: 'Cuisine', desc: 'From butter chicken in Delhi to dosa in Chennai — every state is a new culinary universe.' },
-  { icon: <Landmark className="w-7 h-7" />, title: 'Heritage', desc: 'Over 3,000 years of history: Mughal forts, ancient temples, Buddhist stupas and colonial architecture.' },
-  { icon: <Waves className="w-7 h-7" />, title: 'Coastline', desc: '7,500 km of coastline spanning the Arabian Sea, Indian Ocean and Bay of Bengal.' },
-  { icon: <TreePine className="w-7 h-7" />, title: 'Wildlife', desc: 'Bengal tigers, Asiatic lions, Indian elephants and over 1,300 bird species in their natural habitat.' },
-  { icon: <Sun className="w-7 h-7" />, title: 'Festivals', desc: 'Diwali, Holi, Navratri, Pongal — India\'s festivals are a riot of colour, music and joy.' },
-  { icon: <Camera className="w-7 h-7" />, title: 'Photography', desc: 'Every street corner is a composition — from misty mountain villages to neon-lit city nights.' },
-];
-
-const FAQS = [
-  {
-    q: 'Do I need a visa to visit India?',
-    a: 'Most passport holders require a visa. Citizens of 193+ nationalities are eligible for India eVisa — a convenient online process. Clear eVisa Services helps you verify all required documents and prepares your documentation so your submission on the official portal is error-free.',
-  },
-  {
-    q: 'What is the best time to visit India?',
-    a: 'October to March is generally the best time for most of India — pleasant temperatures and low humidity. The Himalayas are best in summer (April–June). The Kerala backwaters are beautiful year-round. Monsoon season (July–September) transforms the landscape and is spectacular in the Western Ghats.',
-  },
-  {
-    q: 'What India eVisa types are available for tourists?',
-    a: 'Tourist eVisa comes in three durations: 30-day (single/double entry), 1-year (multiple entry), and 5-year (multiple entry). Each stay is limited to 90 or 180 days per visit depending on the visa type. Clear eVisa Services can help you choose the right type and prepare your documentation.',
-  },
-  {
-    q: 'Is India safe to travel?',
-    a: 'India is a safe and welcoming destination visited by millions of tourists every year. Standard travel precautions apply. The Government of India has significantly improved tourist infrastructure across all major destinations in recent years.',
-  },
-  {
-    q: 'What currency is used in India?',
-    a: 'The Indian Rupee (INR). ATMs are widely available in cities and tourist areas. Major credit cards are accepted at hotels, restaurants and larger shops. Carry some cash for local markets and rural areas.',
-  },
-];
-
-const EVISA_STEPS = [
-  { num: '01', title: 'Submit your details', desc: 'Fill in your personal information and travel dates on our platform.' },
-  { num: '02', title: 'Upload documents', desc: 'We tell you exactly which documents are needed and verify every one of them for accuracy.' },
-  { num: '03', title: 'Review your package', desc: 'Our team checks everything against India\'s eVisa requirements and prepares your documentation.' },
-  { num: '04', title: 'Submit on official portal', desc: 'You submit your verified application directly on India\'s official portal (indianvisaonline.gov.in) with confidence.' },
-];
 
 export default function IndiaTourism() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [openFaq, setOpenFaq] = useState(null);
+
+  const DESTINATIONS = [
+    { name: t('pages.indiaTourism.destinations.tajMahal'),  tag: t('pages.indiaTourism.destinations.tajMahalTag'),  tagColor: 'bg-yellow-500', img: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80',  desc: t('pages.indiaTourism.destinations.tajMahalDesc') },
+    { name: t('pages.indiaTourism.destinations.kerala'),    tag: t('pages.indiaTourism.destinations.keralaTag'),    tagColor: 'bg-green-500',  img: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800&q=80',  desc: t('pages.indiaTourism.destinations.keralaDesc') },
+    { name: t('pages.indiaTourism.destinations.rajasthan'), tag: t('pages.indiaTourism.destinations.rajasthanTag'), tagColor: 'bg-orange-500', img: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?w=800&q=80',  desc: t('pages.indiaTourism.destinations.rajasthanDesc') },
+    { name: t('pages.indiaTourism.destinations.goa'),       tag: t('pages.indiaTourism.destinations.goaTag'),       tagColor: 'bg-blue-500',   img: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&q=80',  desc: t('pages.indiaTourism.destinations.goaDesc') },
+    { name: t('pages.indiaTourism.destinations.varanasi'),  tag: t('pages.indiaTourism.destinations.varanasiTag'),  tagColor: 'bg-purple-500', img: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=800&q=80',  desc: t('pages.indiaTourism.destinations.varanasiDesc') },
+    { name: t('pages.indiaTourism.destinations.himachal'),  tag: t('pages.indiaTourism.destinations.himachalTag'),  tagColor: 'bg-cyan-600',   img: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80',  desc: t('pages.indiaTourism.destinations.himachalDesc') },
+  ];
+
+  const EXPERIENCES = [
+    { icon: <Utensils className="w-7 h-7" />, title: t('pages.indiaTourism.whyIndia.cuisine'),     desc: t('pages.indiaTourism.whyIndia.cuisineDesc') },
+    { icon: <Landmark className="w-7 h-7" />, title: t('pages.indiaTourism.whyIndia.heritage'),    desc: t('pages.indiaTourism.whyIndia.heritageDesc') },
+    { icon: <Waves    className="w-7 h-7" />, title: t('pages.indiaTourism.whyIndia.coastline'),   desc: t('pages.indiaTourism.whyIndia.coastlineDesc') },
+    { icon: <TreePine className="w-7 h-7" />, title: t('pages.indiaTourism.whyIndia.wildlife'),    desc: t('pages.indiaTourism.whyIndia.wildlifeDesc') },
+    { icon: <Sun      className="w-7 h-7" />, title: t('pages.indiaTourism.whyIndia.festivals'),   desc: t('pages.indiaTourism.whyIndia.festivalsDesc') },
+    { icon: <Camera   className="w-7 h-7" />, title: t('pages.indiaTourism.whyIndia.photography'), desc: t('pages.indiaTourism.whyIndia.photographyDesc') },
+  ];
+
+  const FAQS = [
+    { q: t('pages.indiaTourism.faq.q1'), a: t('pages.indiaTourism.faq.a1') },
+    { q: t('pages.indiaTourism.faq.q2'), a: t('pages.indiaTourism.faq.a2') },
+    { q: t('pages.indiaTourism.faq.q3'), a: t('pages.indiaTourism.faq.a3') },
+    { q: t('pages.indiaTourism.faq.q4'), a: t('pages.indiaTourism.faq.a4') },
+    { q: t('pages.indiaTourism.faq.q5'), a: t('pages.indiaTourism.faq.a5') },
+  ];
+
+  const EVISA_STEPS = [
+    { num: '01', title: t('pages.indiaTourism.evisaProcess.step1'), desc: t('pages.indiaTourism.evisaProcess.step1Desc') },
+    { num: '02', title: t('pages.indiaTourism.evisaProcess.step2'), desc: t('pages.indiaTourism.evisaProcess.step2Desc') },
+    { num: '03', title: t('pages.indiaTourism.evisaProcess.step3'), desc: t('pages.indiaTourism.evisaProcess.step3Desc') },
+    { num: '04', title: t('pages.indiaTourism.evisaProcess.step4'), desc: t('pages.indiaTourism.evisaProcess.step4Desc') },
+  ];
+
+  const SEASONS = [
+    { season: t('pages.indiaTourism.bestTime.peakRange'),   label: t('pages.indiaTourism.bestTime.peakSeason'), color: 'border-green-500',  badge: 'bg-green-100 text-green-700',   desc: t('pages.indiaTourism.bestTime.peakDesc') },
+    { season: t('pages.indiaTourism.bestTime.summerRange'), label: t('pages.indiaTourism.bestTime.summer'),     color: 'border-orange-400', badge: 'bg-orange-100 text-orange-700', desc: t('pages.indiaTourism.bestTime.summerDesc') },
+    { season: t('pages.indiaTourism.bestTime.monsoonRange'),label: t('pages.indiaTourism.bestTime.monsoon'),    color: 'border-blue-500',   badge: 'bg-blue-100 text-blue-700',     desc: t('pages.indiaTourism.bestTime.monsoonDesc') },
+  ];
+
+  const STATS = [
+    { value: '28+',   label: t('pages.indiaTourism.stats.states') },
+    { value: '40',    label: t('pages.indiaTourism.stats.heritage') },
+    { value: '193+',  label: t('pages.indiaTourism.stats.nationalities') },
+    { value: '0.5B+', label: t('pages.indiaTourism.stats.visitors') },
+  ];
 
   return (
     <div className="min-h-screen bg-white font-sans">
@@ -106,28 +70,27 @@ export default function IndiaTourism() {
         <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/25 rounded-full px-4 py-1.5 mb-6 text-sm font-medium">
             <MapPin className="w-4 h-4 text-orange-300" />
-            Incredible India
+            {t('pages.indiaTourism.hero.badge')}
           </div>
           <h1 className="text-5xl md:text-7xl font-extrabold leading-tight mb-4 drop-shadow-lg">
-            Discover the Soul<br />
-            <span className="text-orange-400">of India</span>
+            {t('pages.indiaTourism.hero.heading1')}<br />
+            <span className="text-orange-400">{t('pages.indiaTourism.hero.heading2')}</span>
           </h1>
           <p className="text-lg md:text-2xl text-white/85 mb-10 max-w-2xl mx-auto leading-relaxed">
-            Ancient temples, royal palaces, golden beaches, and the world's most vibrant street life —
-            all in one extraordinary country.
+            {t('pages.indiaTourism.hero.subheading')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={() => navigate('/home')}
               className="inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-4 rounded-full text-lg transition-all shadow-xl hover:shadow-orange-500/40 hover:scale-105"
             >
-              Get Your India eVisa <ArrowRight className="w-5 h-5" />
+              {t('pages.indiaTourism.hero.cta')} <ArrowRight className="w-5 h-5" />
             </button>
             <a
               href="#destinations"
               className="inline-flex items-center justify-center gap-2 bg-white/15 backdrop-blur-sm border border-white/30 hover:bg-white/25 text-white font-semibold px-8 py-4 rounded-full text-lg transition-all"
             >
-              Explore Destinations
+              {t('pages.indiaTourism.hero.explore')}
             </a>
           </div>
         </div>
@@ -141,12 +104,7 @@ export default function IndiaTourism() {
       {/* ── Stats bar ── */}
       <section className="bg-gradient-to-r from-orange-500 to-amber-500 text-white py-6">
         <div className="max-w-5xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {[
-            { value: '28+', label: 'States & UTs' },
-            { value: '40', label: 'UNESCO Heritage Sites' },
-            { value: '193+', label: 'Nationalities Welcome' },
-            { value: '0.5B+', label: 'Annual Visitor Moments' },
-          ].map(s => (
+          {STATS.map(s => (
             <div key={s.label}>
               <div className="text-3xl font-extrabold">{s.value}</div>
               <div className="text-sm text-orange-100 mt-0.5">{s.label}</div>
@@ -159,9 +117,9 @@ export default function IndiaTourism() {
       <section id="destinations" className="py-20 bg-gray-50 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
-            <p className="text-orange-500 font-semibold uppercase tracking-widest text-sm mb-2">Where to go</p>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900">Iconic Destinations</h2>
-            <p className="mt-4 text-gray-500 text-lg max-w-xl mx-auto">Six unmissable corners of a country that contains multitudes.</p>
+            <p className="text-orange-500 font-semibold uppercase tracking-widest text-sm mb-2">{t('pages.indiaTourism.destinations.sectionLabel')}</p>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900">{t('pages.indiaTourism.destinations.title')}</h2>
+            <p className="mt-4 text-gray-500 text-lg max-w-xl mx-auto">{t('pages.indiaTourism.destinations.subtitle')}</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
             {DESTINATIONS.map(d => (
@@ -202,13 +160,13 @@ export default function IndiaTourism() {
               <div className="flex items-center gap-1 mb-1">
                 {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />)}
               </div>
-              <p className="font-semibold text-lg">"The journey of a thousand colours"</p>
+              <p className="font-semibold text-lg">{t('pages.indiaTourism.whyIndia.quote')}</p>
             </div>
           </div>
           <div>
-            <p className="text-orange-500 font-semibold uppercase tracking-widest text-sm mb-3">Why India</p>
+            <p className="text-orange-500 font-semibold uppercase tracking-widest text-sm mb-3">{t('pages.indiaTourism.whyIndia.sectionLabel')}</p>
             <h2 className="text-4xl font-extrabold text-gray-900 mb-6 leading-tight">
-              A universe of<br />experiences in<br />one country
+              {t('pages.indiaTourism.whyIndia.title')}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {EXPERIENCES.map(e => (
@@ -229,8 +187,8 @@ export default function IndiaTourism() {
       <section className="px-4 pb-20 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10">
-            <p className="text-orange-500 font-semibold uppercase tracking-widest text-sm mb-2">A visual journey</p>
-            <h2 className="text-4xl font-extrabold text-gray-900">India in frames</h2>
+            <p className="text-orange-500 font-semibold uppercase tracking-widest text-sm mb-2">{t('pages.indiaTourism.photoMosaic.sectionLabel')}</p>
+            <h2 className="text-4xl font-extrabold text-gray-900">{t('pages.indiaTourism.photoMosaic.title')}</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden h-72 md:h-auto">
@@ -256,11 +214,10 @@ export default function IndiaTourism() {
       <section className="py-20 bg-gradient-to-br from-blue-700 to-blue-900 text-white px-4">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <p className="text-blue-300 font-semibold uppercase tracking-widest text-sm mb-2">Clear eVisa Services</p>
-            <h2 className="text-4xl md:text-5xl font-extrabold">Your eVisa, done right</h2>
+            <p className="text-blue-300 font-semibold uppercase tracking-widest text-sm mb-2">{t('pages.indiaTourism.evisaProcess.sectionLabel')}</p>
+            <h2 className="text-4xl md:text-5xl font-extrabold">{t('pages.indiaTourism.evisaProcess.title')}</h2>
             <p className="mt-4 text-blue-200 text-lg max-w-2xl mx-auto">
-              We verify every document and prepare your complete documentation package so your official
-              portal submission is error-free — giving your application the best chance of approval.
+              {t('pages.indiaTourism.evisaProcess.subtitle')}
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -277,10 +234,10 @@ export default function IndiaTourism() {
               onClick={() => navigate('/home')}
               className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold px-10 py-4 rounded-full text-lg transition-all shadow-xl hover:shadow-orange-500/30 hover:scale-105"
             >
-              Start Your eVisa Now <ArrowRight className="w-5 h-5" />
+              {t('pages.indiaTourism.evisaProcess.cta')} <ArrowRight className="w-5 h-5" />
             </button>
             <p className="mt-4 text-blue-300 text-sm">
-              Not affiliated with the Government of India. You submit on the official portal yourself.
+              {t('pages.indiaTourism.evisaProcess.disclaimer')}
             </p>
           </div>
         </div>
@@ -290,18 +247,11 @@ export default function IndiaTourism() {
       <section className="py-20 bg-amber-50 px-4">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-orange-500 font-semibold uppercase tracking-widest text-sm mb-2">Plan your trip</p>
-            <h2 className="text-4xl font-extrabold text-gray-900">Best time to visit</h2>
+            <p className="text-orange-500 font-semibold uppercase tracking-widest text-sm mb-2">{t('pages.indiaTourism.bestTime.sectionLabel')}</p>
+            <h2 className="text-4xl font-extrabold text-gray-900">{t('pages.indiaTourism.bestTime.title')}</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { season: 'Oct – Mar', label: 'Peak Season', color: 'border-green-500', badge: 'bg-green-100 text-green-700',
-                desc: 'Cool and dry across most of the country. Best for the Golden Triangle, Rajasthan, Goa and South India. Festive season includes Diwali and Christmas.' },
-              { season: 'Apr – Jun', label: 'Summer', color: 'border-orange-400', badge: 'bg-orange-100 text-orange-700',
-                desc: 'Hot on the plains but perfect for the Himalayas and hill stations like Shimla, Manali and Ooty. Lighter crowds and lower prices in most areas.' },
-              { season: 'Jul – Sep', label: 'Monsoon', color: 'border-blue-500', badge: 'bg-blue-100 text-blue-700',
-                desc: 'Lush green landscapes and dramatic waterfalls. Kerala, Goa and the Western Ghats are spectacular. Hotels offer significant discounts.' },
-            ].map(s => (
+            {SEASONS.map(s => (
               <div key={s.season} className={`bg-white rounded-2xl shadow-md p-7 border-t-4 ${s.color}`}>
                 <span className={`text-xs font-bold px-3 py-1 rounded-full ${s.badge}`}>{s.label}</span>
                 <h3 className="text-2xl font-extrabold text-gray-900 mt-3 mb-1">{s.season}</h3>
@@ -316,8 +266,8 @@ export default function IndiaTourism() {
       <section className="py-20 bg-white px-4">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-orange-500 font-semibold uppercase tracking-widest text-sm mb-2">Common questions</p>
-            <h2 className="text-4xl font-extrabold text-gray-900">FAQs</h2>
+            <p className="text-orange-500 font-semibold uppercase tracking-widest text-sm mb-2">{t('pages.indiaTourism.faq.sectionLabel')}</p>
+            <h2 className="text-4xl font-extrabold text-gray-900">{t('pages.indiaTourism.faq.title')}</h2>
           </div>
           <div className="space-y-3">
             {FAQS.map((f, i) => (
@@ -352,17 +302,17 @@ export default function IndiaTourism() {
         <div className="absolute inset-0 bg-black/65" />
         <div className="relative z-10 text-center text-white max-w-3xl mx-auto">
           <h2 className="text-4xl md:text-6xl font-extrabold mb-4 leading-tight">
-            Your India adventure<br />starts with the right visa.
+            {t('pages.indiaTourism.finalCta.heading1')}<br />
+            {t('pages.indiaTourism.finalCta.heading2')}
           </h2>
           <p className="text-white/80 text-lg mb-10 max-w-xl mx-auto">
-            Let Clear eVisa Services verify your documents and prepare your application package —
-            so you can submit with complete confidence.
+            {t('pages.indiaTourism.finalCta.subtitle')}
           </p>
           <button
             onClick={() => navigate('/home')}
             className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold px-10 py-4 rounded-full text-xl transition-all shadow-2xl hover:scale-105"
           >
-            Get Your India eVisa <ArrowRight className="w-6 h-6" />
+            {t('pages.indiaTourism.finalCta.cta')} <ArrowRight className="w-6 h-6" />
           </button>
         </div>
       </section>

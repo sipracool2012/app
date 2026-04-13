@@ -55,17 +55,17 @@ const Step3AddressDetails = ({ data, onNext, onBack, onDataChange }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const newErrors = {};
-    if (!formData.houseNoStreet.trim()) newErrors.houseNoStreet = 'This field is required.';
-    if (!formData.villageTownCity.trim()) newErrors.villageTownCity = 'This field is required.';
-    if (!formData.country) newErrors.country = 'Please select an option.';
-    if (!formData.stateProvince.trim()) newErrors.stateProvince = 'This field is required.';
-    if (!formData.postalCode.trim()) newErrors.postalCode = 'This field is required.';
-    if (!formData.phoneNumber.trim()) newErrors.phoneNumber = 'Phone number is required.';
+    if (!formData.houseNoStreet.trim()) newErrors.houseNoStreet = t('errors.fieldRequired');
+    if (!formData.villageTownCity.trim()) newErrors.villageTownCity = t('errors.fieldRequired');
+    if (!formData.country) newErrors.country = t('errors.selectOption');
+    if (!formData.stateProvince.trim()) newErrors.stateProvince = t('errors.fieldRequired');
+    if (!formData.postalCode.trim()) newErrors.postalCode = t('errors.fieldRequired');
+    if (!formData.phoneNumber.trim()) newErrors.phoneNumber = t('errors.phoneRequired');
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
       toast({
-        title: 'Please fix the errors below',
-        description: 'Some required fields are missing or contain invalid values.',
+        title: t('errors.fixErrors'),
+        description: t('errors.fixErrorsDesc'),
         variant: 'destructive'
       });
       setTimeout(() => {

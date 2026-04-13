@@ -5,6 +5,76 @@ All notable changes to the Clear eVisa project are documented in this file.
 Format: `## [Date] - Description`
 ---
 
+## [2026-04-13] - i18n: all 10 static pages fully translated (incl. Refund Policy); fr.json French content complete
+
+### Changed
+
+#### JSX components — hardcoded text replaced with `t()` calls
+
+- **`frontend/src/pages/AboutUs.jsx`**
+  - All body text now uses `t()`: `missionText1`, `missionText2`, `visionText`, 6 value descriptions (`transparencyDesc` → `customerFocusDesc`), stats section (`stat1–4 Value/Label`), `byTheNumbers`, `teamMemberRole`, legal section (`legalTitle`, `legalEntityLabel/Value`, `legalAddressLabel/Value`, `legalContactLabel`, `legalEmailLabel`)
+
+- **`frontend/src/pages/Careers.jsx`**
+  - `jobs` array converted from hardcoded objects to `{ id, titleKey, deptKey, descKey }` — rendered with `t(\`pages.careers.${job.titleKey}\`)`
+  - Added `perks` array (`{ titleKey, descKey }`) and `cultureItems` array (`{ labelKey, descKey }`) — both rendered via `.map()` using `t()`
+  - Culture intro uses `t('pages.careers.cultureIntro')`
+
+- **`frontend/src/pages/Press.jsx`**
+  - `pressReleases` array: `{ dateKey, titleKey, excerptKey, link }` — rendered using `t()`
+  - `inTheNews` array: `{ sourceKey, titleKey, dateKey }` — rendered using `t()`
+  - `companyFacts` array: `{ labelKey, valueKey }` — rendered using `t()`
+  - Media contact text and `mediaKitDesc` use `t()`
+
+- **`frontend/src/pages/HelpCenter.jsx`**
+  - `categories` array: `{ id, nameKey }` — rendered using `t(\`pages.helpCenter.${cat.nameKey}\`)`
+  - `articles` object: each entry is `{ id, questionKey, answerKey }` — rendered using `t()`
+  - `contactSupportDesc` uses `t()`
+
+- **`frontend/src/pages/ContactUs.jsx`**
+  - Info section headings/labels: `emailSectionTitle`, `generalInquiries`, `customerSupport`, `phoneSectionTitle`, `phoneHours`, `addressSectionTitle`, `hoursSectionTitle`, `hoursCustomerLabel/Value`, `hoursSalesLabel/Value`
+  - Error/state text: `sendError2`, `sending`, `requiredFields`
+  - Category select options: `catSupport`, `catSales`, `catPartnership`, `catPress`, `catOther`
+  - Other ways section: `liveChatTitle/Desc`, `mobileAppTitle/Desc`, `socialTitle`, `socialFollow`
+
+- **`frontend/src/pages/FAQ.jsx`**
+  - `faqs` array: `{ id, catKey, qKey, aKey }` — rendered using `t(\`pages.faq.${faq.catKey}\`)` etc.
+  - `categoryKeys` array replaces derived `categories`: `['cat1', …, 'cat10']`
+  - `cantFind` paragraph uses `t()`
+
+- **`frontend/src/pages/PrivacyPolicy.jsx`** — complete rewrite
+  - All 13 sections use `t()` with array-mapped `<li>` items for bullet lists
+  - Pattern: `{['s2_1i1','s2_1i2',...].map(k => <li key={k}>{t(\`pages.privacy.${k}\`)}</li>)}`
+
+- **`frontend/src/pages/TermsOfService.jsx`** — complete rewrite
+  - All 16 sections use `t()` with array-mapped bullet lists
+  - Fixed duplicate `s7Outro` bug: removed erroneous `<a>` wrapper around the refund outro line
+
+- **`frontend/src/pages/CookiePolicy.jsx`** — complete rewrite
+  - All 14 sections use `t()` with array-mapped bullet lists
+  - Section 12 cookie table: column headers and all 4 rows rendered dynamically via `{[1,2,3,4].map(n => ...)}` using template literal keys (`s12R${n}Name/Type/Purpose/Duration`)
+
+- **`frontend/src/pages/RefundPolicy.jsx`** — rewritten with `t()` calls
+  - Added `useTranslation` import (was missing entirely)
+  - Overview, sections 1–6 all use `t()` including the subsection paragraphs and bullet lists
+  - Section 1 bullet items use array-map pattern; inline `<a>` links in section 6 use their own keys (`s6ContactLink`, `s6TermsLink`, `s6PrivacyLink`)
+
+#### `frontend/src/i18n/locales/en-US.json` — new `pages.refund` section added
+  - 50+ keys covering all 6 sections: overview, eligibility (full/partial/no refund), application fee, government levy, our services, how to request, contact
+
+#### `frontend/src/i18n/locales/fr.json` — French translations added for all 10 pages
+
+- **`pages.about`**: added `missionText1`, `missionText2`, `visionText`, 6 value descriptions, `stat1–4 Value/Label`, `teamMemberRole`, full legal section (7 keys)
+- **`pages.careers`**: added `remote`, `fullTime`, `perk1–6 Title/Desc`, `cultureIntro`, 6 culture items (`cultureTrust` → `cultureTransparency`), `job1–6 Title/Dept/Desc`
+- **`pages.contact`**: added `emailSectionTitle`, `generalInquiries`, `customerSupport`, `phoneSectionTitle`, `phoneHours`, `addressSectionTitle`, `hoursSectionTitle`, hours labels/values, `sendError2`, `requiredFields`, 5 category labels, `liveChatTitle/Desc`, `mobileAppTitle/Desc`, `socialTitle`, `socialFollow`
+- **`pages.faq`**: added `cantFind`, `cat1–10`, `q1–18`, `a1–18`
+- **`pages.helpCenter`**: added `contactSupportDesc`, `catGettingStarted` through `catTechnical`, `q1–18`, `a1–18`
+- **`pages.press`**: added `mediaRelations`, `pressAddress`, `pressInquiries`, `mediaKitDesc`, all 8 `fact*` label/value pairs, `r1–6 Date/Title/Excerpt`, `n1–4 Source/Title/Date`
+- **`pages.privacy`**: added all 40+ keys for 13 sections (s1Title–s13P1) — intro/list/outro paragraphs and all bullet items
+- **`pages.terms`**: added all 50+ keys for 16 sections (s1Title–s16P1) — paragraphs, bullet lists, disclaimers
+- **`pages.cookies`**: added all 80+ keys for 14 sections (s1Title–s14P1) — paragraphs, bullet lists, browser instructions, table column headers, and all 4 cookie table row cells
+
+---
+
 ## [2026-04-13] - Mobile-friendly header, admin tab icons-only on mobile, Step 8 blank page fix
 
 ### Added

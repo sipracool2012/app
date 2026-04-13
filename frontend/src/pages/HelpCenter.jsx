@@ -7,116 +7,44 @@ export default function HelpCenter() {
   const [selectedCategory, setSelectedCategory] = useState('getting-started');
 
   const categories = [
-    { id: 'getting-started', name: 'Getting Started' },
-    { id: 'application', name: 'Application Process' },
-    { id: 'documents', name: 'Documents & Files' },
-    { id: 'payment', name: 'Payment & Fees' },
-    { id: 'tracking', name: 'Tracking Status' },
-    { id: 'technical', name: 'Technical Issues' }
+    { id: 'getting-started', nameKey: 'catGettingStarted' },
+    { id: 'application', nameKey: 'catApplication' },
+    { id: 'documents', nameKey: 'catDocuments' },
+    { id: 'payment', nameKey: 'catPayment' },
+    { id: 'tracking', nameKey: 'catTracking' },
+    { id: 'technical', nameKey: 'catTechnical' }
   ];
 
   const articles = {
     'getting-started': [
-      {
-        id: 1,
-        question: "How do I create an account?",
-        answer: "To create an account, click the 'Sign Up' button on our homepage. Enter your email address, create a strong password, and agree to our terms. You'll receive a verification email to confirm your account."
-      },
-      {
-        id: 2,
-        question: "What information do I need to get started?",
-        answer: "You'll need basic personal information including your full name, date of birth, passport number, and email address. We'll guide you through collecting additional information as needed for your specific visa type."
-      },
-      {
-        id: 3,
-        question: "Can I save my progress and continue later?",
-        answer: "Yes! Your application is automatically saved as you complete each section. You can log back in anytime to continue where you left off."
-      }
+      { id: 1, questionKey: 'q1', answerKey: 'a1' },
+      { id: 2, questionKey: 'q2', answerKey: 'a2' },
+      { id: 3, questionKey: 'q3', answerKey: 'a3' },
     ],
     'application': [
-      {
-        id: 4,
-        question: "How long does the consultancy process take?",
-        answer: "The document verification and preparation process typically takes 1–2 business days after you submit all required information and documents to us. Once your documentation package is ready, you can submit on India's official eVisa portal yourself. The Indian Government's eVisa processing then typically takes a further 3–5 business days."
-      },
-      {
-        id: 5,
-        question: "Which India eVisa types do you support?",
-        answer: "We specialise exclusively in India eVisa. We support all five types: Tourist (30-day, 1-year, and 5-year), Business, Medical, Medical Attendant, and Conference eVisas — for passport holders from 193+ eligible nationalities."
-      },
-      {
-        id: 6,
-        question: "Can you assist multiple family members travelling together?",
-        answer: "Yes. We can verify and prepare documentation for multiple travellers in the same family group. Each person's documents are reviewed independently. Each traveller must submit their own application on the official portal."
-      }
+      { id: 4, questionKey: 'q4', answerKey: 'a4' },
+      { id: 5, questionKey: 'q5', answerKey: 'a5' },
+      { id: 6, questionKey: 'q6', answerKey: 'a6' },
     ],
     'documents': [
-      {
-        id: 7,
-        question: "What file formats are accepted for document uploads?",
-        answer: "We accept PDF, JPG, PNG, and DOC/DOCX files. Files should be clear and legible, with a maximum size of 10MB per file."
-      },
-      {
-        id: 8,
-        question: "How do I know which documents I need?",
-        answer: "We provide a personalized document checklist based on your visa type and destination country. The checklist will be shown during the application process, and you can download it for reference."
-      },
-      {
-        id: 9,
-        question: "Can I edit or replace uploaded documents?",
-        answer: "Yes, you can replace any uploaded document before submitting your final application. After submission, contact our support team if you need to make changes."
-      }
+      { id: 7, questionKey: 'q7', answerKey: 'a7' },
+      { id: 8, questionKey: 'q8', answerKey: 'a8' },
+      { id: 9, questionKey: 'q9', answerKey: 'a9' },
     ],
     'payment': [
-      {
-        id: 10,
-        question: "What payment methods do you accept?",
-        answer: "We accept credit cards (Visa, Mastercard, American Express), debit cards, and digital wallets (PayPal, Apple Pay, Google Pay)."
-      },
-      {
-        id: 11,
-        question: "Is my payment information secure?",
-        answer: "Yes, all payments are processed through encrypted connections using industry-standard security protocols. We never store your complete credit card information on our servers."
-      },
-      {
-        id: 12,
-        question: "What's included in the consultancy fee?",
-        answer: "Our consultancy fee covers: thorough verification of all your documents against India's eVisa requirements, expert review of your information to catch errors before submission, preparation of a complete documentation package, and customer support throughout the process. Government eVisa fees are paid separately by you on the official portal."
-      }
+      { id: 10, questionKey: 'q10', answerKey: 'a10' },
+      { id: 11, questionKey: 'q11', answerKey: 'a11' },
+      { id: 12, questionKey: 'q12', answerKey: 'a12' },
     ],
     'tracking': [
-      {
-        id: 13,
-        question: "How do I check my application status?",
-        answer: "You can check your application status anytime by logging into your account and visiting the 'My Applications' section. You'll see detailed status updates for each application."
-      },
-      {
-        id: 14,
-        question: "Will I receive notifications about my application?",
-        answer: "Yes, we send email notifications for important updates including submission confirmation, document verification status, and final decisions."
-      },
-      {
-        id: 15,
-        question: "How long does India eVisa processing take?",
-        answer: "The Indian Government typically processes eVisa applications within 3–5 business days of submission. Our consultancy ensures your documents are verified and error-free before you submit, minimising the risk of processing delays or rejection."
-      }
+      { id: 13, questionKey: 'q13', answerKey: 'a13' },
+      { id: 14, questionKey: 'q14', answerKey: 'a14' },
+      { id: 15, questionKey: 'q15', answerKey: 'a15' },
     ],
     'technical': [
-      {
-        id: 16,
-        question: "What browsers do you support?",
-        answer: "We support Chrome, Firefox, Safari, and Edge browsers on both desktop and mobile devices. For the best experience, please keep your browser updated to the latest version."
-      },
-      {
-        id: 17,
-        question: "I'm having trouble uploading documents. What should I do?",
-        answer: "Ensure your file size is under 10MB and in a supported format (PDF, JPG, PNG, DOC/DOCX). Clear your browser cache and try again. If problems persist, contact our support team."
-      },
-      {
-        id: 18,
-        question: "Is the platform mobile-friendly?",
-        answer: "Yes, our platform is fully responsive and works seamlessly on mobile devices, tablets, and desktops. You can start an application on your phone and continue on your computer."
-      }
+      { id: 16, questionKey: 'q16', answerKey: 'a16' },
+      { id: 17, questionKey: 'q17', answerKey: 'a17' },
+      { id: 18, questionKey: 'q18', answerKey: 'a18' },
     ]
   };
 
@@ -156,7 +84,7 @@ export default function HelpCenter() {
                     : 'bg-white text-gray-900 hover:bg-gray-100'
                 }`}
               >
-                {cat.name}
+                {t(`pages.helpCenter.${cat.nameKey}`)}
               </button>
             ))}
           </div>
@@ -170,14 +98,14 @@ export default function HelpCenter() {
                 onClick={() => setExpandedId(expandedId === article.id ? null : article.id)}
                 className="w-full px-6 py-4 text-left hover:bg-gray-50 transition-colors flex justify-between items-center"
               >
-                <h3 className="text-lg font-semibold text-gray-900">{article.question}</h3>
+                <h3 className="text-lg font-semibold text-gray-900">{t(`pages.helpCenter.${article.questionKey}`)}</h3>
                 <span className="text-2xl text-gray-400">
                   {expandedId === article.id ? '−' : '+'}
                 </span>
               </button>
               {expandedId === article.id && (
                 <div className="px-6 pb-4 border-t border-gray-200">
-                  <p className="text-gray-700">{article.answer}</p>
+                  <p className="text-gray-700">{t(`pages.helpCenter.${article.answerKey}`)}</p>
                 </div>
               )}
             </div>
@@ -187,9 +115,7 @@ export default function HelpCenter() {
         {/* Contact Support */}
         <section className="bg-blue-50 rounded-lg p-8 text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('pages.helpCenter.didntFind')}</h2>
-          <p className="text-gray-700 mb-6">
-            Our support team is here to help. Contact us through email.
-          </p>
+          <p className="text-gray-700 mb-6">{t('pages.helpCenter.contactSupportDesc')}</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
            {/*} <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
               Start Live Chat

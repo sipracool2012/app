@@ -6,54 +6,30 @@ export default function Careers() {
   const [expandedId, setExpandedId] = React.useState(null);
 
   const jobs = [
-    {
-      id: 1,
-      title: "Senior Full Stack Engineer",
-      department: "Engineering",
-      location: "Remote",
-      type: "Full-time",
-      description: "We're looking for an experienced full stack engineer to join our growing team. You'll work with React, Node.js, and cloud technologies."
-    },
-    {
-      id: 2,
-      title: "Customer Success Manager",
-      department: "Operations",
-      location: "Remote",
-      type: "Full-time",
-      description: "Help our customers succeed by providing exceptional support and guidance throughout their visa application journey."
-    },
-    {
-      id: 3,
-      title: "Immigration Consultant",
-      department: "Compliance",
-      location: "Remote",
-      type: "Full-time",
-      description: "Join our team of immigration experts to help users navigate complex visa requirements across different countries."
-    },
-    {
-      id: 4,
-      title: "Product Manager",
-      department: "Product",
-      location: "Remote",
-      type: "Full-time",
-      description: "Lead the product strategy for our visa application platform and help shape the future of international mobility."
-    },
-    {
-      id: 5,
-      title: "UI/UX Designer",
-      department: "Design",
-      location: "Remote",
-      type: "Full-time",
-      description: "Create beautiful and intuitive user experiences for millions of visa applicants worldwide."
-    },
-    {
-      id: 6,
-      title: "Data Analyst",
-      department: "Analytics",
-      location: "Remote",
-      type: "Full-time",
-      description: "Turn data into insights that help us improve our platform and better serve our users."
-    }
+    { id: 1, titleKey: 'job1Title', deptKey: 'job1Dept', descKey: 'job1Desc' },
+    { id: 2, titleKey: 'job2Title', deptKey: 'job2Dept', descKey: 'job2Desc' },
+    { id: 3, titleKey: 'job3Title', deptKey: 'job3Dept', descKey: 'job3Desc' },
+    { id: 4, titleKey: 'job4Title', deptKey: 'job4Dept', descKey: 'job4Desc' },
+    { id: 5, titleKey: 'job5Title', deptKey: 'job5Dept', descKey: 'job5Desc' },
+    { id: 6, titleKey: 'job6Title', deptKey: 'job6Dept', descKey: 'job6Desc' },
+  ];
+
+  const perks = [
+    { titleKey: 'perk1Title', descKey: 'perk1Desc' },
+    { titleKey: 'perk2Title', descKey: 'perk2Desc' },
+    { titleKey: 'perk3Title', descKey: 'perk3Desc' },
+    { titleKey: 'perk4Title', descKey: 'perk4Desc' },
+    { titleKey: 'perk5Title', descKey: 'perk5Desc' },
+    { titleKey: 'perk6Title', descKey: 'perk6Desc' },
+  ];
+
+  const cultureItems = [
+    { labelKey: 'cultureTrust', descKey: 'cultureTrustDesc' },
+    { labelKey: 'cultureCollab', descKey: 'cultureCollabDesc' },
+    { labelKey: 'cultureLearning', descKey: 'cultureLearningDesc' },
+    { labelKey: 'cultureDiversity', descKey: 'cultureDiversityDesc' },
+    { labelKey: 'cultureBalance', descKey: 'cultureBalanceDesc' },
+    { labelKey: 'cultureTransparency', descKey: 'cultureTransparencyDesc' },
   ];
 
   return (
@@ -72,42 +48,12 @@ export default function Careers() {
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 mb-8">{t('pages.careers.whyJoin')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-bold text-blue-600 mb-3">🚀 Make an Impact</h3>
-              <p className="text-gray-700">
-                Help millions of people achieve their dreams by simplifying the visa application process.
-              </p>
-            </div>
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-bold text-blue-600 mb-3">💼 Professional Growth</h3>
-              <p className="text-gray-700">
-                Work with talented professionals and continuous learning opportunities in a fast-growing startup.
-              </p>
-            </div>
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-bold text-blue-600 mb-3">🌍 Global Team</h3>
-              <p className="text-gray-700">
-                Collaborate with diverse, talented people from around the world in a truly remote-first culture.
-              </p>
-            </div>
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-bold text-blue-600 mb-3">💰 Competitive Benefits</h3>
-              <p className="text-gray-700">
-                Competitive salaries, equity options, health insurance, and generous time off.
-              </p>
-            </div>
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-bold text-blue-600 mb-3">🎯 Clear Path Forward</h3>
-              <p className="text-gray-700">
-                Work in a structured environment with clear goals, mentorship, and career advancement opportunities.
-              </p>
-            </div>
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-bold text-blue-600 mb-3">🎨 Flexible Work</h3>
-              <p className="text-gray-700">
-                Flexible working hours, remote options, and a focus on work-life balance.
-              </p>
-            </div>
+            {perks.map((perk) => (
+              <div key={perk.titleKey} className="bg-white rounded-lg shadow-md p-6">
+                <h3 className="text-xl font-bold text-blue-600 mb-3">{t(`pages.careers.${perk.titleKey}`)}</h3>
+                <p className="text-gray-700">{t(`pages.careers.${perk.descKey}`)}</p>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -123,14 +69,14 @@ export default function Careers() {
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <h3 className="text-xl font-bold text-gray-900">{job.title}</h3>
+                      <h3 className="text-xl font-bold text-gray-900">{t(`pages.careers.${job.titleKey}`)}</h3>
                       <div className="flex flex-wrap gap-3 mt-2">
-                        <span className="text-sm text-gray-600">{job.department}</span>
+                        <span className="text-sm text-gray-600">{t(`pages.careers.${job.deptKey}`)}</span>
                         <span className="text-sm text-gray-600">•</span>
-                        <span className="text-sm text-gray-600">{job.location}</span>
+                        <span className="text-sm text-gray-600">{t('pages.careers.remote')}</span>
                         <span className="text-sm text-gray-600">•</span>
                         <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">
-                          {job.type}
+                          {t('pages.careers.fullTime')}
                         </span>
                       </div>
                     </div>
@@ -141,7 +87,7 @@ export default function Careers() {
                 </button>
                 {expandedId === job.id && (
                   <div className="px-6 pb-4 border-t border-gray-200">
-                    <p className="text-gray-700 mb-4">{job.description}</p>
+                    <p className="text-gray-700 mb-4">{t(`pages.careers.${job.descKey}`)}</p>
                       <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                       {t('pages.careers.applyNow')}
                     </button>
@@ -156,16 +102,11 @@ export default function Careers() {
         <section>
           <h2 className="text-3xl font-bold text-gray-900 mb-8">{t('pages.careers.ourCulture')}</h2>
           <div className="bg-white rounded-lg shadow-md p-8">
-            <p className="text-lg text-gray-700 mb-4">
-              We believe in creating a workplace where great people can do their best work. Our culture is built on:
-            </p>
+            <p className="text-lg text-gray-700 mb-4">{t('pages.careers.cultureIntro')}</p>
             <ul className="space-y-3 text-gray-700">
-              <li>• <strong>Trust & Autonomy:</strong> We trust our team members to make decisions and own their work</li>
-              <li>• <strong>Collaboration:</strong> We work together across teams and time zones to achieve common goals</li>
-              <li>• <strong>Continuous Learning:</strong> We invest in your development with training, conferences, and mentorship</li>
-              <li>• <strong>Diversity & Inclusion:</strong> We celebrate different perspectives and backgrounds</li>
-              <li>• <strong>Work-Life Balance:</strong> We believe in sustainable pace and time for personal wellbeing</li>
-              <li>• <strong>Transparency:</strong> We communicate openly about company performance, challenges, and opportunities</li>
+              {cultureItems.map((item) => (
+                <li key={item.labelKey}>• <strong>{t(`pages.careers.${item.labelKey}`)}:</strong> {t(`pages.careers.${item.descKey}`)}</li>
+              ))}
             </ul>
           </div>
         </section>

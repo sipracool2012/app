@@ -63,25 +63,25 @@ const Step4FamilyDetails = ({ data, onNext, onBack, onDataChange }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const newErrors = {};
-    if (!formData.fatherName.trim()) newErrors.fatherName = 'This field is required.';
-    if (!formData.fatherNationality) newErrors.fatherNationality = 'Please select an option.';
-    if (!formData.fatherPlaceOfBirth.trim()) newErrors.fatherPlaceOfBirth = 'This field is required.';
-    if (!formData.fatherCountryOfBirth) newErrors.fatherCountryOfBirth = 'Please select an option.';
-    if (!formData.motherName.trim()) newErrors.motherName = 'This field is required.';
-    if (!formData.motherNationality) newErrors.motherNationality = 'Please select an option.';
-    if (!formData.motherPlaceOfBirth.trim()) newErrors.motherPlaceOfBirth = 'This field is required.';
-    if (!formData.motherCountryOfBirth) newErrors.motherCountryOfBirth = 'Please select an option.';
+    if (!formData.fatherName.trim()) newErrors.fatherName = t('errors.fieldRequired');
+    if (!formData.fatherNationality) newErrors.fatherNationality = t('errors.selectOption');
+    if (!formData.fatherPlaceOfBirth.trim()) newErrors.fatherPlaceOfBirth = t('errors.fieldRequired');
+    if (!formData.fatherCountryOfBirth) newErrors.fatherCountryOfBirth = t('errors.selectOption');
+    if (!formData.motherName.trim()) newErrors.motherName = t('errors.fieldRequired');
+    if (!formData.motherNationality) newErrors.motherNationality = t('errors.selectOption');
+    if (!formData.motherPlaceOfBirth.trim()) newErrors.motherPlaceOfBirth = t('errors.fieldRequired');
+    if (!formData.motherCountryOfBirth) newErrors.motherCountryOfBirth = t('errors.selectOption');
     if (formData.maritalStatus === 'Married') {
-      if (!formData.spouseName.trim()) newErrors.spouseName = 'This field is required.';
-      if (!formData.spouseNationality) newErrors.spouseNationality = 'Please select an option.';
-      if (!formData.spousePlaceOfBirth.trim()) newErrors.spousePlaceOfBirth = 'This field is required.';
-      if (!formData.spouseCountryOfBirth) newErrors.spouseCountryOfBirth = 'Please select an option.';
+      if (!formData.spouseName.trim()) newErrors.spouseName = t('errors.fieldRequired');
+      if (!formData.spouseNationality) newErrors.spouseNationality = t('errors.selectOption');
+      if (!formData.spousePlaceOfBirth.trim()) newErrors.spousePlaceOfBirth = t('errors.fieldRequired');
+      if (!formData.spouseCountryOfBirth) newErrors.spouseCountryOfBirth = t('errors.selectOption');
     }
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
       toast({
-        title: 'Please fix the errors below',
-        description: 'Some required fields are missing or contain invalid values.',
+        title: t('errors.fixErrors'),
+        description: t('errors.fixErrorsDesc'),
         variant: 'destructive'
       });
       setTimeout(() => {

@@ -155,49 +155,49 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep, onDataChange }) => {
     }
 
     // Required field checks
-    if (!formData.portOfArrival) newErrors.portOfArrival = 'Port of arrival is required.';
-    if (!formData.visaServiceSubtype) newErrors.visaServiceSubtype = 'Visa subtype is required.';
-    if (!formData.passportNumber.trim()) newErrors.passportNumber = 'Passport number is required.';
-    if (!formData.dateOfIssue) newErrors.dateOfIssue = 'Date of issue is required.';
+    if (!formData.portOfArrival) newErrors.portOfArrival = t('errors.portRequired');
+    if (!formData.visaServiceSubtype) newErrors.visaServiceSubtype = t('errors.subtypeRequired');
+    if (!formData.passportNumber.trim()) newErrors.passportNumber = t('errors.passportRequired');
+    if (!formData.dateOfIssue) newErrors.dateOfIssue = t('errors.dateOfIssueRequired');
 
     // Arrival date: required + must be >= today+4 IST
     if (!formData.expectedArrivalDate) {
-      newErrors.expectedArrivalDate = 'Expected date of arrival is required.';
+      newErrors.expectedArrivalDate = t('errors.arrivalDateRequired');
     } else {
       const minArrival = new Date(getMinArrivalDateIST());
       const selectedArrival = new Date(formData.expectedArrivalDate);
       if (selectedArrival < minArrival) {
-        newErrors.expectedArrivalDate = 'Arrival date must be at least 4 days from today (IST).';
+        newErrors.expectedArrivalDate = t('errors.arrivalDateTooSoon');
       }
     }
 
     // Expiry date: required + must be >= arrival + 6 months
     if (!formData.dateOfExpiry) {
-      newErrors.dateOfExpiry = 'Date of expiry is required.';
+      newErrors.dateOfExpiry = t('errors.expiryDateRequired');
     } else if (formData.expectedArrivalDate) {
       const minExpiry = new Date(formData.expectedArrivalDate);
       minExpiry.setMonth(minExpiry.getMonth() + 6);
       if (new Date(formData.dateOfExpiry) < minExpiry) {
-        newErrors.dateOfExpiry = 'Passport must be valid for at least 6 months from the arrival date.';
+        newErrors.dateOfExpiry = t('errors.passportExpiry6Months');
       }
     }
 
     // Yoga / Additional Information fields
     if (showYogaFields()) {
-      if (!formData.yogaInstituteName.trim()) newErrors.yogaInstituteName = 'This field is required.';
-      if (!formData.yogaInstituteAddress.trim()) newErrors.yogaInstituteAddress = 'Address is required.';
+      if (!formData.yogaInstituteName.trim()) newErrors.yogaInstituteName = t('errors.fieldRequired');
+      if (!formData.yogaInstituteAddress.trim()) newErrors.yogaInstituteAddress = t('errors.fieldRequired');
       if (!formData.yogaInstitutePhone.trim()) {
-        newErrors.yogaInstitutePhone = 'Phone number is required.';
+        newErrors.yogaInstitutePhone = t('errors.phoneRequired');
       } else if (!/^\d{5,15}$/.test(formData.yogaInstitutePhone.replace(/[\s\-]/g, ''))) {
-        newErrors.yogaInstitutePhone = 'Enter a valid phone number (5–15 digits).';
+        newErrors.yogaInstitutePhone = t('errors.phoneInvalid');
       }
     }
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
       toast({
-        title: 'Please fix the errors below',
-        description: 'Some required fields are missing or contain invalid values.',
+        title: t('errors.fixErrors'),
+        description: t('errors.fixErrorsDesc'),
         variant: 'destructive'
       });
       setTimeout(() => {
@@ -393,7 +393,7 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep, onDataChange }) => {
                 const minExpiry = new Date(formData.expectedArrivalDate);
                 minExpiry.setMonth(minExpiry.getMonth() + 6);
                 if (new Date(newExpiry) < minExpiry) {
-                  setErrors(prev => ({ ...prev, dateOfExpiry: 'Passport must be valid for at least 6 months from the arrival date.' }));
+                  setErrors(prev => ({ ...prev, dateOfExpiry: t('errors.passportExpiry6Months') }));
                 } else {
                   setErrors(prev => ({ ...prev, dateOfExpiry: '' }));
                 }
@@ -438,21 +438,21 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep, onDataChange }) => {
           <>
             <div className="md:col-span-2 border-t pt-4 mt-4">
               <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                Additional Information
+                {t('forms.step1.additionalInfo')}
               </h4>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="yogaInstituteName">
                 {formData.visaServiceSubtype === 'Meeting Friends/Relatives'
-                  ? 'Name of Friend or Relative'
+                  ? t('forms.step1.yogaNameFriend')
                   : formData.visaServiceSubtype === 'Short Term Yoga Program'
-                  ? 'Name of the Yoga Institute'
+                  ? t('forms.step1.yogaNameInstitute')
                   : formData.visaServiceSubtype?.startsWith('SHORT TERM COURSES')
-                  ? 'Name of the Course Provider'
+                  ? t('forms.step1.yogaNameCourseProvider')
                   : formData.visaServiceSubtype === 'Voluntary Work of Short Duration'
-                  ? 'Name of the Company'
-                  : 'Name of Yoga Institute/Friend or Relative'}{' '}
+                  ? t('forms.step1.yogaNameCompany')
+                  : t('forms.step1.yogaNameDefault')}{' '}
                 <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -469,7 +469,7 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep, onDataChange }) => {
 
             <div className="space-y-2">
               <Label htmlFor="yogaInstituteAddress">
-                Address <span className="text-red-500">*</span>
+                {t('common.address')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="yogaInstituteAddress"
@@ -485,7 +485,7 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep, onDataChange }) => {
 
             <div className="space-y-2">
               <Label htmlFor="yogaInstitutePhone">
-                Phone Number <span className="text-red-500">*</span>
+                {t('common.phoneNumber')} <span className="text-red-500">*</span>
               </Label>
               <div className="flex gap-2">
                 <Input

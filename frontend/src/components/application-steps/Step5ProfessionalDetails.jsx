@@ -27,14 +27,14 @@ const Step5ProfessionalDetails = ({ data, onNext, onBack, onDataChange }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const newErrors = {};
-    if (!formData.presentOccupation) newErrors.presentOccupation = 'Please select an option.';
-    if (!formData.employerName.trim()) newErrors.employerName = 'This field is required.';
-    if (!formData.employerAddress.trim()) newErrors.employerAddress = 'This field is required.';
+    if (!formData.presentOccupation) newErrors.presentOccupation = t('errors.selectOption');
+    if (!formData.employerName.trim()) newErrors.employerName = t('errors.fieldRequired');
+    if (!formData.employerAddress.trim()) newErrors.employerAddress = t('errors.fieldRequired');
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
       toast({
-        title: 'Please fix the errors below',
-        description: 'Some required fields are missing or contain invalid values.',
+        title: t('errors.fixErrors'),
+        description: t('errors.fixErrorsDesc'),
         variant: 'destructive'
       });
       setTimeout(() => {

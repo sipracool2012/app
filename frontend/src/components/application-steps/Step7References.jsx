@@ -53,17 +53,17 @@ const Step7References = ({ data, onNext, onBack, onDataChange }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const newErrors = {};
-    if (!formData.indiaReferenceName.trim()) newErrors.indiaReferenceName = 'This field is required.';
-    if (!formData.indiaReferenceAddress.trim()) newErrors.indiaReferenceAddress = 'This field is required.';
-    if (!formData.indiaReferencePhoneNumber.trim()) newErrors.indiaReferencePhoneNumber = 'Phone number is required.';
-    if (!formData.homeReferenceName.trim()) newErrors.homeReferenceName = 'This field is required.';
-    if (!formData.homeReferenceAddress.trim()) newErrors.homeReferenceAddress = 'This field is required.';
-    if (!formData.homeReferencePhoneNumber.trim()) newErrors.homeReferencePhoneNumber = 'Phone number is required.';
+    if (!formData.indiaReferenceName.trim()) newErrors.indiaReferenceName = t('errors.fieldRequired');
+    if (!formData.indiaReferenceAddress.trim()) newErrors.indiaReferenceAddress = t('errors.fieldRequired');
+    if (!formData.indiaReferencePhoneNumber.trim()) newErrors.indiaReferencePhoneNumber = t('errors.phoneRequired');
+    if (!formData.homeReferenceName.trim()) newErrors.homeReferenceName = t('errors.fieldRequired');
+    if (!formData.homeReferenceAddress.trim()) newErrors.homeReferenceAddress = t('errors.fieldRequired');
+    if (!formData.homeReferencePhoneNumber.trim()) newErrors.homeReferencePhoneNumber = t('errors.phoneRequired');
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
       toast({
-        title: 'Please fix the errors below',
-        description: 'Some required fields are missing or contain invalid values.',
+        title: t('errors.fixErrors'),
+        description: t('errors.fixErrorsDesc'),
         variant: 'destructive'
       });
       setTimeout(() => {
@@ -91,7 +91,7 @@ const Step7References = ({ data, onNext, onBack, onDataChange }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="indiaReferenceName">
-                Name <span className="text-red-500">*</span>
+                {t('forms.step7.indiaReferenceName')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="indiaReferenceName"
@@ -107,7 +107,7 @@ const Step7References = ({ data, onNext, onBack, onDataChange }) => {
 
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="indiaReferenceAddress">
-                Address <span className="text-red-500">*</span>
+                {t('forms.step7.indiaReferenceAddress')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="indiaReferenceAddress"
@@ -147,7 +147,7 @@ const Step7References = ({ data, onNext, onBack, onDataChange }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="homeReferenceName">
-                Name <span className="text-red-500">*</span>
+                {t('forms.step7.homeReferenceName')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="homeReferenceName"
@@ -163,7 +163,7 @@ const Step7References = ({ data, onNext, onBack, onDataChange }) => {
 
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="homeReferenceAddress">
-                Address <span className="text-red-500">*</span>
+                {t('forms.step7.homeReferenceAddress')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="homeReferenceAddress"
