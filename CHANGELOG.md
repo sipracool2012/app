@@ -5,6 +5,25 @@ All notable changes to the Clear eVisa project are documented in this file.
 Format: `## [Date] - Description`
 ---
 
+## [2026-04-16] - i18n: Legal page fallback system & expanded locale translations
+
+### Changed
+- **i18n architecture refactored with legal page fallback mechanism** (`frontend/src/i18n/index.js`)
+  - Created `mergeLegalPages()` function that ensures all locales inherit missing legal page translations from `en-US`
+  - Applied to all 34 supported locales: `['privacy', 'terms', 'cookies', 'refund']` keys are guaranteed to exist across all languages, preventing missing translation errors
+  - Improved robustness for legal compliance pages without requiring every locale to be manually updated
+
+#### English locale expanded — new homepage, auth, and application flow keys (`frontend/src/i18n/locales/en.json`)
+  - **Homepage content**: `selectCountry`, `noOptions`, `selectPurpose`, `visaRequirements`, `visaOptionsCount`, `embassyVisa`, `embassyDesc`, `trustedBy`, `statistics`, `stat1–4 Value/Label`, `howItWorks`, `howItWorksDesc`, `step1–3 Title/Desc`, `testimonialsTitle`, `trustpilotRating`, `partnersTitle`, `trustedByBrands`, `loadingCountries`, `visitorVisa`, `embassyVisaDesc`, `embassyVisaNote`, `ctaTitle`, `ctaSubtitle`, `ctaButton`
+  - **Application flow**: `submitting`, `submitApplication`
+  - **Auth form**: `confirmPassword`, `signingIn`, `creatingAccount`, `loginSuccess`, `loginError`, `registerSuccess`, `registerError`, `passwordMismatch`, `yourName`
+
+#### All 34 locale files updated with fallback support
+  - `ar.json`, `da.json`, `de.json`, `en-CA.json`, `en-GB.json`, `en.json`, `es-ES.json`, `es-LA.json`, `es.json`, `fi.json`, `fr-CA.json`, `fr.json`, `hi.json`, `id.json`, `is.json`, `it.json`, `ja.json`, `ko.json`, `lv.json`, `ms.json`, `my.json`, `nl.json`, `no.json`, `pl.json`, `pt-BR.json`, `pt-PT.json`, `pt.json`, `ru.json`, `sv.json`, `th.json`, `tr.json`, `uk.json`, `vi.json`, `zh-CN.json`, `zh-TW.json`, `zh.json`
+  - All locales now benefit from automatic English fallback for legal pages
+
+---
+
 ## [2026-04-13] - i18n: all 10 static pages fully translated (incl. Refund Policy); fr.json French content complete
 
 ### Changed
