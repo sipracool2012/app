@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -9,7 +9,7 @@ import { getAuthHeaders } from '../../utils/auth';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-const Step9DocumentUpload = ({ data, onNext, onBack }) => {
+const Step9DocumentUpload = ({ data, onNext, onBack, onDataChange }) => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [uploading, setUploading] = useState(false);
@@ -31,6 +31,9 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
     confirmedTravelTicket: data?.confirmedTravelTicket || '',
     destinationVisaOrPassport: data?.destinationVisaOrPassport || ''
   });
+
+  // Report local changes to parent so jumping away via stepper saves latest data
+  useEffect(() => { onDataChange?.(formData); }, [formData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [fileNames, setFileNames] = useState({
     passportDocument: data?.passportDocument || '',
@@ -145,6 +148,54 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Check required documents
+    const missingDocs = [];
+    if (!formData.passportDocument) missingDocs.push('Passport copy');
+    if (!formData.photoDocument) missingDocs.push('Recent photograph');
+    if (isBusinessVisa) {
+      if (!formData.businessLetter) missingDocs.push('Indian firm invitation letter');
+      if (!formData.businessCard) missingDocs.push('Business card');
+    }
+    if (isConferenceVisa) {
+      if (!formData.organizerInvitation) missingDocs.push('Organizer invitation letter');
+      if (!formData.meaPoliticalClearance) missingDocs.push('MEA political clearance');
+      if (!formData.mhaEventClearance) missingDocs.push('MHA event clearance');
+    }
+    if (isMedicalVisa) {
+      if (!formData.medicalInvitationLetter) missingDocs.push('Medical invitation letter');
+    }
+    if (isTransitVisa) {
+      if (!formData.confirmedTravelTicket) missingDocs.push('Confirmed travel ticket');
+      if (!formData.destinationVisaOrPassport) missingDocs.push('Destination visa / passport');
+    }
+
+    if (missingDocs.length > 0) {
+      toast({
+        title: 'Required documents missing',
+        description: `Please upload: ${missingDocs.join(', ')}.`,
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    // Re-check that the arrival date is still at least 4 days from today (IST)
+    if (data?.expectedArrivalDate) {
+      const now = new Date();
+      const istMs = now.getTime() + (5.5 * 60 * 60 * 1000);
+      const istDate = new Date(istMs);
+      istDate.setUTCDate(istDate.getUTCDate() + 4);
+      const minArrival = istDate.toISOString().split('T')[0];
+      if (data.expectedArrivalDate < minArrival) {
+        toast({
+          title: 'Expected arrival date is no longer valid',
+          description: 'Your selected arrival date is too soon. Please go back to Step 1 and choose a new date at least 4 days from today (IST).',
+          variant: 'destructive'
+        });
+        return;
+      }
+    }
+
     onNext(formData);
   };
 
@@ -162,7 +213,7 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
             htmlFor={fieldName} 
             className="cursor-pointer text-blue-600 hover:text-blue-700"
           >
-            Click to upload
+            {t('forms.step9.clickToUpload')}
           </Label>
           <p className="text-xs text-gray-500 mt-1">JPG, PNG or PDF (max 5MB)</p>
           <Input
@@ -171,7 +222,6 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
             accept=".jpg,.jpeg,.png,.pdf"
             onChange={(e) => handleFileUpload(e, fieldName)}
             className="hidden"
-            required={required}
           />
         </div>
       ) : (
@@ -287,7 +337,6 @@ const Step9DocumentUpload = ({ data, onNext, onBack }) => {
               fieldName="medicalDocument4"
               label={t('forms.step9.additionalDocLabel')}
               description={t('forms.step9.additionalDocHint')}
-              required={false}
             />
           </>
         )}

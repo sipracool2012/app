@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-const Step3AddressDetails = ({ data, onNext, onBack }) => {
+const Step3AddressDetails = ({ data, onNext, onBack, onDataChange }) => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [countries, setCountries] = useState([]);
@@ -26,6 +26,9 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
     phoneCountryCode: data?.phoneCountryCode || '+1',
     phoneNumber: data?.phoneNumber || ''
   });
+  // Report local changes to parent so jumping away via stepper saves latest data
+  useEffect(() => { onDataChange?.(formData); }, [formData]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     fetchConstants();
@@ -51,6 +54,26 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const newErrors = {};
+    if (!formData.houseNoStreet.trim()) newErrors.houseNoStreet = t('errors.fieldRequired');
+    if (!formData.villageTownCity.trim()) newErrors.villageTownCity = t('errors.fieldRequired');
+    if (!formData.country) newErrors.country = t('errors.selectOption');
+    if (!formData.stateProvince.trim()) newErrors.stateProvince = t('errors.fieldRequired');
+    if (!formData.postalCode.trim()) newErrors.postalCode = t('errors.fieldRequired');
+    if (!formData.phoneNumber.trim()) newErrors.phoneNumber = t('errors.phoneRequired');
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      toast({
+        title: t('errors.fixErrors'),
+        description: t('errors.fixErrorsDesc'),
+        variant: 'destructive'
+      });
+      setTimeout(() => {
+        const firstError = document.querySelector('.border-red-500');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
+      return;
+    }
     onNext(formData);
   };
 
@@ -71,9 +94,13 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
           <Input
             id="houseNoStreet"
             value={formData.houseNoStreet}
-            onChange={(e) => setFormData({ ...formData, houseNoStreet: e.target.value })}
-            required
+            onChange={(e) => {
+              setFormData({ ...formData, houseNoStreet: e.target.value });
+              setErrors(prev => ({ ...prev, houseNoStreet: '' }));
+            }}
+            className={errors.houseNoStreet ? 'border-red-500' : ''}
           />
+          {errors.houseNoStreet && <p className="text-sm text-red-600">{errors.houseNoStreet}</p>}
         </div>
 
         {/* Village/Town/City */}
@@ -84,21 +111,32 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
           <Input
             id="villageTownCity"
             value={formData.villageTownCity}
-            onChange={(e) => setFormData({ ...formData, villageTownCity: e.target.value })}
-            required
+            onChange={(e) => {
+              setFormData({ ...formData, villageTownCity: e.target.value });
+              setErrors(prev => ({ ...prev, villageTownCity: '' }));
+            }}
+            className={errors.villageTownCity ? 'border-red-500' : ''}
           />
+          {errors.villageTownCity && <p className="text-sm text-red-600">{errors.villageTownCity}</p>}
         </div>
 
         {/* Country */}
-        <SearchableSelect
-          label={t('forms.step3.country')}
-          value={formData.country}
-          onValueChange={(value) => setFormData({ ...formData, country: value })}
-          options={countries}
-          placeholder={t('forms.step3.selectCountry')}
-          searchPlaceholder={t('forms.step3.searchCountries')}
-          required
-        />
+        <div>
+          <SearchableSelect
+            label={t('forms.step3.country')}
+            value={formData.country}
+            onValueChange={(value) => {
+              setFormData({ ...formData, country: value });
+              setErrors(prev => ({ ...prev, country: '' }));
+            }}
+            options={countries}
+            placeholder={t('forms.step3.selectCountry')}
+            searchPlaceholder={t('forms.step3.searchCountries')}
+            error={!!errors.country}
+            required
+          />
+          {errors.country && <p className="text-sm text-red-600 mt-1">{errors.country}</p>}
+        </div>
 
         {/* State/Province/District */}
         <div className="space-y-2">
@@ -108,9 +146,13 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
           <Input
             id="stateProvince"
             value={formData.stateProvince}
-            onChange={(e) => setFormData({ ...formData, stateProvince: e.target.value })}
-            required
+            onChange={(e) => {
+              setFormData({ ...formData, stateProvince: e.target.value });
+              setErrors(prev => ({ ...prev, stateProvince: '' }));
+            }}
+            className={errors.stateProvince ? 'border-red-500' : ''}
           />
+          {errors.stateProvince && <p className="text-sm text-red-600">{errors.stateProvince}</p>}
         </div>
 
         {/* Postal/Zip Code */}
@@ -121,9 +163,13 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
           <Input
             id="postalCode"
             value={formData.postalCode}
-            onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
-            required
+            onChange={(e) => {
+              setFormData({ ...formData, postalCode: e.target.value });
+              setErrors(prev => ({ ...prev, postalCode: '' }));
+            }}
+            className={errors.postalCode ? 'border-red-500' : ''}
           />
+          {errors.postalCode && <p className="text-sm text-red-600">{errors.postalCode}</p>}
         </div>
 
         {/* Phone Number with Country Code */}
@@ -133,10 +179,15 @@ const Step3AddressDetails = ({ data, onNext, onBack }) => {
             countryCode={formData.phoneCountryCode}
             phoneNumber={formData.phoneNumber}
             onCountryCodeChange={(value) => setFormData({ ...formData, phoneCountryCode: value })}
-            onPhoneNumberChange={(value) => setFormData({ ...formData, phoneNumber: value })}
+            onPhoneNumberChange={(value) => {
+              setFormData({ ...formData, phoneNumber: value });
+              setErrors(prev => ({ ...prev, phoneNumber: '' }));
+            }}
             phoneCodes={phoneCodes}
+            error={!!errors.phoneNumber}
             required
           />
+          {errors.phoneNumber && <p className="text-sm text-red-600 mt-1">{errors.phoneNumber}</p>}
         </div>
       </div>
 

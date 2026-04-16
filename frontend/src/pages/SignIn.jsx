@@ -161,6 +161,12 @@ const SignIn = () => {
                 </Button>
               </form>
 
+              <div className="mt-3 text-right text-sm">
+                <Link to="/forgot-password" className="text-blue-600 hover:text-blue-700 font-medium">
+                  Forgot password?
+                </Link>
+              </div>
+
               <div className="mt-4 text-center text-sm">
                 <span className="text-gray-600">{t('auth.noAccount')} </span>
                 <Link to="/signup" className="text-blue-600 hover:text-blue-700 font-medium">

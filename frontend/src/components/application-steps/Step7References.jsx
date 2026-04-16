@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-const Step7References = ({ data, onNext, onBack }) => {
+const Step7References = ({ data, onNext, onBack, onDataChange }) => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [phoneCodes, setPhoneCodes] = useState([]);
@@ -25,6 +25,9 @@ const Step7References = ({ data, onNext, onBack }) => {
     homeReferencePhoneCountryCode: data?.homeReferencePhoneCountryCode || '+1',
     homeReferencePhoneNumber: data?.homeReferencePhoneNumber || ''
   });
+  // Report local changes to parent so jumping away via stepper saves latest data
+  useEffect(() => { onDataChange?.(formData); }, [formData]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     fetchPhoneCodes();
@@ -49,6 +52,26 @@ const Step7References = ({ data, onNext, onBack }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const newErrors = {};
+    if (!formData.indiaReferenceName.trim()) newErrors.indiaReferenceName = t('errors.fieldRequired');
+    if (!formData.indiaReferenceAddress.trim()) newErrors.indiaReferenceAddress = t('errors.fieldRequired');
+    if (!formData.indiaReferencePhoneNumber.trim()) newErrors.indiaReferencePhoneNumber = t('errors.phoneRequired');
+    if (!formData.homeReferenceName.trim()) newErrors.homeReferenceName = t('errors.fieldRequired');
+    if (!formData.homeReferenceAddress.trim()) newErrors.homeReferenceAddress = t('errors.fieldRequired');
+    if (!formData.homeReferencePhoneNumber.trim()) newErrors.homeReferencePhoneNumber = t('errors.phoneRequired');
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      toast({
+        title: t('errors.fixErrors'),
+        description: t('errors.fixErrorsDesc'),
+        variant: 'destructive'
+      });
+      setTimeout(() => {
+        const firstError = document.querySelector('.border-red-500');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
+      return;
+    }
     onNext(formData);
   };
 
@@ -68,26 +91,34 @@ const Step7References = ({ data, onNext, onBack }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="indiaReferenceName">
-                Name <span className="text-red-500">*</span>
+                {t('forms.step7.indiaReferenceName')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="indiaReferenceName"
                 value={formData.indiaReferenceName}
-                onChange={(e) => setFormData({ ...formData, indiaReferenceName: e.target.value })}
-                required
+                onChange={(e) => {
+                  setFormData({ ...formData, indiaReferenceName: e.target.value });
+                  setErrors(prev => ({ ...prev, indiaReferenceName: '' }));
+                }}
+                className={errors.indiaReferenceName ? 'border-red-500' : ''}
               />
+              {errors.indiaReferenceName && <p className="text-sm text-red-600">{errors.indiaReferenceName}</p>}
             </div>
 
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="indiaReferenceAddress">
-                Address <span className="text-red-500">*</span>
+                {t('forms.step7.indiaReferenceAddress')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="indiaReferenceAddress"
                 value={formData.indiaReferenceAddress}
-                onChange={(e) => setFormData({ ...formData, indiaReferenceAddress: e.target.value })}
-                required
+                onChange={(e) => {
+                  setFormData({ ...formData, indiaReferenceAddress: e.target.value });
+                  setErrors(prev => ({ ...prev, indiaReferenceAddress: '' }));
+                }}
+                className={errors.indiaReferenceAddress ? 'border-red-500' : ''}
               />
+              {errors.indiaReferenceAddress && <p className="text-sm text-red-600">{errors.indiaReferenceAddress}</p>}
             </div>
 
             <div className="md:col-span-2">
@@ -96,10 +127,15 @@ const Step7References = ({ data, onNext, onBack }) => {
                 countryCode={formData.indiaReferencePhoneCountryCode}
                 phoneNumber={formData.indiaReferencePhoneNumber}
                 onCountryCodeChange={(value) => setFormData({ ...formData, indiaReferencePhoneCountryCode: value })}
-                onPhoneNumberChange={(value) => setFormData({ ...formData, indiaReferencePhoneNumber: value })}
+                onPhoneNumberChange={(value) => {
+                  setFormData({ ...formData, indiaReferencePhoneNumber: value });
+                  setErrors(prev => ({ ...prev, indiaReferencePhoneNumber: '' }));
+                }}
                 phoneCodes={phoneCodes}
+                error={!!errors.indiaReferencePhoneNumber}
                 required
               />
+              {errors.indiaReferencePhoneNumber && <p className="text-sm text-red-600 mt-1">{errors.indiaReferencePhoneNumber}</p>}
             </div>
           </div>
         </div>
@@ -111,26 +147,34 @@ const Step7References = ({ data, onNext, onBack }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="homeReferenceName">
-                Name <span className="text-red-500">*</span>
+                {t('forms.step7.homeReferenceName')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="homeReferenceName"
                 value={formData.homeReferenceName}
-                onChange={(e) => setFormData({ ...formData, homeReferenceName: e.target.value })}
-                required
+                onChange={(e) => {
+                  setFormData({ ...formData, homeReferenceName: e.target.value });
+                  setErrors(prev => ({ ...prev, homeReferenceName: '' }));
+                }}
+                className={errors.homeReferenceName ? 'border-red-500' : ''}
               />
+              {errors.homeReferenceName && <p className="text-sm text-red-600">{errors.homeReferenceName}</p>}
             </div>
 
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="homeReferenceAddress">
-                Address <span className="text-red-500">*</span>
+                {t('forms.step7.homeReferenceAddress')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="homeReferenceAddress"
                 value={formData.homeReferenceAddress}
-                onChange={(e) => setFormData({ ...formData, homeReferenceAddress: e.target.value })}
-                required
+                onChange={(e) => {
+                  setFormData({ ...formData, homeReferenceAddress: e.target.value });
+                  setErrors(prev => ({ ...prev, homeReferenceAddress: '' }));
+                }}
+                className={errors.homeReferenceAddress ? 'border-red-500' : ''}
               />
+              {errors.homeReferenceAddress && <p className="text-sm text-red-600">{errors.homeReferenceAddress}</p>}
             </div>
 
             <div className="md:col-span-2">
@@ -139,10 +183,15 @@ const Step7References = ({ data, onNext, onBack }) => {
                 countryCode={formData.homeReferencePhoneCountryCode}
                 phoneNumber={formData.homeReferencePhoneNumber}
                 onCountryCodeChange={(value) => setFormData({ ...formData, homeReferencePhoneCountryCode: value })}
-                onPhoneNumberChange={(value) => setFormData({ ...formData, homeReferencePhoneNumber: value })}
+                onPhoneNumberChange={(value) => {
+                  setFormData({ ...formData, homeReferencePhoneNumber: value });
+                  setErrors(prev => ({ ...prev, homeReferencePhoneNumber: '' }));
+                }}
                 phoneCodes={phoneCodes}
+                error={!!errors.homeReferencePhoneNumber}
                 required
               />
+              {errors.homeReferencePhoneNumber && <p className="text-sm text-red-600 mt-1">{errors.homeReferencePhoneNumber}</p>}
             </div>
           </div>
         </div>

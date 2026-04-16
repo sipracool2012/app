@@ -7,6 +7,7 @@ from models.payment_gateway_config import (
 )
 from utils.auth import get_current_user
 from datetime import datetime
+from utils.constants import now_ist
 from bson import ObjectId
 from pydantic import BaseModel
 import httpx
@@ -84,7 +85,7 @@ async def _record_transaction(
         "gateway": gateway,
         "transaction_id": transaction_id,
         "status": "success",
-        "created_at": datetime.utcnow(),
+        "created_at": now_ist(),
     })
 
 
@@ -117,7 +118,7 @@ async def get_payment_gateway_config(current_user_id: str = Depends(get_current_
             tazapay_enabled=False,
             tazapay_mode="sandbox",
             tazapay_configured=False,
-            updated_at=datetime.utcnow()
+            updated_at=now_ist()
         )
     
     return PaymentGatewayConfigResponse(
@@ -130,7 +131,7 @@ async def get_payment_gateway_config(current_user_id: str = Depends(get_current_
         tazapay_enabled=config.get("tazapay_enabled", False),
         tazapay_mode=config.get("tazapay_mode", "sandbox"),
         tazapay_configured=bool(config.get("tazapay_api_key")),
-        updated_at=config.get("updated_at", datetime.utcnow())
+        updated_at=config.get("updated_at", now_ist())
     )
 
 @router.get("/config/admin")
@@ -167,7 +168,7 @@ async def get_payment_gateway_config_admin(current_user_id: str = Depends(get_cu
             "tazapay_secret_key": "",
             "tazapay_webhook_secret": "",
             "tazapay_mode": "sandbox",
-            "updated_at": datetime.utcnow(),
+            "updated_at": now_ist(),
             "updated_by": ""
         }
     
@@ -186,7 +187,7 @@ async def get_payment_gateway_config_admin(current_user_id: str = Depends(get_cu
         "tazapay_secret_key": config.get("tazapay_secret_key", ""),
         "tazapay_webhook_secret": config.get("tazapay_webhook_secret", ""),
         "tazapay_mode": config.get("tazapay_mode", "sandbox"),
-        "updated_at": config.get("updated_at", datetime.utcnow()),
+        "updated_at": config.get("updated_at", now_ist()),
         "updated_by": config.get("updated_by", "")
     }
 
@@ -211,7 +212,7 @@ async def update_payment_gateway_config(
     
     # Prepare update data
     update_data = config_update.dict(exclude_unset=True)
-    update_data["updated_at"] = datetime.utcnow()
+    update_data["updated_at"] = now_ist()
     update_data["updated_by"] = current_user_id
     
     if existing_config:
@@ -350,7 +351,7 @@ async def paypal_create_order(
         # Persist order_id and amount on the application for retry
         await db.applications.update_one(
             {"applicationId": req.application_id},
-            {"$set": {"paypal_order_id": order["id"], "payment_amount": req.amount, "updatedAt": datetime.utcnow()}}
+            {"$set": {"paypal_order_id": order["id"], "payment_amount": req.amount, "updatedAt": now_ist()}}
         )
 
         approval_url = next(l["href"] for l in order["links"] if l["rel"] == "approve")
@@ -395,7 +396,7 @@ async def paypal_capture_order(
 
         transaction_id = capture["purchase_units"][0]["payments"]["captures"][0]["id"]
 
-        # Mark application as submitted + record transaction
+        # Mark application as paid + record transaction
         capture_amount = float(
             capture["purchase_units"][0]["payments"]["captures"][0]["amount"]["value"]
         )
@@ -403,10 +404,11 @@ async def paypal_capture_order(
         await db.applications.update_one(
             {"applicationId": req.application_id},
             {"$set": {
-                "status": "submitted",
+                "status": "paid",
+                "paidAt": now_ist(),
                 "paypal_transaction_id": transaction_id,
                 "paypal_capture": capture,
-                "updatedAt": datetime.utcnow()
+                "updatedAt": now_ist()
             }}
         )
         await _record_transaction(req.application_id, "paypal", transaction_id, capture_amount, capture_currency)
@@ -454,7 +456,7 @@ async def razorpay_create_order(
 
         await db.applications.update_one(
             {"applicationId": req.application_id},
-            {"$set": {"razorpay_order_id": order["id"], "payment_amount": req.amount, "updatedAt": datetime.utcnow()}}
+            {"$set": {"razorpay_order_id": order["id"], "payment_amount": req.amount, "updatedAt": now_ist()}}
         )
 
         return {
@@ -495,10 +497,11 @@ async def razorpay_verify_payment(
     await db.applications.update_one(
         {"applicationId": req.application_id},
         {"$set": {
-            "status": "submitted",
+            "status": "paid",
+            "paidAt": now_ist(),
             "razorpay_payment_id": req.payment_id,
             "razorpay_order_id": req.order_id,
-            "updatedAt": datetime.utcnow(),
+            "updatedAt": now_ist(),
         }}
     )
     await _record_transaction(req.application_id, "razorpay", req.payment_id, pay_amount)
@@ -547,7 +550,7 @@ async def tazapay_create_checkout(
 
         await db.applications.update_one(
             {"applicationId": req.application_id},
-            {"$set": {"tazapay_session_id": session_id, "payment_amount": req.amount, "updatedAt": datetime.utcnow()}}
+            {"$set": {"tazapay_session_id": session_id, "payment_amount": req.amount, "updatedAt": now_ist()}}
         )
 
         return {"redirect_url": redirect_url, "session_id": session_id}
@@ -593,9 +596,10 @@ async def tazapay_verify(
         await db.applications.update_one(
             {"applicationId": application_id},
             {"$set": {
-                "status": "submitted",
+                "status": "paid",
+                "paidAt": now_ist(),
                 "tazapay_session_id": session_id,
-                "updatedAt": datetime.utcnow(),
+                "updatedAt": now_ist(),
             }}
         )
         await _record_transaction(application_id, "tazapay", session_id, pay_amount)

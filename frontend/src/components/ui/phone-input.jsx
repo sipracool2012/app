@@ -11,7 +11,8 @@ export function PhoneInput({
   onPhoneNumberChange,
   phoneCodes = [],
   required = false,
-  disabled = false
+  disabled = false,
+  error = false
 }) {
   return (
     <div className="space-y-2">
@@ -46,10 +47,9 @@ export function PhoneInput({
             onPhoneNumberChange(value);
           }}
           placeholder="Phone number"
-          required={required}
           disabled={disabled}
           maxLength={12}
-          className="flex-1"
+          className={`flex-1${error ? ' border-red-500' : ''}`}
         />
       </div>
     </div>

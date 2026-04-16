@@ -270,7 +270,7 @@ const AdminPanel = () => {
 
   const downloadCSV = async (application) => {
     try {
-      const url = `${BACKEND_URL}/api/applications/export?ids=${application.applicationId}`;
+      const url = `${BACKEND_URL}/api/applications/${application.applicationId}/etourist-csv`;
       
       const response = await fetch(url, {
         headers: {
@@ -407,33 +407,40 @@ const AdminPanel = () => {
 
   // Status workflow
   // pending   → (system only, set when app is started)
-  // submitted → set when user clicks Pay
-  // paid      → set when payment is confirmed
-  // processed → admin marks as processed
-  // approved  → admin final approval
-  // rejected  → admin final rejection
+  // Status workflow:
+  // draft          → user is filling steps 1-10
+  // paid           → payment confirmed (set automatically by payment gateway)
+  // pending_review → set automatically after 1 hour, or admin does it manually
+  // submitted      → admin manually advances
+  // processed      → admin manually advances
+  // approved       → admin final approval
+  // rejected       → admin final rejection
   const ALLOWED_TRANSITIONS = {
-    pending:   ['submitted'],           // admin can manually advance if needed
-    submitted: ['paid', 'rejected'],
-    paid:      ['processed', 'rejected'],
-    processed: ['approved', 'rejected'],
-    approved:  [],                      // terminal
-    rejected:  [],                      // terminal
+    pending:        ['pending_review', 'rejected'],  // legacy status fallback
+    paid:           ['pending_review', 'rejected'],
+    pending_review: ['submitted', 'rejected'],
+    submitted:      ['processed', 'rejected'],
+    processed:      ['approved', 'rejected'],
+    approved:       [],                              // terminal
+    rejected:       [],                              // terminal
   };
 
   const getStatusBadge = (status) => {
     const colors = {
-      draft:     'bg-gray-100 text-gray-600',
-      pending:   'bg-yellow-100 text-yellow-800',
-      submitted: 'bg-blue-100 text-blue-800',
-      paid:      'bg-indigo-100 text-indigo-800',
-      processed: 'bg-purple-100 text-purple-800',
-      approved:  'bg-green-100 text-green-800',
-      rejected:  'bg-red-100 text-red-800',
+      draft:          'bg-gray-100 text-gray-600',
+      paid:           'bg-indigo-100 text-indigo-800',
+      pending_review: 'bg-yellow-100 text-yellow-800',
+      submitted:      'bg-blue-100 text-blue-800',
+      processed:      'bg-purple-100 text-purple-800',
+      approved:       'bg-green-100 text-green-800',
+      rejected:       'bg-red-100 text-red-800',
+      // legacy
+      pending:        'bg-yellow-100 text-yellow-800',
     };
+    const label = status === 'pending_review' ? 'PENDING REVIEW' : status?.toUpperCase();
     return (
       <Badge className={colors[status] || 'bg-gray-100 text-gray-800'}>
-        {status?.toUpperCase()}
+        {label}
       </Badge>
     );
   };
@@ -472,51 +479,51 @@ const AdminPanel = () => {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* Super Admin sees 5 tabs; regular Admin sees 1 tab (Applications only) */}
-          <TabsList className={`grid w-full ${currentUser?.role === 'super_admin' ? 'max-w-5xl grid-cols-7' : 'max-w-xs grid-cols-1'}`}>
-            <TabsTrigger value="applications" className="flex items-center gap-2">
+          <TabsList className={`grid w-full ${currentUser?.role === 'super_admin' ? 'grid-cols-7' : 'max-w-xs grid-cols-1'}`}>
+            <TabsTrigger value="applications" className="flex items-center gap-2" title="Applications">
               <Eye className="w-4 h-4" />
-              Applications
+              <span className="hidden sm:inline">Applications</span>
             </TabsTrigger>
             {/* Country Config — Super Admin only */}
             {currentUser?.role === 'super_admin' && (
-              <TabsTrigger value="countries" className="flex items-center gap-2">
+              <TabsTrigger value="countries" className="flex items-center gap-2" title="Country Config">
                 <Globe className="w-4 h-4" />
-                Country Config
+                <span className="hidden sm:inline">Country Config</span>
               </TabsTrigger>
             )}
             {/* Payment Gateways — Super Admin only */}
             {currentUser?.role === 'super_admin' && (
-              <TabsTrigger value="payment-gateways" className="flex items-center gap-2">
+              <TabsTrigger value="payment-gateways" className="flex items-center gap-2" title="Payment Gateways">
                 <CreditCard className="w-4 h-4" />
-                Payment Gateways
+                <span className="hidden sm:inline">Payment Gateways</span>
               </TabsTrigger>
             )}
             {/* Email Providers — Super Admin only */}
             {currentUser?.role === 'super_admin' && (
-              <TabsTrigger value="email-providers" className="flex items-center gap-2">
+              <TabsTrigger value="email-providers" className="flex items-center gap-2" title="Email Providers">
                 <Mail className="w-4 h-4" />
-                Email Providers
+                <span className="hidden sm:inline">Email Providers</span>
               </TabsTrigger>
             )}
             {/* User Management — Super Admin only */}
             {currentUser?.role === 'super_admin' && (
-              <TabsTrigger value="users" className="flex items-center gap-2">
+              <TabsTrigger value="users" className="flex items-center gap-2" title="User Management">
                 <Users className="w-4 h-4" />
-                User Management
+                <span className="hidden sm:inline">User Management</span>
               </TabsTrigger>
             )}
             {/* Utility — Super Admin only */}
             {currentUser?.role === 'super_admin' && (
-              <TabsTrigger value="utility" className="flex items-center gap-2">
+              <TabsTrigger value="utility" className="flex items-center gap-2" title="Utility">
                 <Wrench className="w-4 h-4" />
-                Utility
+                <span className="hidden sm:inline">Utility</span>
               </TabsTrigger>
             )}
             {/* Transactions — Super Admin only */}
             {currentUser?.role === 'super_admin' && (
-              <TabsTrigger value="transactions" className="flex items-center gap-2">
+              <TabsTrigger value="transactions" className="flex items-center gap-2" title="Transactions">
                 <Receipt className="w-4 h-4" />
-                Transactions
+                <span className="hidden sm:inline">Transactions</span>
               </TabsTrigger>
             )}
           </TabsList>
@@ -524,7 +531,7 @@ const AdminPanel = () => {
           {/* Applications Tab */}
           <TabsContent value="applications" className="space-y-6">
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-7 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-8 gap-4">
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-xs font-medium text-gray-600">Total</CardTitle>
@@ -545,11 +552,21 @@ const AdminPanel = () => {
               </Card>
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-medium text-gray-600">Pending</CardTitle>
+                  <CardTitle className="text-xs font-medium text-gray-600">Paid</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold text-indigo-600">
+                    {applications.filter(a => a.status === 'paid').length}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-xs font-medium text-gray-600">Pending Review</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-2xl font-bold text-yellow-600">
-                    {applications.filter(a => a.status === 'pending').length}
+                    {applications.filter(a => a.status === 'pending_review').length}
                   </p>
                 </CardContent>
               </Card>
@@ -565,11 +582,11 @@ const AdminPanel = () => {
               </Card>
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-medium text-gray-600">Paid</CardTitle>
+                  <CardTitle className="text-xs font-medium text-gray-600">Processed</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-2xl font-bold text-indigo-600">
-                    {applications.filter(a => a.status === 'paid').length}
+                  <p className="text-2xl font-bold text-purple-600">
+                    {applications.filter(a => a.status === 'processed').length}
                   </p>
                 </CardContent>
               </Card>
@@ -618,9 +635,9 @@ const AdminPanel = () => {
                     <SelectContent>
                       <SelectItem value="all">All Status</SelectItem>
                       <SelectItem value="draft">Draft / In Progress</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="submitted">Submitted</SelectItem>
                       <SelectItem value="paid">Paid</SelectItem>
+                      <SelectItem value="pending_review">Pending Review</SelectItem>
+                      <SelectItem value="submitted">Submitted</SelectItem>
                       <SelectItem value="processed">Processed</SelectItem>
                       <SelectItem value="approved">Approved</SelectItem>
                       <SelectItem value="rejected">Rejected</SelectItem>
@@ -663,22 +680,54 @@ const AdminPanel = () => {
                           </TableCell>
                         </TableRow>
                       ) : (
-                        filteredApps.map((app) => (
+                        filteredApps.map((app) => {
+                          // Friendly short visa type label
+                          const rawVisa = app.visaOptionName || app.visaService || '';
+                          let shortVisa = rawVisa;
+                          if (/tourist.*30|30.*tourist/i.test(rawVisa)) shortVisa = 'Tourist 30D';
+                          else if (/tourist.*(1\s*yr|1\s*year)/i.test(rawVisa)) shortVisa = 'Tourist 1Y';
+                          else if (/tourist.*(5\s*yr|5\s*year)/i.test(rawVisa)) shortVisa = 'Tourist 5Y';
+                          else if (/medical\s+attendant/i.test(rawVisa)) shortVisa = 'Med. Attendant';
+                          else if (/medical/i.test(rawVisa)) shortVisa = 'Medical';
+                          else if (/business/i.test(rawVisa)) shortVisa = 'Business';
+                          else if (/conference/i.test(rawVisa)) shortVisa = 'Conference';
+                          else if (/transit/i.test(rawVisa)) shortVisa = 'Transit';
+
+                          // Submitted date: use paidAt once payment confirmed, else submittedDate
+                          const PAID_STATUSES = ['paid', 'pending_review', 'submitted', 'processed', 'approved', 'rejected'];
+                          const dateToShow = PAID_STATUSES.includes(app.status) && app.paidAt && app.paidAt !== 'None' && app.paidAt !== ''
+                            ? app.paidAt
+                            : (app.submittedDate && app.submittedDate !== 'None' && app.submittedDate !== '' ? app.submittedDate : null);
+
+                          return (
                           <TableRow key={app.applicationId}>
                             <TableCell className="font-medium">
                               {app.applicationId
                                 ? app.applicationId
                                 : <span className="text-gray-400 italic">Not assigned</span>}
                             </TableCell>
-                            <TableCell>{app.surname || app.givenNames ? `${app.surname || ''} ${app.givenNames || ''}`.trim() : <span className="text-gray-400 italic">—</span>}</TableCell>
+                            <TableCell>{app.givenNames || app.surname ? `${app.givenNames || ''} ${app.surname || ''}`.trim() : <span className="text-gray-400 italic">—</span>}</TableCell>
                             <TableCell>{app.email || <span className="text-gray-400 italic">—</span>}</TableCell>
-                            <TableCell>{app.nationality || <span className="text-gray-400 italic">—</span>}</TableCell>
-                            <TableCell>{app.visaService || <span className="text-gray-400 italic">—</span>}</TableCell>
+                            <TableCell>
+                              {app.passportName || app.passportCountryCode ? (
+                                <div className="flex items-center gap-1.5">
+                                  {app.passportCountryCode && (
+                                    <FlagIcon code={app.passportCountryCode} width={20} height={15} />
+                                  )}
+                                  <span className="text-sm">{app.passportName || app.passportCountryCode}</span>
+                                </div>
+                              ) : <span className="text-gray-400 italic">—</span>}
+                            </TableCell>
+                            <TableCell>
+                              {shortVisa
+                                ? <span className="text-sm font-medium whitespace-nowrap">{shortVisa}</span>
+                                : <span className="text-gray-400 italic">—</span>}
+                            </TableCell>
                             <TableCell>{getStatusBadge(app.status)}</TableCell>
                             <TableCell>
-                              {app.submittedDate && app.submittedDate !== 'None' && app.submittedDate !== ''
-                                ? new Date(app.submittedDate).toLocaleDateString()
-                                : <span className="text-gray-400 italic">Not submitted</span>}
+                              {dateToShow
+                                ? new Date(dateToShow).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })
+                                : <span className="text-gray-400 italic">—</span>}
                             </TableCell>
                             <TableCell>
                               <div className="flex space-x-2">
@@ -696,9 +745,9 @@ const AdminPanel = () => {
                                     <SelectContent>
                                       {currentUser?.role === 'super_admin' ? (
                                         // Super admin sees every status
-                                        ['pending', 'submitted', 'paid', 'processed', 'approved', 'rejected'].map(s => (
+                                        ['paid', 'pending_review', 'submitted', 'processed', 'approved', 'rejected'].map(s => (
                                           <SelectItem key={s} value={s}>
-                                            {s.charAt(0).toUpperCase() + s.slice(1)}
+                                            {s === 'pending_review' ? 'Pending Review' : s.charAt(0).toUpperCase() + s.slice(1)}
                                             {s === app.status ? ' (current)' : ''}
                                           </SelectItem>
                                         ))
@@ -706,11 +755,11 @@ const AdminPanel = () => {
                                         // Regular admin: current status as disabled reference + allowed next states only
                                         <>
                                           <SelectItem value={app.status} disabled>
-                                            {app.status.charAt(0).toUpperCase() + app.status.slice(1)} (current)
+                                            {app.status === 'pending_review' ? 'Pending Review' : app.status.charAt(0).toUpperCase() + app.status.slice(1)} (current)
                                           </SelectItem>
                                           {(ALLOWED_TRANSITIONS[app.status] || []).map(next => (
                                             <SelectItem key={next} value={next}>
-                                              {next.charAt(0).toUpperCase() + next.slice(1)}
+                                              {next === 'pending_review' ? 'Pending Review' : next.charAt(0).toUpperCase() + next.slice(1)}
                                             </SelectItem>
                                           ))}
                                         </>
@@ -732,7 +781,8 @@ const AdminPanel = () => {
                               </div>
                             </TableCell>
                           </TableRow>
-                        ))
+                          );
+                        })
                       )}
                     </TableBody>
                   </Table>

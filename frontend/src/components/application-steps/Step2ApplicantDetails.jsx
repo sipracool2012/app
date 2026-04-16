@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-const Step2ApplicantDetails = ({ data, onNext, onBack }) => {
+const Step2ApplicantDetails = ({ data, onNext, onBack, onDataChange }) => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [religions, setReligions] = useState([]);
@@ -25,6 +25,9 @@ const Step2ApplicantDetails = ({ data, onNext, onBack }) => {
     qualificationFrom: data?.qualificationFrom || '',
     livedTwoYears: data?.livedTwoYears || 'Yes'
   });
+  // Report local changes to parent so jumping away via stepper saves latest data
+  useEffect(() => { onDataChange?.(formData); }, [formData]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     fetchConstants();
@@ -50,6 +53,28 @@ const Step2ApplicantDetails = ({ data, onNext, onBack }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const newErrors = {};
+
+    if (!formData.surname.trim()) newErrors.surname = t('errors.fieldRequired');
+    if (!formData.givenNames.trim()) newErrors.givenNames = t('errors.fieldRequired');
+    if (!formData.religion) newErrors.religion = t('errors.selectOption');
+    if (!formData.visibleMarks.trim()) newErrors.visibleMarks = t('errors.fieldRequired');
+    if (!formData.educationalQualification) newErrors.educationalQualification = t('errors.selectOption');
+    if (!formData.qualificationFrom.trim()) newErrors.qualificationFrom = t('errors.fieldRequired');
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      toast({
+        title: t('errors.fixErrors'),
+        description: t('errors.fixErrorsDesc'),
+        variant: 'destructive'
+      });
+      setTimeout(() => {
+        const firstError = document.querySelector('.border-red-500');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
+      return;
+    }
     onNext(formData);
   };
 
@@ -70,9 +95,13 @@ const Step2ApplicantDetails = ({ data, onNext, onBack }) => {
           <Input
             id="surname"
             value={formData.surname}
-            onChange={(e) => setFormData({ ...formData, surname: e.target.value })}
-            required
+            onChange={(e) => {
+              setFormData({ ...formData, surname: e.target.value });
+              setErrors(prev => ({ ...prev, surname: '' }));
+            }}
+            className={errors.surname ? 'border-red-500' : ''}
           />
+          {errors.surname && <p className="text-sm text-red-600">{errors.surname}</p>}
         </div>
 
         {/* Given Names */}
@@ -83,9 +112,13 @@ const Step2ApplicantDetails = ({ data, onNext, onBack }) => {
           <Input
             id="givenNames"
             value={formData.givenNames}
-            onChange={(e) => setFormData({ ...formData, givenNames: e.target.value })}
-            required
+            onChange={(e) => {
+              setFormData({ ...formData, givenNames: e.target.value });
+              setErrors(prev => ({ ...prev, givenNames: '' }));
+            }}
+            className={errors.givenNames ? 'border-red-500' : ''}
           />
+          {errors.givenNames && <p className="text-sm text-red-600">{errors.givenNames}</p>}
         </div>
 
         {/* Religion */}
@@ -95,10 +128,12 @@ const Step2ApplicantDetails = ({ data, onNext, onBack }) => {
           </Label>
           <Select 
             value={formData.religion} 
-            onValueChange={(value) => setFormData({ ...formData, religion: value })} 
-            required
+            onValueChange={(value) => {
+              setFormData({ ...formData, religion: value });
+              setErrors(prev => ({ ...prev, religion: '' }));
+            }}
           >
-            <SelectTrigger>
+            <SelectTrigger className={errors.religion ? 'border-red-500' : ''}>
               <SelectValue placeholder={t('forms.step2.selectReligion')} />
             </SelectTrigger>
             <SelectContent>
@@ -109,20 +144,26 @@ const Step2ApplicantDetails = ({ data, onNext, onBack }) => {
               ))}
             </SelectContent>
           </Select>
+          {errors.religion && <p className="text-sm text-red-600">{errors.religion}</p>}
         </div>
 
         {/* Visible Identification Marks */}
         <div className="space-y-2">
           <Label htmlFor="visibleMarks">
-            {t('forms.step2.visibleMarks')}
+            {t('forms.step2.visibleMarks')} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="visibleMarks"
             value={formData.visibleMarks}
-            onChange={(e) => setFormData({ ...formData, visibleMarks: e.target.value })}
+            onChange={(e) => {
+              setFormData({ ...formData, visibleMarks: e.target.value });
+              setErrors(prev => ({ ...prev, visibleMarks: '' }));
+            }}
             placeholder={t('forms.step2.visibleMarksHint')}
+            className={errors.visibleMarks ? 'border-red-500' : ''}
           />
-          <p className="text-xs text-gray-500">{t('forms.step2.visibleMarksHint')}</p>
+          {errors.visibleMarks && <p className="text-sm text-red-600">{errors.visibleMarks}</p>}
+          {!errors.visibleMarks && <p className="text-xs text-gray-500">{t('forms.step2.visibleMarksHint')}</p>}
         </div>
 
         {/* Educational Qualification */}
@@ -132,10 +173,12 @@ const Step2ApplicantDetails = ({ data, onNext, onBack }) => {
           </Label>
           <Select 
             value={formData.educationalQualification} 
-            onValueChange={(value) => setFormData({ ...formData, educationalQualification: value })} 
-            required
+            onValueChange={(value) => {
+              setFormData({ ...formData, educationalQualification: value });
+              setErrors(prev => ({ ...prev, educationalQualification: '' }));
+            }}
           >
-            <SelectTrigger>
+            <SelectTrigger className={errors.educationalQualification ? 'border-red-500' : ''}>
               <SelectValue placeholder={t('forms.step2.selectQualification')} />
             </SelectTrigger>
             <SelectContent>
@@ -146,6 +189,7 @@ const Step2ApplicantDetails = ({ data, onNext, onBack }) => {
               ))}
             </SelectContent>
           </Select>
+          {errors.educationalQualification && <p className="text-sm text-red-600">{errors.educationalQualification}</p>}
         </div>
 
         {/* Qualification From */}
@@ -156,10 +200,14 @@ const Step2ApplicantDetails = ({ data, onNext, onBack }) => {
           <Input
             id="qualificationFrom"
             value={formData.qualificationFrom}
-            onChange={(e) => setFormData({ ...formData, qualificationFrom: e.target.value })}
+            onChange={(e) => {
+              setFormData({ ...formData, qualificationFrom: e.target.value });
+              setErrors(prev => ({ ...prev, qualificationFrom: '' }));
+            }}
             placeholder={t('forms.step2.qualificationFromPlaceholder')}
-            required
+            className={errors.qualificationFrom ? 'border-red-500' : ''}
           />
+          {errors.qualificationFrom && <p className="text-sm text-red-600">{errors.qualificationFrom}</p>}
         </div>
 
         {/* Lived Two Years */}
@@ -170,7 +218,6 @@ const Step2ApplicantDetails = ({ data, onNext, onBack }) => {
           <Select 
             value={formData.livedTwoYears} 
             onValueChange={(value) => setFormData({ ...formData, livedTwoYears: value })} 
-            required
           >
             <SelectTrigger>
               <SelectValue />

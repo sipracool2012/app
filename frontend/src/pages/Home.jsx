@@ -232,11 +232,12 @@ const Home = () => {
                       {/* Visa Option Cards */}
                       {visaOptions.map((visa) => {
                         const discount = parseFloat(visa.discount_amount) || 0;
+                        const visaOurFee = parseFloat(visa.our_fee) || 0;
                         const displayedPrice =
                           feeDisplayMode === 'our_fee_only'
-                            ? parseFloat(visa.our_fee) || 0
+                            ? visaOurFee
                             : feeDisplayMode === 'with_discount'
-                            ? Math.max(0, visa.price - discount)
+                            ? Math.max(0, visaOurFee - discount)
                             : visa.price;
                         const priceLabel =
                           feeDisplayMode === 'our_fee_only'
@@ -259,7 +260,7 @@ const Home = () => {
                               </div>
                               <div className="text-right">
                                 {feeDisplayMode === 'with_discount' && discount > 0 && (
-                                  <p className="text-sm line-through text-gray-400">USD ${visa.price.toFixed(2)}</p>
+                                  <p className="text-sm line-through text-gray-400">USD ${visaOurFee.toFixed(2)}</p>
                                 )}
                                 <p className="text-2xl font-bold text-gray-900">USD ${displayedPrice.toFixed(2)}</p>
                                 {priceLabel && (

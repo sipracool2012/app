@@ -23,20 +23,28 @@ import FAQ from "./pages/FAQ";
 import TermsOfService from "./pages/TermsOfService";
 import CookiePolicy from "./pages/CookiePolicy";
 import RefundPolicy from "./pages/RefundPolicy";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import VisaDetail from "./pages/VisaDetail";
 import Requirements from "./pages/Requirements";
+import IndiaTourism from "./pages/IndiaTourism";
 import { Toaster } from "./components/ui/toaster";
+import { ScrollToTopOnNav, ScrollToTopButton } from "./components/ScrollToTop";
 
 function App() {
   return (
     <AuthProvider>
       <div className="App">
         <BrowserRouter>
+          <ScrollToTopOnNav />
           <Header />
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<IndiaTourism />} />
+            <Route path="/home" element={<Home />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route
               path="/apply/:visaId"
               element={
@@ -89,8 +97,10 @@ function App() {
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/cookies" element={<CookiePolicy />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
+            <Route path="/india-tourism" element={<IndiaTourism />} />
           </Routes>
           <Footer />
+          <ScrollToTopButton />
           <Toaster />
         </BrowserRouter>
       </div>

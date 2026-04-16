@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { ChevronLeft } from 'lucide-react';
+import { useToast } from '../../hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 
-const Step5ProfessionalDetails = ({ data, onNext, onBack }) => {
+const Step5ProfessionalDetails = ({ data, onNext, onBack, onDataChange }) => {
+  const { toast } = useToast();
   const { t } = useTranslation();
   const [formData, setFormData] = useState({
     presentOccupation: data?.presentOccupation || '',
@@ -18,9 +20,29 @@ const Step5ProfessionalDetails = ({ data, onNext, onBack }) => {
     militaryService: data?.militaryService || 'No',
     pastOccupationIfAny: data?.pastOccupationIfAny || ''
   });
+  // Report local changes to parent so jumping away via stepper saves latest data
+  useEffect(() => { onDataChange?.(formData); }, [formData]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [errors, setErrors] = useState({});
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const newErrors = {};
+    if (!formData.presentOccupation) newErrors.presentOccupation = t('errors.selectOption');
+    if (!formData.employerName.trim()) newErrors.employerName = t('errors.fieldRequired');
+    if (!formData.employerAddress.trim()) newErrors.employerAddress = t('errors.fieldRequired');
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      toast({
+        title: t('errors.fixErrors'),
+        description: t('errors.fixErrorsDesc'),
+        variant: 'destructive'
+      });
+      setTimeout(() => {
+        const firstError = document.querySelector('.border-red-500');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
+      return;
+    }
     onNext(formData);
   };
 
@@ -30,9 +52,12 @@ const Step5ProfessionalDetails = ({ data, onNext, onBack }) => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="presentOccupation">{t('forms.step5.presentOccupation')} *</Label>
-          <Select value={formData.presentOccupation} onValueChange={(value) => setFormData({ ...formData, presentOccupation: value })} required>
-            <SelectTrigger>
+          <Label htmlFor="presentOccupation">{t('forms.step5.presentOccupation')} <span className="text-red-500">*</span></Label>
+          <Select value={formData.presentOccupation} onValueChange={(value) => {
+            setFormData({ ...formData, presentOccupation: value });
+            setErrors(prev => ({ ...prev, presentOccupation: '' }));
+          }}>
+            <SelectTrigger className={errors.presentOccupation ? 'border-red-500' : ''}>
               <SelectValue placeholder={t('forms.step5.selectOccupation')} />
             </SelectTrigger>
             <SelectContent>
@@ -45,16 +70,21 @@ const Step5ProfessionalDetails = ({ data, onNext, onBack }) => {
               <SelectItem value="Others">{t('forms.step5.others')}</SelectItem>
             </SelectContent>
           </Select>
+          {errors.presentOccupation && <p className="text-sm text-red-600">{errors.presentOccupation}</p>}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="employerName">{t('forms.step5.employerName')} *</Label>
+          <Label htmlFor="employerName">{t('forms.step5.employerName')} <span className="text-red-500">*</span></Label>
           <Input
             id="employerName"
             value={formData.employerName}
-            onChange={(e) => setFormData({ ...formData, employerName: e.target.value })}
-            required
+            onChange={(e) => {
+              setFormData({ ...formData, employerName: e.target.value });
+              setErrors(prev => ({ ...prev, employerName: '' }));
+            }}
+            className={errors.employerName ? 'border-red-500' : ''}
           />
+          {errors.employerName && <p className="text-sm text-red-600">{errors.employerName}</p>}
         </div>
 
         <div className="space-y-2">
@@ -68,13 +98,17 @@ const Step5ProfessionalDetails = ({ data, onNext, onBack }) => {
         </div>
 
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="employerAddress">{t('forms.step5.employerAddress')} *</Label>
+          <Label htmlFor="employerAddress">{t('forms.step5.employerAddress')} <span className="text-red-500">*</span></Label>
           <Input
             id="employerAddress"
             value={formData.employerAddress}
-            onChange={(e) => setFormData({ ...formData, employerAddress: e.target.value })}
-            required
+            onChange={(e) => {
+              setFormData({ ...formData, employerAddress: e.target.value });
+              setErrors(prev => ({ ...prev, employerAddress: '' }));
+            }}
+            className={errors.employerAddress ? 'border-red-500' : ''}
           />
+          {errors.employerAddress && <p className="text-sm text-red-600">{errors.employerAddress}</p>}
         </div>
 
         <div className="space-y-2">
@@ -97,7 +131,7 @@ const Step5ProfessionalDetails = ({ data, onNext, onBack }) => {
 
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="militaryService">{t('forms.step5.militaryService')} *</Label>
-          <Select value={formData.militaryService} onValueChange={(value) => setFormData({ ...formData, militaryService: value })} required>
+          <Select value={formData.militaryService} onValueChange={(value) => setFormData({ ...formData, militaryService: value })}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>

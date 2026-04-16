@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Trash2, Clock, CheckCircle, XCircle, AlertCircle, ArrowRight } from 'lucide-react';
+import { FileText, Trash2, Clock, CheckCircle, XCircle, AlertCircle, ArrowRight, Timer } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
@@ -10,37 +10,123 @@ import { getAuthHeaders } from '../utils/auth';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const statusConfig = {
-  draft:     { label: 'Draft',          color: 'bg-yellow-100 text-yellow-800', icon: Clock },
-  pending:   { label: 'Pending Review', color: 'bg-yellow-100 text-yellow-800', icon: AlertCircle },
-  submitted: { label: 'Submitted',      color: 'bg-blue-100 text-blue-800',   icon: AlertCircle },
-  paid:      { label: 'Paid',           color: 'bg-indigo-100 text-indigo-800', icon: CheckCircle },
-  processed: { label: 'Processed',      color: 'bg-purple-100 text-purple-800', icon: AlertCircle },
-  approved:  { label: 'Approved',       color: 'bg-green-100 text-green-800',  icon: CheckCircle },
-  rejected:  { label: 'Rejected',       color: 'bg-red-100 text-red-800',     icon: XCircle },
+  draft:          { label: 'Draft',          color: 'bg-yellow-100 text-yellow-800', icon: Clock },
+  paid:           { label: 'Paid',           color: 'bg-indigo-100 text-indigo-800', icon: CheckCircle },
+  pending_review: { label: 'Pending Review', color: 'bg-yellow-100 text-yellow-800', icon: AlertCircle },
+  submitted:      { label: 'Submitted',      color: 'bg-blue-100 text-blue-800',   icon: AlertCircle },
+  processed:      { label: 'Processed',      color: 'bg-purple-100 text-purple-800', icon: AlertCircle },
+  approved:       { label: 'Approved',       color: 'bg-green-100 text-green-800',  icon: CheckCircle },
+  rejected:       { label: 'Rejected',       color: 'bg-red-100 text-red-800',     icon: XCircle },
+  // legacy
+  pending:        { label: 'Pending Review', color: 'bg-yellow-100 text-yellow-800', icon: AlertCircle },
 };
 
 // Ordered workflow steps shown in the stepper.
 // 'rejected' is handled separately as a terminal branch.
 const WORKFLOW_STEPS = [
-  { key: 'pending',   label: 'Pending' },
-  { key: 'submitted', label: 'Submitted' },
-  { key: 'paid',      label: 'Paid' },
-  { key: 'processed', label: 'Processed' },
-  { key: 'approved',  label: 'Approved' },
+  { key: 'paid',           label: 'Paid' },
+  { key: 'pending_review', label: 'Pending Review' },
+  { key: 'submitted',      label: 'Submitted' },
+  { key: 'processed',      label: 'Processed' },
+  { key: 'approved',       label: 'Approved' },
 ];
 
 const stepIndex = Object.fromEntries(WORKFLOW_STEPS.map((s, i) => [s.key, i]));
 
 /**
+ * Live IST clock banner — ticks every second.
+ */
+const ISTClock = () => {
+  const getIST = () => new Date().toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+  });
+
+  const [display, setDisplay] = useState(getIST);
+  const ref = useRef(null);
+  useEffect(() => {
+    ref.current = setInterval(() => setDisplay(getIST()), 1000);
+    return () => clearInterval(ref.current);
+  }, []);
+
+  // Split into time + date parts for formatting
+  const now = new Date();
+  const time = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+  const date = now.toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  return (
+    <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center gap-3 text-sm mb-6">
+      <Clock className="w-4 h-4 text-blue-500 flex-shrink-0" />
+      <span className="text-blue-700">
+        <span className="font-semibold">Time in India (UTC+05:30)</span>
+        {' — '}
+        <span className="font-mono">{time}</span>
+        {' · '}
+        <span>{date}</span>
+      </span>
+    </div>
+  );
+};
+
+/**
+ * Live countdown timer showing time remaining until a draft expires.
+ * Turns orange when < 24 h remain, red when < 1 h remain.
+ */
+const ExpiryCountdown = ({ expiresAt }) => {
+  const calcRemaining = () => {
+    const diff = new Date(expiresAt) - Date.now();
+    if (diff <= 0) return null;
+    const totalSecs = Math.floor(diff / 1000);
+    const d = Math.floor(totalSecs / 86400);
+    const h = Math.floor((totalSecs % 86400) / 3600);
+    const m = Math.floor((totalSecs % 3600) / 60);
+    const s = totalSecs % 60;
+    return { d, h, m, s, totalSecs };
+  };
+
+  const [remaining, setRemaining] = useState(calcRemaining);
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      const r = calcRemaining();
+      setRemaining(r);
+      if (!r) clearInterval(timerRef.current);
+    }, 1000);
+    return () => clearInterval(timerRef.current);
+  }, [expiresAt]);
+
+  if (!remaining) return <span className="text-xs text-red-600 font-medium">Expired</span>;
+
+  const { d, h, m, s, totalSecs } = remaining;
+  const colorClass = totalSecs < 3600 ? 'text-red-600' : totalSecs < 86400 ? 'text-orange-500' : 'text-gray-500';
+  const label = d > 0
+    ? `${d}d ${h}h ${m}m remaining`
+    : h > 0
+    ? `${h}h ${m}m ${s}s remaining`
+    : `${m}m ${s}s remaining`;
+
+  return (
+    <span className={`inline-flex items-center gap-1 text-xs font-medium ${colorClass}`}>
+      <Timer className="w-3 h-3" />
+      {label}
+    </span>
+  );
+};
+
+/**
  * Horizontal stepper that visualises where an application sits in the
- * Pending → Submitted → Paid → Processed → Approved workflow.
+ * Paid → Pending Review → Submitted → Processed → Approved workflow.
  * Rejected applications show a red terminal indicator instead.
  */
 const StatusStepper = ({ status }) => {
   if (status === 'draft') return null;
 
   const isRejected = status === 'rejected';
-  const currentIdx  = isRejected ? -1 : (stepIndex[status] ?? 0);
+  // Map legacy 'pending' to 'pending_review' position
+  const normalised = status === 'pending' ? 'pending_review' : status;
+  const currentIdx  = isRejected ? -1 : (stepIndex[normalised] ?? 0);
 
   return (
     <div className="mt-4 px-1">
@@ -149,15 +235,16 @@ const MyApplications = () => {
       toast({ title: 'Cannot resume', description: 'Visa info missing. Please start a new application.', variant: 'destructive' });
       return;
     }
-    navigate(`/apply/${app.visaId}`);
+    navigate(`/apply/${app.visaId}`, { state: { draftId: app.id } });
   };
 
   const formatDate = (dateStr) => {
-    if (!dateStr) return '-';
+    if (!dateStr || dateStr === 'None' || dateStr === '') return '—';
     try {
-      return new Date(dateStr).toLocaleDateString('en-US', {
+      return new Date(dateStr).toLocaleString('en-IN', {
+        timeZone: 'Asia/Kolkata',
         year: 'numeric', month: 'short', day: 'numeric',
-        hour: '2-digit', minute: '2-digit'
+        hour: '2-digit', minute: '2-digit', hour12: true
       });
     } catch {
       return dateStr;
@@ -181,7 +268,7 @@ const MyApplications = () => {
             <p className="text-gray-600 mt-1">{t('myApps.subtitle')}</p>
           </div>
           <Button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/home')}
             className="bg-blue-600 hover:bg-blue-700 text-white"
             data-testid="new-application-btn"
           >
@@ -190,21 +277,26 @@ const MyApplications = () => {
         </div>
 
         {applications.length === 0 ? (
-          <Card data-testid="no-applications-card">
+          <>
+            <ISTClock />
+            <Card data-testid="no-applications-card">
             <CardContent className="p-12 text-center">
               <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-700 mb-2">{t('myApps.noApps')}</h3>
               <p className="text-gray-500 mb-6">{t('myApps.noAppsDesc')}</p>
               <Button
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/home')}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 {t('myApps.startApplication')}
               </Button>
             </CardContent>
           </Card>
+          </>
         ) : (
-          <div className="space-y-4" data-testid="applications-list">
+          <>
+            <ISTClock />
+            <div className="space-y-4" data-testid="applications-list">
             {applications.map((app) => {
               const status = statusConfig[app.status] || statusConfig.pending;
               const StatusIcon = status.icon;
@@ -245,8 +337,19 @@ const MyApplications = () => {
                           )}
                         </div>
                         <p className="text-xs text-gray-400 mt-2">
-                          {app.status === 'draft' ? t('myApps.lastSaved') : t('myApps.submitted')}: {formatDate(app.status === 'draft' ? app.updatedAt : app.submittedDate)}
+                          {app.status === 'draft'
+                            ? <>{t('myApps.lastSaved')}: {formatDate(app.updatedAt)}</>
+                            : <>{t('myApps.submitted')}: {formatDate(
+                                ['paid','pending_review','submitted','processed','approved','rejected'].includes(app.status) && app.paidAt && app.paidAt !== 'None' && app.paidAt !== ''
+                                  ? app.paidAt
+                                  : app.submittedDate
+                              )}</>}
                         </p>
+                        {app.status === 'draft' && app.expiresAt && app.expiresAt !== 'None' && app.expiresAt !== '' && (
+                          <p className="mt-1">
+                            <ExpiryCountdown expiresAt={app.expiresAt} />
+                          </p>
+                        )}
                       </div>
 
                       <div className="flex items-center gap-2 shrink-0">
@@ -278,6 +381,7 @@ const MyApplications = () => {
               );
             })}
           </div>
+          </>
         )}
       </div>
     </div>

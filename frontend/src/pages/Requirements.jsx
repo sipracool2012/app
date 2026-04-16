@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Search, CheckCircle2, XCircle, AlertCircle, Clock,
@@ -14,65 +15,13 @@ import { Card, CardContent } from '../components/ui/card';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 /* ── Helpers ──────────────────────────────────────────── */
-const PURPOSES = [
-  { value: 'tourist',           label: 'Tourism' },
-  { value: 'business',          label: 'Business' },
-  { value: 'medical',           label: 'Medical' },
-  { value: 'medical_attendant', label: 'Medical Attendant' },
-  { value: 'conference',        label: 'Conference / Seminar' },
-  { value: 'transit',           label: 'Transit' },
-];
-
-const REQUIRED_DOCS = {
-  tourist: [
-    { label: 'Valid Passport', info: 'Must be valid for at least 6 months beyond your stay' },
-    { label: 'Passport-size Photo', info: 'Recent photo, white background, no glasses' },
-    { label: 'Accommodation details', info: 'Name and address of hotel or host' },
-    { label: 'Return flight details', info: 'Confirmed onward or return ticket' },
-  ],
-  business: [
-    { label: 'Valid Passport', info: 'Must be valid for at least 6 months beyond your stay' },
-    { label: 'Passport-size Photo', info: 'Recent photo, white background, no glasses' },
-    { label: 'Business invitation letter', info: 'From an Indian company or organisation' },
-    { label: 'Company registration', info: 'Proof of your company or self-employment' },
-  ],
-  medical: [
-    { label: 'Valid Passport', info: 'Must be valid for at least 6 months beyond your stay' },
-    { label: 'Passport-size Photo', info: 'Recent photo, white background, no glasses' },
-    { label: 'Medical appointment letter', info: 'From the Indian hospital or clinic' },
-    { label: 'Hospital documentation', info: 'Doctor referral or diagnostic report' },
-  ],
-  medical_attendant: [
-    { label: 'Valid Passport', info: 'Must be valid for at least 6 months beyond your stay' },
-    { label: 'Passport-size Photo', info: 'Recent photo, white background, no glasses' },
-    { label: "Patient's medical visa copy", info: "Copy of the patient's Medical eVisa" },
-  ],
-  conference: [
-    { label: 'Valid Passport', info: 'Must be valid for at least 6 months beyond your stay' },
-    { label: 'Passport-size Photo', info: 'Recent photo, white background, no glasses' },
-    { label: 'Conference invitation letter', info: 'From the organising body in India' },
-  ],
-  transit: [
-    { label: 'Valid Passport', info: 'Must be valid for at least 6 months beyond your stay' },
-    { label: 'Onward ticket', info: 'Confirmed booking to next destination' },
-    { label: 'Passport-size Photo', info: 'Recent photo, white background, no glasses' },
-  ],
-};
-
-const ENTRY_REQUIREMENTS = [
-  { icon: Shield,       label: 'Passport validity', value: 'Minimum 6 months beyond your travel dates' },
-  { icon: FileText,     label: 'Blank pages',        value: 'At least 2 blank pages required' },
-  { icon: Stamp,        label: 'Entry type',         value: 'Via designated eVisa airports & seaports only' },
-  { icon: Users,        label: 'Minors',             value: 'Every traveller including children needs their own visa' },
-];
-
-const VISA_TYPE_LABEL = {
-  tourist:           'Tourist',
-  business:          'Business',
-  medical:           'Medical',
-  medical_attendant: 'Medical Attendant',
-  conference:        'Conference',
-  transit:           'Transit',
+const REQUIRED_DOCS_KEYS = {
+  tourist:           ['validPassport', 'passportPhoto', 'accommodation', 'returnFlight'],
+  business:          ['validPassport', 'passportPhoto', 'businessLetter', 'companyReg'],
+  medical:           ['validPassport', 'passportPhoto', 'medicalAppointment', 'hospitalDoc'],
+  medical_attendant: ['validPassport', 'passportPhoto', 'patientVisaCopy'],
+  conference:        ['validPassport', 'passportPhoto', 'conferenceInvitation'],
+  transit:           ['validPassport', 'onwardTicket', 'passportPhoto'],
 };
 
 /* ── Tooltip ──────────────────────────────────────────── */
@@ -88,6 +37,7 @@ const Tooltip = ({ text }) => (
 
 /* ── Country Search Dropdown ──────────────────────────── */
 const CountryDropdown = ({ value, onChange, countries }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const ref = useRef(null);
@@ -124,7 +74,7 @@ const CountryDropdown = ({ value, onChange, countries }) => {
             <span className="flex-1 truncate">{selected.name}</span>
           </>
         ) : (
-          <span className="flex-1 text-gray-400">Select passport country…</span>
+          <span className="flex-1 text-gray-400">{t('pages.requirements.selectPassportCountry')}</span>
         )}
         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
@@ -138,14 +88,14 @@ const CountryDropdown = ({ value, onChange, countries }) => {
                 ref={inputRef}
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                placeholder="Search country…"
+                placeholder={t('pages.requirements.searchCountry')}
                 className="w-full pl-8 pr-3 py-1.5 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
           </div>
           <ul className="max-h-56 overflow-y-auto py-1">
             {filtered.length === 0 ? (
-              <li className="px-3 py-2 text-sm text-gray-500">No results found</li>
+              <li className="px-3 py-2 text-sm text-gray-500">{t('pages.requirements.noResults')}</li>
             ) : filtered.map(c => (
               <li
                 key={c.code}
@@ -165,43 +115,47 @@ const CountryDropdown = ({ value, onChange, countries }) => {
 };
 
 /* ── Visa Option Card ─────────────────────────────────── */
-const VisaCard = ({ option, onApply }) => (
-  <div className="border rounded-xl p-4 hover:border-blue-400 hover:shadow-sm transition bg-white">
-    <div className="flex items-start justify-between gap-2">
-      <div>
-        <p className="font-semibold text-gray-900 text-sm">{option.name}</p>
-        <div className="flex flex-wrap gap-2 mt-2">
-          <span className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 rounded-full px-2.5 py-0.5">
-            <RotateCcw className="w-3 h-3" /> {option.entries}
-          </span>
-          <span className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 rounded-full px-2.5 py-0.5">
-            <Clock className="w-3 h-3" /> Stay: {option.stay_duration}
-          </span>
-          <span className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 rounded-full px-2.5 py-0.5">
-            <CalendarDays className="w-3 h-3" /> Valid: {option.validity}
-          </span>
-          <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 rounded-full px-2.5 py-0.5">
-            <Clock className="w-3 h-3" /> Approved by {option.approved_by}
-          </span>
+const VisaCard = ({ option, onApply }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="border rounded-xl p-4 hover:border-blue-400 hover:shadow-sm transition bg-white">
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <p className="font-semibold text-gray-900 text-sm">{option.name}</p>
+          <div className="flex flex-wrap gap-2 mt-2">
+            <span className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 rounded-full px-2.5 py-0.5">
+              <RotateCcw className="w-3 h-3" /> {option.entries}
+            </span>
+            <span className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 rounded-full px-2.5 py-0.5">
+              <Clock className="w-3 h-3" /> Stay: {option.stay_duration}
+            </span>
+            <span className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 rounded-full px-2.5 py-0.5">
+              <CalendarDays className="w-3 h-3" /> Valid: {option.validity}
+            </span>
+            <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 rounded-full px-2.5 py-0.5">
+              <Clock className="w-3 h-3" /> {t('pages.requirements.approvedBy')} {option.approved_by}
+            </span>
+          </div>
+        </div>
+        <div className="text-right shrink-0">
+          <p className="text-xl font-bold text-gray-900">${option.price}</p>
+          <p className="text-xs text-gray-500">{t('pages.requirements.perPerson')}</p>
         </div>
       </div>
-      <div className="text-right shrink-0">
-        <p className="text-xl font-bold text-gray-900">${option.price}</p>
-        <p className="text-xs text-gray-500">per person</p>
-      </div>
+      <Button
+        size="sm"
+        className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white"
+        onClick={() => onApply(option)}
+      >
+        {t('pages.requirements.applyNow')} <ArrowRight className="ml-2 w-3.5 h-3.5" />
+      </Button>
     </div>
-    <Button
-      size="sm"
-      className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white"
-      onClick={() => onApply(option)}
-    >
-      Apply Now <ArrowRight className="ml-2 w-3.5 h-3.5" />
-    </Button>
-  </div>
-);
+  );
+};
 
 /* ── Main Page ────────────────────────────────────────── */
 export default function Requirements() {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -257,8 +211,44 @@ export default function Requirements() {
     navigate(`/visa/${option.id}?passport=${passportCode}&passportName=${encodeURIComponent(countryMeta?.name || passportCode)}`);
   };
 
-  const docs = REQUIRED_DOCS[purpose] || REQUIRED_DOCS.tourist;
-  const purposeLabel = PURPOSES.find(p => p.value === purpose)?.label || 'Tourism';
+  const docs = (REQUIRED_DOCS_KEYS[purpose] || REQUIRED_DOCS_KEYS.tourist).map(key => ({
+    label: t(`pages.requirements.docs.${key}`),
+    info:  t(`pages.requirements.docs.${key}Info`),
+  }));
+
+  const PURPOSES = [
+    { value: 'tourist',           label: t('pages.requirements.purposes.tourist') },
+    { value: 'business',          label: t('pages.requirements.purposes.business') },
+    { value: 'medical',           label: t('pages.requirements.purposes.medical') },
+    { value: 'medical_attendant', label: t('pages.requirements.purposes.medical_attendant') },
+    { value: 'conference',        label: t('pages.requirements.purposes.conference') },
+    { value: 'transit',           label: t('pages.requirements.purposes.transit') },
+  ];
+
+  const ENTRY_REQUIREMENTS = [
+    { icon: Shield,   label: t('pages.requirements.entryReqs.passportValidity'), value: t('pages.requirements.entryReqs.passportValidityValue') },
+    { icon: FileText, label: t('pages.requirements.entryReqs.blankPages'),       value: t('pages.requirements.entryReqs.blankPagesValue') },
+    { icon: Stamp,    label: t('pages.requirements.entryReqs.entryType'),        value: t('pages.requirements.entryReqs.entryTypeValue') },
+    { icon: Users,    label: t('pages.requirements.entryReqs.minors'),           value: t('pages.requirements.entryReqs.minorsValue') },
+  ];
+
+  const VISA_TYPE_LABEL = {
+    tourist:           t('pages.requirements.visaTypeLabel.tourist'),
+    business:          t('pages.requirements.visaTypeLabel.business'),
+    medical:           t('pages.requirements.visaTypeLabel.medical'),
+    medical_attendant: t('pages.requirements.visaTypeLabel.medical_attendant'),
+    conference:        t('pages.requirements.visaTypeLabel.conference'),
+    transit:           t('pages.requirements.visaTypeLabel.transit'),
+  };
+
+  const HOW_TO_APPLY_STEPS = [
+    { step: t('pages.requirements.howToApplySteps.step1'), desc: t('pages.requirements.howToApplySteps.step1Desc') },
+    { step: t('pages.requirements.howToApplySteps.step2'), desc: t('pages.requirements.howToApplySteps.step2Desc') },
+    { step: t('pages.requirements.howToApplySteps.step3'), desc: t('pages.requirements.howToApplySteps.step3Desc') },
+    { step: t('pages.requirements.howToApplySteps.step4'), desc: t('pages.requirements.howToApplySteps.step4Desc') },
+  ];
+
+  const purposeLabel = PURPOSES.find(p => p.value === purpose)?.label || t('pages.requirements.purposes.tourist');
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -268,12 +258,12 @@ export default function Requirements() {
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
           <FlagIcon code="IN" width={28} height={21} />
           <div>
-            <h1 className="font-bold text-gray-900 leading-tight">India eVisa Requirements</h1>
-            <p className="text-xs text-gray-500">Check if you need a visa and what documents are required</p>
+            <h1 className="font-bold text-gray-900 leading-tight">{t('pages.requirements.pageTitle')}</h1>
+            <p className="text-xs text-gray-500">{t('pages.requirements.pageSubtitle')}</p>
           </div>
           <div className="ml-auto hidden sm:flex items-center gap-2">
             <Globe className="w-4 h-4 text-blue-500" />
-            <span className="text-sm text-gray-600">Official eVisa service for India</span>
+            <span className="text-sm text-gray-600">{t('pages.requirements.officialService')}</span>
           </div>
         </div>
       </div>
@@ -285,23 +275,23 @@ export default function Requirements() {
           <div className="bg-white border rounded-2xl shadow-sm p-5 lg:sticky lg:top-20">
             <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
               <Search className="w-4 h-4 text-blue-500" />
-              Check My Requirements
+              {t('pages.requirements.sidebarTitle')}
             </h2>
 
             {/* Destination – fixed */}
             <div className="mb-3">
-              <label className="block text-xs font-medium text-gray-500 mb-1">Destination</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">{t('pages.requirements.destination')}</label>
               <div className="flex items-center gap-2 px-3 py-2.5 border rounded-lg bg-gray-50 text-sm">
                 <FlagIcon code="IN" width={20} height={15} />
                 <span className="text-gray-700">India</span>
-                <Badge variant="secondary" className="ml-auto text-[10px] py-0">Fixed</Badge>
+                <Badge variant="secondary" className="ml-auto text-[10px] py-0">{t('pages.requirements.fixed')}</Badge>
               </div>
             </div>
 
             {/* Passport country */}
             <div className="mb-3">
               <label className="block text-xs font-medium text-gray-500 mb-1">
-                Passport Country <span className="text-red-500">*</span>
+                {t('pages.requirements.passportCountry')} <span className="text-red-500">*</span>
               </label>
               <CountryDropdown
                 value={passportCode}
@@ -312,7 +302,7 @@ export default function Requirements() {
 
             {/* Travel purpose */}
             <div className="mb-4">
-              <label className="block text-xs font-medium text-gray-500 mb-1">Travel Purpose</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">{t('pages.requirements.travelPurpose')}</label>
               <div className="grid grid-cols-2 gap-1.5">
                 {PURPOSES.map(p => (
                   <button
@@ -336,12 +326,12 @@ export default function Requirements() {
               className="w-full bg-blue-600 hover:bg-blue-700 text-white"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Search className="w-4 h-4 mr-2" />}
-              Check Requirements
+              {t('pages.requirements.checkBtn')}
             </Button>
 
             {/* Info note */}
             <p className="mt-3 text-[11px] text-gray-400 text-center leading-snug">
-              Results are based on your passport country and travel purpose.
+              {t('pages.requirements.disclaimer')}
             </p>
           </div>
         </div>
@@ -355,9 +345,9 @@ export default function Requirements() {
               <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Plane className="w-8 h-8 text-blue-400" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-700 mb-2">Select your passport country</h3>
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">{t('pages.requirements.emptyTitle')}</h3>
               <p className="text-sm text-gray-500 max-w-sm mx-auto">
-                Choose your passport country and travel purpose to instantly see your India eVisa requirements and available options.
+                {t('pages.requirements.emptyDesc')}
               </p>
             </div>
           )}
@@ -366,7 +356,7 @@ export default function Requirements() {
           {loading && (
             <div className="bg-white border rounded-2xl p-12 text-center shadow-sm">
               <Loader2 className="w-10 h-10 animate-spin text-blue-500 mx-auto mb-3" />
-              <p className="text-gray-500 text-sm">Checking requirements…</p>
+              <p className="text-gray-500 text-sm">{t('pages.requirements.checking')}</p>
             </div>
           )}
 
@@ -380,12 +370,12 @@ export default function Requirements() {
                   <CheckCircle2 className="w-6 h-6 text-green-600 mt-0.5 shrink-0" />
                   <div>
                     <p className="font-semibold text-green-800">
-                      eVisa available for{' '}
+                      {t('pages.requirements.evisaAvailable')}{' '}
                       {countryMeta && <><FlagIcon code={countryMeta.code} width={18} height={13} className="inline mx-1" />{countryMeta.name}</>}
-                      {' '}passport holders
+                      {' '}{t('pages.requirements.passportHolders')}
                     </p>
                     <p className="text-sm text-green-700 mt-0.5">
-                      You can apply online — no embassy visit required. Visa is sent to your email.
+                      {t('pages.requirements.applyOnlineDesc')}
                     </p>
                   </div>
                 </div>
@@ -394,10 +384,10 @@ export default function Requirements() {
                   <AlertCircle className="w-6 h-6 text-orange-500 mt-0.5 shrink-0" />
                   <div>
                     <p className="font-semibold text-orange-800">
-                      eVisa not currently available for {purposeLabel.toLowerCase()} travel
+                      {t('pages.requirements.evisaNotAvailable', { purpose: purposeLabel.toLowerCase() })}
                     </p>
                     <p className="text-sm text-orange-700 mt-0.5">
-                      {results.message || 'Please apply through the Indian embassy or consulate in your country.'}
+                      {results.message || t('pages.requirements.noEvisaDesc')}
                     </p>
                   </div>
                 </div>
@@ -409,7 +399,7 @@ export default function Requirements() {
                   <CardContent className="pt-5 pb-4">
                     <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
                       <CreditCard className="w-4 h-4 text-blue-500" />
-                      Available {VISA_TYPE_LABEL[purpose] || 'eVisa'} Options
+                      {t('pages.requirements.availableOptions', { purpose: VISA_TYPE_LABEL[purpose] || 'eVisa' })}
                     </h3>
                     <div className="space-y-3">
                       {results.options.map(opt => (
@@ -425,7 +415,7 @@ export default function Requirements() {
                 <CardContent className="pt-5 pb-4">
                   <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
                     <FileText className="w-4 h-4 text-blue-500" />
-                    Required Documents
+                    {t('pages.requirements.requiredDocs')}
                     <span className="ml-1 text-xs font-normal text-gray-400">({purposeLabel})</span>
                   </h3>
                   <ul className="space-y-2">
@@ -447,7 +437,7 @@ export default function Requirements() {
                 <CardContent className="pt-5 pb-4">
                   <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
                     <Shield className="w-4 h-4 text-blue-500" />
-                    Entry Requirements
+                    {t('pages.requirements.entryRequirements')}
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {ENTRY_REQUIREMENTS.map(({ icon: Icon, label, value }, i) => (
@@ -470,15 +460,10 @@ export default function Requirements() {
                 <CardContent className="pt-5 pb-4">
                   <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
                     <Plane className="w-4 h-4 text-blue-500" />
-                    How to Apply
+                    {t('pages.requirements.howToApply')}
                   </h3>
                   <ol className="relative border-l border-blue-200 ml-2 space-y-5">
-                    {[
-                      { step: 'Fill in application', desc: 'Enter your personal details and travel information online.' },
-                      { step: 'Upload documents',    desc: 'Upload a photo and any required supporting documents.' },
-                      { step: 'Pay the visa fee',    desc: 'Secure online payment — all major cards accepted.' },
-                      { step: 'Receive your eVisa',  desc: 'Approved eVisa delivered to your email within 2–5 business days.' },
-                    ].map(({ step, desc }, i) => (
+                    {HOW_TO_APPLY_STEPS.map(({ step, desc }, i) => (
                       <li key={i} className="ml-4">
                         <span className="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-white text-xs font-bold ring-4 ring-white">
                           {i + 1}
@@ -494,16 +479,16 @@ export default function Requirements() {
               {/* CTA */}
               {results.has_evisa_options && (
                 <div className="bg-blue-600 rounded-2xl p-6 text-center text-white">
-                  <h3 className="text-lg font-bold mb-1">Ready to apply?</h3>
+                  <h3 className="text-lg font-bold mb-1">{t('pages.requirements.readyToApply')}</h3>
                   <p className="text-blue-100 text-sm mb-4">
-                    Complete your India eVisa application online in minutes.
+                    {t('pages.requirements.ctaDesc')}
                   </p>
                   <Button
                     variant="secondary"
                     className="bg-white text-blue-700 hover:bg-blue-50 font-semibold"
                     onClick={() => navigate(`/?country=${passportCode}`)}
                   >
-                    View All Visa Options <ArrowRight className="ml-2 w-4 h-4" />
+                    {t('pages.requirements.viewAllOptions')} <ArrowRight className="ml-2 w-4 h-4" />
                   </Button>
                 </div>
               )}

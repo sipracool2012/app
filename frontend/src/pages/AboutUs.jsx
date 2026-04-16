@@ -18,25 +18,14 @@ export default function AboutUs() {
         {/* Mission Section */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 mb-6">{t('pages.about.mission')}</h2>
-          <p className="text-lg text-gray-700 mb-4">
-            We are dedicated to revolutionizing the visa application process by providing a seamless, user-friendly platform 
-            that simplifies international travel. Our mission is to remove barriers and complexities in visa applications, 
-            making it easier for people around the world to pursue their dreams.
-          </p>
-          <p className="text-lg text-gray-700">
-            By combining technology, expertise, and a commitment to excellence, we empower individuals and families to 
-            navigate the visa application process with confidence and clarity.
-          </p>
+          <p className="text-lg text-gray-700 mb-4">{t('pages.about.missionText1')}</p>
+          <p className="text-lg text-gray-700">{t('pages.about.missionText2')}</p>
         </section>
 
         {/* Vision Section */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 mb-6">{t('pages.about.vision')}</h2>
-          <p className="text-lg text-gray-700">
-            To create a world where visa applications are no longer a burden, but a straightforward step toward achieving 
-            your goals. We envision a future where technology and human expertise work together to make international mobility 
-            accessible to everyone.
-          </p>
+          <p className="text-lg text-gray-700">{t('pages.about.visionText')}</p>
         </section>
 
         {/* Values Section */}
@@ -45,42 +34,27 @@ export default function AboutUs() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-2xl font-bold text-blue-600 mb-3">{t('pages.about.transparency')}</h3>
-              <p className="text-gray-700">
-                We believe in clear communication. Our users always know what to expect, what information we need, 
-                and how we use their data.
-              </p>
+              <p className="text-gray-700">{t('pages.about.transparencyDesc')}</p>
             </div>
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-2xl font-bold text-blue-600 mb-3">{t('pages.about.excellence')}</h3>
-              <p className="text-gray-700">
-                We are committed to delivering the highest quality service, continuously improving our platform, 
-                and exceeding user expectations.
-              </p>
+              <p className="text-gray-700">{t('pages.about.excellenceDesc')}</p>
             </div>
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-2xl font-bold text-blue-600 mb-3">{t('pages.about.accessibility')}</h3>
-              <p className="text-gray-700">
-                We believe visa services should be available to everyone. Our platform is designed to be user-friendly, 
-                affordable, and inclusive.
-              </p>
+              <p className="text-gray-700">{t('pages.about.accessibilityDesc')}</p>
             </div>
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-2xl font-bold text-blue-600 mb-3">{t('pages.about.security')}</h3>
-              <p className="text-gray-700">
-                Your data is precious. We implement world-class security measures to protect your personal and sensitive information.
-              </p>
+              <p className="text-gray-700">{t('pages.about.securityDesc')}</p>
             </div>
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-2xl font-bold text-blue-600 mb-3">{t('pages.about.innovation')}</h3>
-              <p className="text-gray-700">
-                We continuously adopt cutting-edge technology and best practices to improve the visa application journey.
-              </p>
+              <p className="text-gray-700">{t('pages.about.innovationDesc')}</p>
             </div>
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-2xl font-bold text-blue-600 mb-3">{t('pages.about.customerFocus')}</h3>
-              <p className="text-gray-700">
-                Our users are at the heart of everything we do. We listen, learn, and evolve based on your feedback.
-              </p>
+              <p className="text-gray-700">{t('pages.about.customerFocusDesc')}</p>
             </div>
           </div>
         </section>
@@ -90,20 +64,20 @@ export default function AboutUs() {
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">{t('pages.about.byTheNumbers')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-4xl font-bold text-blue-600 mb-2">50K+</div>
-              <p className="text-gray-700">{t('pages.about.applicationsProcessed')}</p>
+              <div className="text-4xl font-bold text-blue-600 mb-2">{t('pages.about.stat1Value')}</div>
+              <p className="text-gray-700">{t('pages.about.stat1Label')}</p>
             </div>
             <div>
-              <div className="text-4xl font-bold text-blue-600 mb-2">150+</div>
-              <p className="text-gray-700">{t('pages.about.countriesSupported')}</p>
+              <div className="text-4xl font-bold text-blue-600 mb-2">{t('pages.about.stat2Value')}</div>
+              <p className="text-gray-700">{t('pages.about.stat2Label')}</p>
             </div>
             <div>
-              <div className="text-4xl font-bold text-blue-600 mb-2">98%</div>
-              <p className="text-gray-700">{t('pages.about.successRate')}</p>
+              <div className="text-4xl font-bold text-blue-600 mb-2">{t('pages.about.stat3Value')}</div>
+              <p className="text-gray-700">{t('pages.about.stat3Label')}</p>
             </div>
             <div>
-              <div className="text-4xl font-bold text-blue-600 mb-2">24/7</div>
-              <p className="text-gray-700">{t('pages.about.customerSupport')}</p>
+              <div className="text-4xl font-bold text-blue-600 mb-2">{t('pages.about.stat4Value')}</div>
+              <p className="text-gray-700">{t('pages.about.stat4Label')}</p>
             </div>
           </div>
         </section>
@@ -111,29 +85,25 @@ export default function AboutUs() {
         {/* Team Section */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 mb-8">{t('pages.about.ourTeam')}</h2>
-          <p className="text-lg text-gray-700 mb-8">
-            Our team consists of experienced immigration professionals, software engineers, designers, and customer support specialists 
-            working together to provide you with the best visa application experience possible.
-          </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white rounded-lg shadow-md p-6 text-center">
-              <div className="w-24 h-24 bg-gray-300 rounded-full mx-auto mb-4"></div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">John Smith</h3>
-              <p className="text-blue-600 font-semibold mb-2">Founder & CEO</p>
-              <p className="text-gray-700 text-sm">20+ years in immigration services</p>
+              <div className="w-24 h-24 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <span className="text-3xl text-blue-600 font-bold">SS</span>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Sipra Satpathi</h3>
+              <p className="text-blue-600 font-semibold mb-2">{t('pages.about.teamMemberRole')}</p>
             </div>
-            <div className="bg-white rounded-lg shadow-md p-6 text-center">
-              <div className="w-24 h-24 bg-gray-300 rounded-full mx-auto mb-4"></div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Sarah Johnson</h3>
-              <p className="text-blue-600 font-semibold mb-2">Chief Technology Officer</p>
-              <p className="text-gray-700 text-sm">Fintech & SaaS technology expert</p>
-            </div>
-            <div className="bg-white rounded-lg shadow-md p-6 text-center">
-              <div className="w-24 h-24 bg-gray-300 rounded-full mx-auto mb-4"></div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Michael Chen</h3>
-              <p className="text-blue-600 font-semibold mb-2">Head of Operations</p>
-              <p className="text-gray-700 text-sm">Global operations and compliance</p>
-            </div>
+          </div>
+        </section>
+
+        {/* Legal Information */}
+        <section className="mb-16 bg-gray-100 rounded-lg p-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('pages.about.legalTitle')}</h2>
+          <div className="space-y-2 text-gray-700">
+            <p><strong>{t('pages.about.legalEntityLabel')}:</strong> {t('pages.about.legalEntityValue')}</p>
+            <p><strong>{t('pages.about.legalAddressLabel')}:</strong> {t('pages.about.legalAddressValue')}</p>
+            <p><strong>{t('pages.about.legalContactLabel')}:</strong> +91-9474475384</p>
+            <p><strong>{t('pages.about.legalEmailLabel')}:</strong> admin@clearevisa.com</p>
           </div>
         </section>
 

@@ -43,49 +43,71 @@ import vi from './locales/vi.json';
 import zhCN from './locales/zh-CN.json';
 import zhTW from './locales/zh-TW.json';
 
+const legalPageKeys = ['privacy', 'terms', 'cookies', 'refund'];
+
+function mergeLegalPages(locale) {
+  const mergedPages = { ...(locale.pages || {}) };
+
+  for (const pageKey of legalPageKeys) {
+    mergedPages[pageKey] = {
+      ...(enUS.pages?.[pageKey] || {}),
+      ...(locale.pages?.[pageKey] || {})
+    };
+  }
+
+  return {
+    ...locale,
+    pages: mergedPages
+  };
+}
+
+const resources = {
+  en: mergeLegalPages(en),
+  ar: mergeLegalPages(ar),
+  de: mergeLegalPages(de),
+  es: mergeLegalPages(es),
+  fr: mergeLegalPages(fr),
+  hi: mergeLegalPages(hi),
+  ja: mergeLegalPages(ja),
+  pt: mergeLegalPages(pt),
+  ru: mergeLegalPages(ru),
+  zh: mergeLegalPages(zh),
+  da: mergeLegalPages(da),
+  'en-CA': mergeLegalPages(enCA),
+  'en-GB': mergeLegalPages(enGB),
+  'en-US': mergeLegalPages(enUS),
+  'es-ES': mergeLegalPages(esES),
+  'es-LA': mergeLegalPages(esLA),
+  fi: mergeLegalPages(fi),
+  'fr-CA': mergeLegalPages(frCA),
+  id: mergeLegalPages(id),
+  is: mergeLegalPages(is),
+  it: mergeLegalPages(it),
+  ko: mergeLegalPages(ko),
+  lv: mergeLegalPages(lv),
+  ms: mergeLegalPages(ms),
+  my: mergeLegalPages(my),
+  nl: mergeLegalPages(nl),
+  no: mergeLegalPages(no),
+  pl: mergeLegalPages(pl),
+  'pt-BR': mergeLegalPages(ptBR),
+  'pt-PT': mergeLegalPages(ptPT),
+  sv: mergeLegalPages(sv),
+  th: mergeLegalPages(th),
+  tr: mergeLegalPages(tr),
+  uk: mergeLegalPages(uk),
+  vi: mergeLegalPages(vi),
+  'zh-CN': mergeLegalPages(zhCN),
+  'zh-TW': mergeLegalPages(zhTW)
+};
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    resources: {
-      en:    { translation: en },
-      ar:    { translation: ar },
-      de:    { translation: de },
-      es:    { translation: es },
-      fr:    { translation: fr },
-      hi:    { translation: hi },
-      ja:    { translation: ja },
-      pt:    { translation: pt },
-      ru:    { translation: ru },
-      zh:    { translation: zh },
-      da:    { translation: da },
-      'en-CA': { translation: enCA },
-      'en-GB': { translation: enGB },
-      'en-US': { translation: enUS },
-      'es-ES': { translation: esES },
-      'es-LA': { translation: esLA },
-      fi:    { translation: fi },
-      'fr-CA': { translation: frCA },
-      id:    { translation: id },
-      is:    { translation: is },
-      it:    { translation: it },
-      ko:    { translation: ko },
-      lv:    { translation: lv },
-      ms:    { translation: ms },
-      my:    { translation: my },
-      nl:    { translation: nl },
-      no:    { translation: no },
-      pl:    { translation: pl },
-      'pt-BR': { translation: ptBR },
-      'pt-PT': { translation: ptPT },
-      sv:    { translation: sv },
-      th:    { translation: th },
-      tr:    { translation: tr },
-      uk:    { translation: uk },
-      vi:    { translation: vi },
-      'zh-CN': { translation: zhCN },
-      'zh-TW': { translation: zhTW }
-    },
+    resources: Object.fromEntries(
+      Object.entries(resources).map(([code, translation]) => [code, { translation }])
+    ),
     fallbackLng: 'en-US',
     interpolation: {
       escapeValue: false

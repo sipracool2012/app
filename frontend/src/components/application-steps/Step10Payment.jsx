@@ -35,7 +35,7 @@ const GatewayLogo = ({ id, name }) => {
   );
 };
 
-const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
+const Step10Payment = ({ data, onNext, onBack, isLastStep, onDataChange }) => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [paymentMethod, setPaymentMethod] = useState('');
@@ -95,7 +95,7 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
     feeDisplayMode === 'our_fee_only'
       ? ourFee
       : feeDisplayMode === 'with_discount'
-      ? Math.max(0, fullTotal - discount)
+      ? Math.max(0, ourFee - discount)
       : fullTotal;
   const totalAmount = displayedTotal;
 
@@ -359,7 +359,7 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep }) => {
             <span className="font-bold">{t('forms.step10.totalAmount')}</span>
             <div className="text-right">
               {feeDisplayMode === 'with_discount' && discount > 0 && (
-                <span className="text-sm line-through text-gray-400 block">${fullTotal.toFixed(2)}</span>
+                <span className="text-sm line-through text-gray-400 block">${ourFee.toFixed(2)}</span>
               )}
               <span className="font-bold text-blue-600">${totalAmount.toFixed(2)}</span>
             </div>

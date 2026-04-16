@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-const Step4FamilyDetails = ({ data, onNext, onBack }) => {
+const Step4FamilyDetails = ({ data, onNext, onBack, onDataChange }) => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [countries, setCountries] = useState([]);
@@ -35,6 +35,9 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
     spouseCountryOfBirth: data?.spouseCountryOfBirth || '',
     pakistanConnection: data?.pakistanConnection || 'No'
   });
+  // Report local changes to parent so jumping away via stepper saves latest data
+  useEffect(() => { onDataChange?.(formData); }, [formData]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     fetchConstants();
@@ -59,8 +62,34 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Validate Pakistan connection
+    const newErrors = {};
+    if (!formData.fatherName.trim()) newErrors.fatherName = t('errors.fieldRequired');
+    if (!formData.fatherNationality) newErrors.fatherNationality = t('errors.selectOption');
+    if (!formData.fatherPlaceOfBirth.trim()) newErrors.fatherPlaceOfBirth = t('errors.fieldRequired');
+    if (!formData.fatherCountryOfBirth) newErrors.fatherCountryOfBirth = t('errors.selectOption');
+    if (!formData.motherName.trim()) newErrors.motherName = t('errors.fieldRequired');
+    if (!formData.motherNationality) newErrors.motherNationality = t('errors.selectOption');
+    if (!formData.motherPlaceOfBirth.trim()) newErrors.motherPlaceOfBirth = t('errors.fieldRequired');
+    if (!formData.motherCountryOfBirth) newErrors.motherCountryOfBirth = t('errors.selectOption');
+    if (formData.maritalStatus === 'Married') {
+      if (!formData.spouseName.trim()) newErrors.spouseName = t('errors.fieldRequired');
+      if (!formData.spouseNationality) newErrors.spouseNationality = t('errors.selectOption');
+      if (!formData.spousePlaceOfBirth.trim()) newErrors.spousePlaceOfBirth = t('errors.fieldRequired');
+      if (!formData.spouseCountryOfBirth) newErrors.spouseCountryOfBirth = t('errors.selectOption');
+    }
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      toast({
+        title: t('errors.fixErrors'),
+        description: t('errors.fixErrorsDesc'),
+        variant: 'destructive'
+      });
+      setTimeout(() => {
+        const firstError = document.querySelector('.border-red-500');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
+      return;
+    }
     if (formData.pakistanConnection === 'Yes') {
       toast({
         title: t('forms.step4.cannotProceed'),
@@ -69,7 +98,6 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
       });
       return;
     }
-
     onNext(formData);
   };
 
@@ -96,20 +124,31 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
           <Input
             id="fatherName"
             value={formData.fatherName}
-            onChange={(e) => setFormData({ ...formData, fatherName: e.target.value })}
-            required
+            onChange={(e) => {
+              setFormData({ ...formData, fatherName: e.target.value });
+              setErrors(prev => ({ ...prev, fatherName: '' }));
+            }}
+            className={errors.fatherName ? 'border-red-500' : ''}
           />
+          {errors.fatherName && <p className="text-sm text-red-600">{errors.fatherName}</p>}
         </div>
 
-        <SearchableSelect
-          label={t('forms.step4.fatherNationality')}
-          value={formData.fatherNationality}
-          onValueChange={(value) => setFormData({ ...formData, fatherNationality: value })}
-          options={countries}
-          placeholder={t('forms.step4.selectNationality')}
-          searchPlaceholder={t('forms.step4.searchCountries')}
-          required
-        />
+        <div>
+          <SearchableSelect
+            label={t('forms.step4.fatherNationality')}
+            value={formData.fatherNationality}
+            onValueChange={(value) => {
+              setFormData({ ...formData, fatherNationality: value });
+              setErrors(prev => ({ ...prev, fatherNationality: '' }));
+            }}
+            options={countries}
+            placeholder={t('forms.step4.selectNationality')}
+            searchPlaceholder={t('forms.step4.searchCountries')}
+            error={!!errors.fatherNationality}
+            required
+          />
+          {errors.fatherNationality && <p className="text-sm text-red-600 mt-1">{errors.fatherNationality}</p>}
+        </div>
 
         <SearchableSelect
           label={t('forms.step4.fatherPreviousNationality')}
@@ -127,20 +166,31 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
           <Input
             id="fatherPlaceOfBirth"
             value={formData.fatherPlaceOfBirth}
-            onChange={(e) => setFormData({ ...formData, fatherPlaceOfBirth: e.target.value })}
-            required
+            onChange={(e) => {
+              setFormData({ ...formData, fatherPlaceOfBirth: e.target.value });
+              setErrors(prev => ({ ...prev, fatherPlaceOfBirth: '' }));
+            }}
+            className={errors.fatherPlaceOfBirth ? 'border-red-500' : ''}
           />
+          {errors.fatherPlaceOfBirth && <p className="text-sm text-red-600">{errors.fatherPlaceOfBirth}</p>}
         </div>
 
-        <SearchableSelect
-          label={t('forms.step4.fatherCountryOfBirth')}
-          value={formData.fatherCountryOfBirth}
-          onValueChange={(value) => setFormData({ ...formData, fatherCountryOfBirth: value })}
-          options={countries}
-          placeholder={t('forms.step3.selectCountry')}
-          searchPlaceholder={t('forms.step4.searchCountries')}
-          required
-        />
+        <div>
+          <SearchableSelect
+            label={t('forms.step4.fatherCountryOfBirth')}
+            value={formData.fatherCountryOfBirth}
+            onValueChange={(value) => {
+              setFormData({ ...formData, fatherCountryOfBirth: value });
+              setErrors(prev => ({ ...prev, fatherCountryOfBirth: '' }));
+            }}
+            options={countries}
+            placeholder={t('forms.step3.selectCountry')}
+            searchPlaceholder={t('forms.step4.searchCountries')}
+            error={!!errors.fatherCountryOfBirth}
+            required
+          />
+          {errors.fatherCountryOfBirth && <p className="text-sm text-red-600 mt-1">{errors.fatherCountryOfBirth}</p>}
+        </div>
 
         {/* Mother's Details */}
         <div className="md:col-span-2 border-b pb-2 mb-2 mt-4">
@@ -154,20 +204,31 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
           <Input
             id="motherName"
             value={formData.motherName}
-            onChange={(e) => setFormData({ ...formData, motherName: e.target.value })}
-            required
+            onChange={(e) => {
+              setFormData({ ...formData, motherName: e.target.value });
+              setErrors(prev => ({ ...prev, motherName: '' }));
+            }}
+            className={errors.motherName ? 'border-red-500' : ''}
           />
+          {errors.motherName && <p className="text-sm text-red-600">{errors.motherName}</p>}
         </div>
 
-        <SearchableSelect
-          label={t('forms.step4.motherNationality')}
-          value={formData.motherNationality}
-          onValueChange={(value) => setFormData({ ...formData, motherNationality: value })}
-          options={countries}
-          placeholder={t('forms.step4.selectNationality')}
-          searchPlaceholder={t('forms.step4.searchCountries')}
-          required
-        />
+        <div>
+          <SearchableSelect
+            label={t('forms.step4.motherNationality')}
+            value={formData.motherNationality}
+            onValueChange={(value) => {
+              setFormData({ ...formData, motherNationality: value });
+              setErrors(prev => ({ ...prev, motherNationality: '' }));
+            }}
+            options={countries}
+            placeholder={t('forms.step4.selectNationality')}
+            searchPlaceholder={t('forms.step4.searchCountries')}
+            error={!!errors.motherNationality}
+            required
+          />
+          {errors.motherNationality && <p className="text-sm text-red-600 mt-1">{errors.motherNationality}</p>}
+        </div>
 
         <SearchableSelect
           label={t('forms.step4.motherPreviousNationality')}
@@ -185,20 +246,31 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
           <Input
             id="motherPlaceOfBirth"
             value={formData.motherPlaceOfBirth}
-            onChange={(e) => setFormData({ ...formData, motherPlaceOfBirth: e.target.value })}
-            required
+            onChange={(e) => {
+              setFormData({ ...formData, motherPlaceOfBirth: e.target.value });
+              setErrors(prev => ({ ...prev, motherPlaceOfBirth: '' }));
+            }}
+            className={errors.motherPlaceOfBirth ? 'border-red-500' : ''}
           />
+          {errors.motherPlaceOfBirth && <p className="text-sm text-red-600">{errors.motherPlaceOfBirth}</p>}
         </div>
 
-        <SearchableSelect
-          label={t('forms.step4.motherCountryOfBirth')}
-          value={formData.motherCountryOfBirth}
-          onValueChange={(value) => setFormData({ ...formData, motherCountryOfBirth: value })}
-          options={countries}
-          placeholder={t('forms.step3.selectCountry')}
-          searchPlaceholder={t('forms.step4.searchCountries')}
-          required
-        />
+        <div>
+          <SearchableSelect
+            label={t('forms.step4.motherCountryOfBirth')}
+            value={formData.motherCountryOfBirth}
+            onValueChange={(value) => {
+              setFormData({ ...formData, motherCountryOfBirth: value });
+              setErrors(prev => ({ ...prev, motherCountryOfBirth: '' }));
+            }}
+            options={countries}
+            placeholder={t('forms.step3.selectCountry')}
+            searchPlaceholder={t('forms.step4.searchCountries')}
+            error={!!errors.motherCountryOfBirth}
+            required
+          />
+          {errors.motherCountryOfBirth && <p className="text-sm text-red-600 mt-1">{errors.motherCountryOfBirth}</p>}
+        </div>
 
         {/* Marital Status */}
         <div className="md:col-span-2 border-b pb-2 mb-2 mt-4">
@@ -212,7 +284,6 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
           <Select 
             value={formData.maritalStatus} 
             onValueChange={(value) => setFormData({ ...formData, maritalStatus: value })} 
-            required
           >
             <SelectTrigger>
               <SelectValue />
@@ -240,20 +311,31 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
               <Input
                 id="spouseName"
                 value={formData.spouseName}
-                onChange={(e) => setFormData({ ...formData, spouseName: e.target.value })}
-                required={showSpouseFields}
+                onChange={(e) => {
+                  setFormData({ ...formData, spouseName: e.target.value });
+                  setErrors(prev => ({ ...prev, spouseName: '' }));
+                }}
+                className={errors.spouseName ? 'border-red-500' : ''}
               />
+              {errors.spouseName && <p className="text-sm text-red-600">{errors.spouseName}</p>}
             </div>
 
-            <SearchableSelect
-              label={t('forms.step4.spouseNationality')}
-              value={formData.spouseNationality}
-              onValueChange={(value) => setFormData({ ...formData, spouseNationality: value })}
-              options={countries}
-              placeholder={t('forms.step4.selectNationality')}
-              searchPlaceholder={t('forms.step4.searchCountries')}
-              required={showSpouseFields}
-            />
+            <div>
+              <SearchableSelect
+                label={t('forms.step4.spouseNationality')}
+                value={formData.spouseNationality}
+                onValueChange={(value) => {
+                  setFormData({ ...formData, spouseNationality: value });
+                  setErrors(prev => ({ ...prev, spouseNationality: '' }));
+                }}
+                options={countries}
+                placeholder={t('forms.step4.selectNationality')}
+                searchPlaceholder={t('forms.step4.searchCountries')}
+                error={!!errors.spouseNationality}
+                required
+              />
+              {errors.spouseNationality && <p className="text-sm text-red-600 mt-1">{errors.spouseNationality}</p>}
+            </div>
 
             <SearchableSelect
               label={t('forms.step4.spousePreviousNationality')}
@@ -271,20 +353,31 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
               <Input
                 id="spousePlaceOfBirth"
                 value={formData.spousePlaceOfBirth}
-                onChange={(e) => setFormData({ ...formData, spousePlaceOfBirth: e.target.value })}
-                required={showSpouseFields}
+                onChange={(e) => {
+                  setFormData({ ...formData, spousePlaceOfBirth: e.target.value });
+                  setErrors(prev => ({ ...prev, spousePlaceOfBirth: '' }));
+                }}
+                className={errors.spousePlaceOfBirth ? 'border-red-500' : ''}
               />
+              {errors.spousePlaceOfBirth && <p className="text-sm text-red-600">{errors.spousePlaceOfBirth}</p>}
             </div>
 
-            <SearchableSelect
-              label={t('forms.step4.spouseCountryOfBirth')}
-              value={formData.spouseCountryOfBirth}
-              onValueChange={(value) => setFormData({ ...formData, spouseCountryOfBirth: value })}
-              options={countries}
-              placeholder={t('forms.step3.selectCountry')}
-              searchPlaceholder={t('forms.step4.searchCountries')}
-              required={showSpouseFields}
-            />
+            <div>
+              <SearchableSelect
+                label={t('forms.step4.spouseCountryOfBirth')}
+                value={formData.spouseCountryOfBirth}
+                onValueChange={(value) => {
+                  setFormData({ ...formData, spouseCountryOfBirth: value });
+                  setErrors(prev => ({ ...prev, spouseCountryOfBirth: '' }));
+                }}
+                options={countries}
+                placeholder={t('forms.step3.selectCountry')}
+                searchPlaceholder={t('forms.step4.searchCountries')}
+                error={!!errors.spouseCountryOfBirth}
+                required
+              />
+              {errors.spouseCountryOfBirth && <p className="text-sm text-red-600 mt-1">{errors.spouseCountryOfBirth}</p>}
+            </div>
           </>
         )}
 
@@ -297,7 +390,6 @@ const Step4FamilyDetails = ({ data, onNext, onBack }) => {
             <Select 
               value={formData.pakistanConnection} 
               onValueChange={(value) => setFormData({ ...formData, pakistanConnection: value })} 
-              required
             >
               <SelectTrigger>
                 <SelectValue />

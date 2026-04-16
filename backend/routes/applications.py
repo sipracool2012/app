@@ -3,6 +3,8 @@ from fastapi.responses import StreamingResponse
 from models.application import ApplicationCreate, Application, ApplicationStatusUpdate
 from utils.auth import get_current_user
 from utils.email import send_application_confirmation, send_application_status_update
+from utils.constants import now_ist
+from utils.etourist_csv import save_etourist_csv
 from datetime import datetime, timedelta
 from typing import List, Optional
 from bson import ObjectId
@@ -10,6 +12,7 @@ from pathlib import Path
 import csv
 import io
 import os
+import secrets
 
 router = APIRouter(prefix="/api/applications", tags=["applications"])
 
@@ -34,7 +37,7 @@ db = get_db()
 
 def generate_temp_id() -> str:
     """Generate a temporary application ID: TEMP{DDMMYYYY}{HHMMSS}"""
-    now = datetime.utcnow()
+    now = now_ist()
     return f"TEMP{now.strftime('%d%m%Y%H%M%S')}"
 
 
@@ -59,14 +62,31 @@ async def save_draft(
     draft_data: dict,
     user_id: str = Depends(get_current_user)
 ):
-    """Save or update a draft application. One draft per user per visa (upsert).
+    """Save or update a draft application. Supports multiple drafts per user per visa (family members).
+    If __draftId is present in the payload, update that specific draft.
+    If not, always create a new draft (no per-visa deduplication).
     Also assigns a TEMP ID on first save and resets/extends expiresAt on every save."""
-    now = datetime.utcnow()
-    
+    now = now_ist()
+
+    # Extract the target draft ID (if updating an existing draft)
+    draft_id_str = draft_data.pop("__draftId", None)
+
     # Remove any _id field from incoming data
     draft_data.pop("_id", None)
     draft_data.pop("id", None)
-    
+
+    # Security: never allow an APP ID to be written via save_draft.
+    # APP IDs are assigned exclusively by /assign-id; if the payload carries an APP ID
+    # that was already assigned to a *different* or paid application, strip it so we
+    # don't accidentally duplicate IDs across documents.
+    incoming_app_id = draft_data.get("applicationId", "")
+    if incoming_app_id and not incoming_app_id.startswith("TEMP"):
+        existing_app = await db.applications.find_one(
+            {"applicationId": incoming_app_id, "status": {"$ne": "draft"}}
+        )
+        if existing_app:
+            draft_data.pop("applicationId", None)
+
     expiry_delta = await get_expiry_delta()
     expires_at = now + expiry_delta
 
@@ -76,27 +96,37 @@ async def save_draft(
         "updatedAt": now,
         "expiresAt": expires_at,
     })
-    
-    visa_id = draft_data.get("visaId")
-    draft_query = {"userId": user_id, "status": "draft"}
-    if visa_id:
-        draft_query["visaId"] = visa_id
-    existing = await db.applications.find_one(draft_query)
-    
-    if existing:
+
+    if draft_id_str:
+        # Update the specific draft referenced by draftId
+        try:
+            target_oid = ObjectId(draft_id_str)
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid draftId format")
+
+        existing = await db.applications.find_one(
+            {"_id": target_oid, "userId": user_id, "status": "draft"}
+        )
+        if not existing:
+            raise HTTPException(status_code=404, detail="Draft not found")
+
+        # Preserve existing APP ID if payload doesn't carry one
+        if not draft_data.get("applicationId") and existing.get("applicationId"):
+            draft_data["applicationId"] = existing["applicationId"]
+
         await db.applications.update_one(
-            {"_id": existing["_id"]},
+            {"_id": target_oid},
             {"$set": draft_data}
         )
         return {
             "message": "Draft updated",
-            "draftId": str(existing["_id"]),
-            "tempId": existing.get("applicationId", ""),
+            "draftId": draft_id_str,
+            "tempId": draft_data.get("applicationId", existing.get("applicationId", "")),
             "expiresAt": expires_at.isoformat(),
         }
     else:
+        # Create a new draft — multiple drafts per visa are supported (e.g. family members)
         draft_data["createdAt"] = now
-        # Assign TEMP ID only if not already present
         if not draft_data.get("applicationId"):
             draft_data["applicationId"] = generate_temp_id()
         result = await db.applications.insert_one(draft_data)
@@ -122,12 +152,15 @@ async def get_draft(user_id: str = Depends(get_current_user)):
 
 @router.get("/drafts", response_model=dict)
 async def get_all_drafts(user_id: str = Depends(get_current_user)):
-    """Get all draft applications for the logged-in user."""
+    """Get all draft applications for the logged-in user, newest first."""
     cursor = db.applications.find(
-        {"userId": user_id, "status": "draft"},
-        {"_id": 0}
-    )
-    drafts = await cursor.to_list(length=100)
+        {"userId": user_id, "status": "draft"}
+    ).sort("updatedAt", -1)
+    raw = await cursor.to_list(length=100)
+    drafts = []
+    for doc in raw:
+        doc["id"] = str(doc.pop("_id"))
+        drafts.append(doc)
     return {"drafts": drafts}
 
 
@@ -180,10 +213,13 @@ async def get_my_applications(user_id: str = Depends(get_current_user)):
             "surname": app.get("surname", ""),
             "givenNames": app.get("givenNames", ""),
             "email": app.get("email", ""),
+            "nationality": app.get("nationality", ""),
+            "passportCountryCode": (visa_id.split("-")[0].upper() if visa_id else ""),
             "currentStep": app.get("currentStep", 1),
-            "createdAt": app.get("createdAt", datetime.utcnow()).isoformat() if isinstance(app.get("createdAt"), datetime) else str(app.get("createdAt", "")),
-            "updatedAt": app.get("updatedAt", datetime.utcnow()).isoformat() if isinstance(app.get("updatedAt"), datetime) else str(app.get("updatedAt", "")),
+            "createdAt": app.get("createdAt", now_ist()).isoformat() if isinstance(app.get("createdAt"), datetime) else str(app.get("createdAt", "")),
+            "updatedAt": app.get("updatedAt", now_ist()).isoformat() if isinstance(app.get("updatedAt"), datetime) else str(app.get("updatedAt", "")),
             "submittedDate": app.get("submittedDate", "").isoformat() if isinstance(app.get("submittedDate"), datetime) else str(app.get("submittedDate", "")),
+            "paidAt": app.get("paidAt", "").isoformat() if isinstance(app.get("paidAt"), datetime) else str(app.get("paidAt", "")),
             "expiresAt": app["expiresAt"].isoformat() if isinstance(app.get("expiresAt"), datetime) else str(app.get("expiresAt", "")),
         })
     
@@ -193,24 +229,56 @@ BASE_DIR = Path(__file__).parent.parent
 UPLOAD_DIR = BASE_DIR / "uploads"
 
 def generate_application_id() -> str:
-    """Generate unique application ID using full timestamp"""
-    timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
-    return f"APP{timestamp}"
+    """Generate unique application ID: APP{timestamp}{6-char hex} to avoid timestamp collisions."""
+    timestamp = now_ist().strftime('%Y%m%d%H%M%S')
+    suffix = secrets.token_hex(3).upper()  # 6 hex chars
+    return f"APP{timestamp}{suffix}"
 
 
 @router.post("/assign-id", response_model=dict)
-async def assign_application_id(user_id: str = Depends(get_current_user)):
+async def assign_application_id(
+    body: dict = {},
+    user_id: str = Depends(get_current_user)
+):
     """
     Generate a permanent APP ID for the user's draft and create the upload folder.
     Replaces any existing TEMP ID. Called when the user reaches the Document Upload step.
+    Accepts draftId (MongoDB _id string) to scope the lookup to the exact draft,
+    falling back to userId+visaId if not provided.
     """
-    now = datetime.utcnow()
-    existing = await db.applications.find_one({"userId": user_id, "status": "draft"})
+    from bson import ObjectId
+    now = now_ist()
+    visa_id = body.get("visaId") if body else None
+    draft_id_str = body.get("draftId") if body else None
+
+    # Build query scoped to the correct draft
+    if draft_id_str:
+        try:
+            draft_query: dict = {"_id": ObjectId(draft_id_str), "userId": user_id, "status": "draft"}
+        except Exception:
+            draft_query = {"userId": user_id, "status": "draft"}
+            if visa_id:
+                draft_query["visaId"] = visa_id
+    else:
+        draft_query = {"userId": user_id, "status": "draft"}
+        if visa_id:
+            draft_query["visaId"] = visa_id
+
+    existing = await db.applications.find_one(draft_query)
     existing_id = existing.get("applicationId", "") if existing else ""
 
     # Assign a new APP ID if there's no ID yet or the current one is a TEMP placeholder
     if not existing_id or existing_id.startswith("TEMP"):
-        application_id = generate_application_id()
+        # Keep generating until we find a unique ID (extremely rare collision guard)
+        for _ in range(10):
+            candidate = generate_application_id()
+            clash = await db.applications.find_one({"applicationId": candidate})
+            if not clash:
+                application_id = candidate
+                break
+        else:
+            application_id = generate_application_id()  # last resort
+
         if existing:
             await db.applications.update_one(
                 {"_id": existing["_id"]},
@@ -229,6 +297,7 @@ async def assign_application_id(user_id: str = Depends(get_current_user)):
         else:
             await db.applications.insert_one({
                 "userId": user_id,
+                "visaId": visa_id,
                 "applicationId": application_id,
                 "status": "draft",
                 "createdAt": now,
@@ -250,7 +319,7 @@ async def generate_application_csv(
     user_id: str = Depends(get_current_user)
 ):
     """
-    Generate a transposed CSV file with all application data and save it to the
+    Generate an eTourist-format CSV fill-in sheet and save it to the
     uploads/{applicationId}/ folder. Called when user clicks Pay.
     """
     application_id = application_data.get("applicationId")
@@ -260,24 +329,8 @@ async def generate_application_csv(
             detail="applicationId is required"
         )
 
-    app_folder = UPLOAD_DIR / application_id
-    os.makedirs(app_folder, exist_ok=True)
-
-    csv_path = app_folder / f"{application_id}_application.csv"
-
-    # Write transposed CSV: one row per field (Field, Value)
-    skip_fields = {"_id", "userId", "passportDocument", "photoDocument",
-                   "businessLetter", "businessCard", "organizerInvitation",
-                   "meaPoliticalClearance", "mhaEventClearance",
-                   "medicalInvitationLetter", "confirmedTravelTicket",
-                   "destinationVisaOrPassport"}
-
-    with open(csv_path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow(["Field", "Value"])
-        for key, value in application_data.items():
-            if key not in skip_fields:
-                writer.writerow([key, value if value is not None else ""])
+    csv_path = UPLOAD_DIR / application_id / f"{application_id}_application.csv"
+    save_etourist_csv(application_data, csv_path)
 
     return {"success": True, "csvFile": f"{application_id}_application.csv"}
 
@@ -302,9 +355,9 @@ async def create_application(
         "applicationId": application_id,
         "userId": user_id,
         "status": "pending",
-        "submittedDate": datetime.utcnow(),
-        "createdAt": datetime.utcnow(),
-        "updatedAt": datetime.utcnow()
+        "submittedDate": now_ist(),
+        "createdAt": now_ist(),
+        "updatedAt": now_ist()
     })
     
     # Insert into database
@@ -395,7 +448,7 @@ async def update_application_status(
         {
             "$set": {
                 "status": status_update.status,
-                "updatedAt": datetime.utcnow()
+                "updatedAt": now_ist()
             }
         }
     )
@@ -427,6 +480,36 @@ async def update_application_status(
         "id": application_id,
         "status": status_update.status
     }
+
+@router.get("/{application_id}/etourist-csv")
+async def download_etourist_csv(
+    application_id: str,
+    user_id: str = Depends(get_current_user)
+):
+    """
+    Generate and stream an eTourist-format fill-in CSV for a single application.
+    Always re-generates from the latest DB data so edits are reflected immediately.
+    """
+    from utils.etourist_csv import generate_etourist_csv
+
+    application = await db.applications.find_one({"applicationId": application_id})
+    if not application:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Application not found"
+        )
+
+    # Remove MongoDB internals before passing to the CSV generator
+    application.pop("_id", None)
+
+    csv_content = generate_etourist_csv(application)
+    filename = f"{application_id}_application.csv"
+
+    return StreamingResponse(
+        iter([csv_content]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
 
 @router.get("/export")
 async def export_applications(
@@ -537,7 +620,7 @@ async def export_applications(
     
     # Create response
     output.seek(0)
-    filename = f"visa_applications_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+    filename = f"visa_applications_{now_ist().strftime('%Y%m%d_%H%M%S')}.csv"
     
     return StreamingResponse(
         iter([output.getvalue()]),

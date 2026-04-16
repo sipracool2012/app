@@ -1,47 +1,47 @@
 Field,Value
-visaId,au-tourist-1yr
-passportName,Australia
+visaId,us-tourist-5yr
+passportName,
 passportDemonym,
-selectedVisaOption,"{'id': 'au-tourist-1yr', 'name': '1 year Indian Tourist eVisa', 'visa_type': 'tourist', 'duration': '1yr', 'price': 88, 'govt_fee': 40, 'our_fee': 47, 'processing_fee': 1, 'entries': 'Multiple', 'stay_duration': '90 days per visit', 'validity': '1 year', 'purpose': 'Tourism', 'approved_by': 'April 11', 'approval_days': 5, 'discount_amount': 50}"
+selectedVisaOption,"{'id': 'us-tourist-5yr', 'name': '5 year Indian Tourist eVisa', 'visa_type': 'tourist', 'duration': '5yr', 'price': 129, 'govt_fee': 80, 'our_fee': 47, 'processing_fee': 2, 'entries': 'Multiple', 'stay_duration': '90 days per visit', 'validity': '5 years', 'purpose': 'Tourism', 'approved_by': 'April 10', 'approval_days': 5}"
 email,admin@clearevisa.com
 passportType,Ordinary
-portOfArrival,Ahmedabad Airport
-expectedArrivalDate,2026-04-29
-visaService,1 year Indian Tourist eVisa
+portOfArrival,
+expectedArrivalDate,2026-05-02
+visaService,5 year Indian Tourist eVisa
 visaServiceSubtype,"Tourism, Recreation, Sight-seeing"
 passportNumber,PN123456789
-dateOfIssue,2026-03-29
-dateOfExpiry,2026-05-01
+dateOfIssue,2026-03-30
+dateOfExpiry,2026-04-23
 otherPassportHeld,No
 yogaInstituteName,
 yogaInstituteAddress,
 yogaInstitutePhone,
-expiresAt,2026-04-13T21:40:26.615000
+expiresAt,2026-04-13T20:08:51.534000
 applicationId,APP20260404134701
 educationalQualification,
-givenNames,XS
+givenNames,Rohit
 livedTwoYears,Yes
-qualificationFrom,XS
+qualificationFrom,Test university 
 religion,
 surname,Sinha Mahapatra
 visibleMarks,None
 country,
-houseNoStreet,"D4, Orange Habitat Society"
+houseNoStreet,"B1109, Venkatesh Graffiti Glover"
 phoneCountryCode,+1
 phoneNumber,8436005887
 postalCode,411036
 stateProvince,Maharashtra
 villageTownCity,Pune
 fatherCountryOfBirth,
-fatherName,sdgf
+fatherName,Test
 fatherNationality,
-fatherPlaceOfBirth,Leicester
+fatherPlaceOfBirth,Test
 fatherPreviousNationality,
 maritalStatus,Single
 motherCountryOfBirth,
-motherName,Kathleen Fortay Drewery
+motherName,Test
 motherNationality,
-motherPlaceOfBirth,Stockport
+motherPlaceOfBirth,Test
 motherPreviousNationality,
 pakistanConnection,No
 spouseCountryOfBirth,
@@ -50,8 +50,8 @@ spouseNationality,
 spousePlaceOfBirth,
 spousePreviousNationality,
 designation,
-employerAddress,A
-employerName,A
+employerAddress,Test
+employerName,Test
 employerPhone,
 militaryService,No
 pastOccupation,
@@ -83,19 +83,19 @@ organizerEmail,
 organizerName,
 organizerPhoneCountryCode,+91
 organizerPhoneNumber,
-placesToVisit,A
+placesToVisit,Test
 placesToVisitLine2,
 previousAddress,
 visitedIndiaBefore,No
 visitedSAARCCountries,No
-homeReferenceAddress,iamtravel100@gmail.com
-homeReferenceName,iamtravel100@gmail.com
+homeReferenceAddress,"B1109, Venkatesh Graffiti Glover"
+homeReferenceName,Rohit Sinha Mahapatra
 homeReferencePhoneCountryCode,+1
-homeReferencePhoneNumber,1231231234
-indiaReferenceAddress,JAGANNATHPUR
-indiaReferenceName,Satpati
+homeReferencePhoneNumber,8436005887
+indiaReferenceAddress,"B1109, Venkatesh Graffiti Glover"
+indiaReferenceName,Rohit Sinha Mahapatra
 indiaReferencePhoneCountryCode,+91
-indiaReferencePhoneNumber,9933698424
+indiaReferencePhoneNumber,8436005887
 arrestedConvicted,No
 arrestedConvictedReason,
 asylumSought,No

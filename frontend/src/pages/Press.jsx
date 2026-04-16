@@ -4,65 +4,29 @@ import { useTranslation } from 'react-i18next';
 export default function Press() {
   const { t } = useTranslation();
   const pressReleases = [
-    {
-      date: "March 15, 2026",
-      title: "Visa Application Platform Reaches 50K+ Processed Applications",
-      excerpt: "Major milestone achieved as our platform helps thousands of users successfully navigate visa applications worldwide.",
-      link: "#"
-    },
-    {
-      date: "February 28, 2026",
-      title: "Announcing Partnership with Leading Immigration Consultancies",
-      excerpt: "Strategic partnerships expand our network of expert consultants available on our platform.",
-      link: "#"
-    },
-    {
-      date: "February 10, 2026",
-      title: "New Feature: AI-Powered Document Verification",
-      excerpt: "Introducing intelligent document scanning and verification to streamline the application process.",
-      link: "#"
-    },
-    {
-      date: "January 22, 2026",
-      title: "Series A Funding: $10M Investment Announced",
-      excerpt: "Secured Series A funding to accelerate product development and expand into new markets.",
-      link: "#"
-    },
-    {
-      date: "January 5, 2026",
-      title: "Expanding Support to 50 New Countries",
-      excerpt: "Launched visa application support for 50 additional countries, bringing our total to 150+ destinations.",
-      link: "#"
-    },
-    {
-      date: "December 15, 2025",
-      title: "Awarded Best SaaS Startup in Immigration Technology",
-      excerpt: "Recognized for innovation and customer satisfaction in the immigration tech sector.",
-      link: "#"
-    }
+    { dateKey: 'r1Date', titleKey: 'r1Title', excerptKey: 'r1Excerpt', link: '#' },
+    { dateKey: 'r2Date', titleKey: 'r2Title', excerptKey: 'r2Excerpt', link: '#' },
+    { dateKey: 'r3Date', titleKey: 'r3Title', excerptKey: 'r3Excerpt', link: '#' },
+    { dateKey: 'r4Date', titleKey: 'r4Title', excerptKey: 'r4Excerpt', link: '#' },
+    { dateKey: 'r5Date', titleKey: 'r5Title', excerptKey: 'r5Excerpt', link: '#' },
+    { dateKey: 'r6Date', titleKey: 'r6Title', excerptKey: 'r6Excerpt', link: '#' },
   ];
 
   const inTheNews = [
-    {
-      source: "TechCrunch",
-      title: "How One Startup is Simplifying Visa Applications",
-      date: "March 10, 2026"
-    },
-    {
-      source: "Forbes",
-      title: "The Future of Immigration: Q&A with Our CEO",
-      date: "February 20, 2026"
-    },
-    {
-      source: "VentureBeat",
-      title: "Immigration Tech Platform Raises $10M Series A",
-      date: "January 25, 2026"
-    },
-    {
-      source: "BBC News",
-      title: "Making Global Immigration Easier with Technology",
-      date: "December 10, 2025"
-    }
+    { sourceKey: 'n1Source', titleKey: 'n1Title', dateKey: 'n1Date' },
+    { sourceKey: 'n2Source', titleKey: 'n2Title', dateKey: 'n2Date' },
+    { sourceKey: 'n3Source', titleKey: 'n3Title', dateKey: 'n3Date' },
+    { sourceKey: 'n4Source', titleKey: 'n4Title', dateKey: 'n4Date' },
+  ];
+
+  const companyFacts = [
+    { labelKey: 'factFounded', valueKey: 'factFoundedValue' },
+    { labelKey: 'factHQ', valueKey: 'factHQValue' },
+    { labelKey: 'factTeam', valueKey: 'factTeamValue' },
+    { labelKey: 'factCountries', valueKey: 'factCountriesValue' },
+    { labelKey: 'factApps', valueKey: 'factAppsValue' },
+    { labelKey: 'factSuccess', valueKey: 'factSuccessValue' },
+    { labelKey: 'factLanguages', valueKey: 'factLanguagesValue' },
   ];
 
   return (
@@ -81,12 +45,10 @@ export default function Press() {
         <section className="mb-16 bg-white rounded-lg shadow-md p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('pages.press.pressContact')}</h2>
           <div className="space-y-3 text-gray-700">
-            <p><strong>Media Relations:</strong> press@clearevisa.com</p>
+            <p><strong>{t('pages.press.mediaRelations')}:</strong> press@clearevisa.com</p>
             {/*<p><strong>Phone:</strong> +1 (555) 123-4567</p>*/}
-            <p><strong>Address:</strong> B1109 - Graffiti Glover Commercial, Pune, MH, 411036, India</p>
-            <p className="mt-4">
-              For press inquiries, interview requests, or media kits, please contact our press team at the email above.
-            </p>
+            <p><strong>{t('pages.press.pressAddress')}</strong></p>
+            <p className="mt-4">{t('pages.press.pressInquiries')}</p>
           </div>
         </section>
 
@@ -96,9 +58,9 @@ export default function Press() {
           <div className="space-y-6">
             {pressReleases.map((release, idx) => (
               <article key={idx} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                <div className="text-sm text-gray-500 mb-2">{release.date}</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">{release.title}</h3>
-                <p className="text-gray-700 mb-4">{release.excerpt}</p>
+                <div className="text-sm text-gray-500 mb-2">{t(`pages.press.${release.dateKey}`)}</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{t(`pages.press.${release.titleKey}`)}</h3>
+                <p className="text-gray-700 mb-4">{t(`pages.press.${release.excerptKey}`)}</p>
                 <a href={release.link} className="text-blue-600 hover:text-blue-800 font-semibold">
                   {t('pages.press.readFullRelease')} →
                 </a>
@@ -113,9 +75,9 @@ export default function Press() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {inTheNews.map((article, idx) => (
               <article key={idx} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                <div className="text-sm text-blue-600 font-semibold mb-2">{article.source}</div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3">{article.title}</h3>
-                <div className="text-sm text-gray-500">{article.date}</div>
+                <div className="text-sm text-blue-600 font-semibold mb-2">{t(`pages.press.${article.sourceKey}`)}</div>
+                <h3 className="text-lg font-bold text-gray-900 mb-3">{t(`pages.press.${article.titleKey}`)}</h3>
+                <div className="text-sm text-gray-500">{t(`pages.press.${article.dateKey}`)}</div>
               </article>
             ))}
           </div>
@@ -125,9 +87,7 @@ export default function Press() {
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 mb-8">{t('pages.press.mediaKit')}</h2>
           <div className="bg-white rounded-lg shadow-md p-8">
-            <p className="text-gray-700 mb-6">
-              Download our media kit for logos, company photos, founder headshots, and other resources for press coverage.
-            </p>
+            <p className="text-gray-700 mb-6">{t('pages.press.mediaKitDesc')}</p>
             <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
               {t('pages.press.downloadMediaKit')}
             </button>
@@ -139,13 +99,9 @@ export default function Press() {
           <h2 className="text-3xl font-bold text-gray-900 mb-8">{t('pages.press.companyFacts')}</h2>
           <div className="bg-white rounded-lg shadow-md p-8">
             <ul className="space-y-3 text-gray-700">
-              <li>• <strong>Founded:</strong> 2025</li>
-              <li>• <strong>Headquarters:</strong> Pune, Maharashtra, India</li>
-              <li>• <strong>Team Size:</strong> 50+ employees globally</li>
-              <li>• <strong>Countries Served:</strong> 150+</li>
-              <li>• <strong>Applications Processed:</strong> 50,000+</li>
-              <li>• <strong>Success Rate:</strong> 98%</li>
-              <li>• <strong>Languages Supported:</strong> 25+</li>
+              {companyFacts.map((fact) => (
+                <li key={fact.labelKey}>• <strong>{t(`pages.press.${fact.labelKey}`)}:</strong> {t(`pages.press.${fact.valueKey}`)}</li>
+              ))}
              {/* <li>•  <strong>Funding:</strong> Series A: $10M </li> */}
             </ul>
           </div>

@@ -14,18 +14,47 @@ export function SearchableSelect({
   label,
   required = false,
   disabled = false,
-  emptyMessage = "No results found."
+  emptyMessage = "No results found.",
+  error = false
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const containerRef = useRef(null);
   const inputRef = useRef(null);
+  // Tracks the accumulated prefix buffer and the debounce timer
+  const typeAheadRef = useRef({ buffer: '', timer: null });
 
   const filteredOptions = options.filter(option =>
     option.toLowerCase().includes(search.toLowerCase())
   );
 
   const selectedValue = value || '';
+
+  // Type-ahead: when the trigger button is focused (dropdown closed), typing
+  // letters quickly builds a prefix buffer (e.g. "ind" → "India").
+  // Buffer resets 600ms after the last keypress.
+  const handleTriggerKeyDown = (e) => {
+    if (disabled || open) return;
+    const char = e.key.toLowerCase();
+    if (char.length !== 1 || !/[a-z0-9 ]/.test(char)) return;
+
+    e.preventDefault();
+    const ta = typeAheadRef.current;
+
+    // Accumulate buffer
+    ta.buffer += char;
+
+    // Clear any pending reset
+    if (ta.timer) clearTimeout(ta.timer);
+    ta.timer = setTimeout(() => { ta.buffer = ''; }, 600);
+
+    // Find first option whose name starts with the current buffer
+    const match = options.find(opt => opt.toLowerCase().startsWith(ta.buffer));
+    if (match) {
+      onValueChange(match);
+    }
+    // If no match, do nothing (keep current selection)
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -59,9 +88,11 @@ export function SearchableSelect({
           aria-expanded={open}
           className={cn(
             "w-full justify-between font-normal",
-            !selectedValue && "text-muted-foreground"
+            !selectedValue && "text-muted-foreground",
+            error && "border-red-500"
           )}
           onClick={() => !disabled && setOpen(!open)}
+          onKeyDown={handleTriggerKeyDown}
           disabled={disabled}
         >
           <span className="truncate">

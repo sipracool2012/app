@@ -31,6 +31,11 @@ class UserRoleUpdate(BaseModel):
     role: str  # user, admin, super_admin
 
 
+class UserEmailRoleUpdate(BaseModel):
+    email: EmailStr
+    role: str  # admin or super_admin
+
+
 class OTPVerifyRequest(BaseModel):
     """Request body for /api/auth/verify-otp."""
     email: EmailStr
@@ -47,6 +52,15 @@ class SignupOTPVerifyRequest(BaseModel):
     """Request body for /api/auth/verify-signup-otp."""
     email: EmailStr
     otp: str
+
+class ForgotPasswordRequest(BaseModel):
+    """Request body for /api/auth/forgot-password."""
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    """Request body for /api/auth/reset-password."""
+    token: str
+    new_password: str
 
 class User(BaseModel):
     id: Optional[str] = Field(alias="_id", default=None)

@@ -1,19 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { PhoneInput } from '../ui/phone-input';
+import { MultiSelectCountries } from '../ui/multi-select-countries';
 import { ChevronLeft } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-const Step6VisaDetails = ({ data, onNext, onBack }) => {
+const Step6VisaDetails = ({ data, onNext, onBack, onDataChange }) => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [phoneCodes, setPhoneCodes] = useState([]);
+  const [countries, setCountries] = useState([]);
 
   const [formData, setFormData] = useState({
     placesToVisit: data?.placesToVisit || '',
@@ -52,10 +54,24 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
     organizerPhoneNumber: data?.organizerPhoneNumber || '',
     organizerEmail: data?.organizerEmail || ''
   });
+  // Report local changes to parent so jumping away via stepper saves latest data
+  useEffect(() => { onDataChange?.(formData); }, [formData]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [errors, setErrors] = useState({});
 
   React.useEffect(() => {
     fetchPhoneCodes();
+    fetchCountries();
   }, []);
+
+  const fetchCountries = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/constants/countries`);
+      const data = await response.json();
+      setCountries(data.countries || []);
+    } catch (error) {
+      console.error('Failed to fetch countries:', error);
+    }
+  };
 
   const fetchPhoneCodes = async () => {
     try {
@@ -69,6 +85,47 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const newErrors = {};
+    if (!formData.placesToVisit.trim()) newErrors.placesToVisit = t('errors.fieldRequired');
+    if (formData.visitedIndiaBefore === 'Yes') {
+      if (!formData.previousAddress.trim()) newErrors.previousAddress = t('errors.fieldRequired');
+      if (!formData.citiesPreviouslyVisited.trim()) newErrors.citiesPreviouslyVisited = t('errors.fieldRequired');
+      if (!formData.lastIndianVisaNo.trim()) newErrors.lastIndianVisaNo = t('errors.fieldRequired');
+      if (!formData.oldVisaType) newErrors.oldVisaType = t('errors.selectOption');
+      if (!formData.oldVisaIssuePlace.trim()) newErrors.oldVisaIssuePlace = t('errors.fieldRequired');
+      if (!formData.oldVisaIssueDate) newErrors.oldVisaIssueDate = t('errors.fieldRequired');
+    }
+    if (isBusinessVisa) {
+      if (!formData.companyName.trim()) newErrors.companyName = t('errors.fieldRequired');
+      if (!formData.companyAddress.trim()) newErrors.companyAddress = t('errors.fieldRequired');
+      if (!formData.companyPhoneNumber.trim()) newErrors.companyPhoneNumber = t('errors.phoneRequired');
+      if (!formData.indianFirmName.trim()) newErrors.indianFirmName = t('errors.fieldRequired');
+      if (!formData.indianFirmAddress.trim()) newErrors.indianFirmAddress = t('errors.fieldRequired');
+      if (!formData.indianFirmPhoneNumber.trim()) newErrors.indianFirmPhoneNumber = t('errors.phoneRequired');
+    }
+    if (isConferenceVisa) {
+      if (!formData.conferenceName.trim()) newErrors.conferenceName = t('errors.fieldRequired');
+      if (!formData.conferenceStartDate) newErrors.conferenceStartDate = t('errors.fieldRequired');
+      if (!formData.conferenceEndDate) newErrors.conferenceEndDate = t('errors.fieldRequired');
+      if (!formData.conferenceAddress.trim()) newErrors.conferenceAddress = t('errors.fieldRequired');
+      if (!formData.organizerName.trim()) newErrors.organizerName = t('errors.fieldRequired');
+      if (!formData.organizerAddress.trim()) newErrors.organizerAddress = t('errors.fieldRequired');
+      if (!formData.organizerPhoneNumber.trim()) newErrors.organizerPhoneNumber = t('errors.phoneRequired');
+      if (!formData.organizerEmail.trim()) newErrors.organizerEmail = t('errors.fieldRequired');
+    }
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      toast({
+        title: t('errors.fixErrors'),
+        description: t('errors.fixErrorsDesc'),
+        variant: 'destructive'
+      });
+      setTimeout(() => {
+        const firstError = document.querySelector('.border-red-500');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
+      return;
+    }
     onNext(formData);
   };
 
@@ -91,9 +148,13 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
           <Input
             id="placesToVisit"
             value={formData.placesToVisit}
-            onChange={(e) => setFormData({ ...formData, placesToVisit: e.target.value })}
-            required
+            onChange={(e) => {
+              setFormData({ ...formData, placesToVisit: e.target.value });
+              setErrors(prev => ({ ...prev, placesToVisit: '' }));
+            }}
+            className={errors.placesToVisit ? 'border-red-500' : ''}
           />
+          {errors.placesToVisit && <p className="text-sm text-red-600">{errors.placesToVisit}</p>}
         </div>
 
         <div className="space-y-2 md:col-span-2">
@@ -153,49 +214,67 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
           <>
             <div className="space-y-2">
               <Label htmlFor="previousAddress">
-                Previous Address
+                {t('forms.step6.previousAddress')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="previousAddress"
                 value={formData.previousAddress}
-                onChange={(e) => setFormData({ ...formData, previousAddress: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, previousAddress: e.target.value });
+                  setErrors(prev => ({ ...prev, previousAddress: '' }));
+                }}
                 placeholder="NA if not remember"
+                className={errors.previousAddress ? 'border-red-500' : ''}
               />
+              {errors.previousAddress && <p className="text-sm text-red-600">{errors.previousAddress}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="citiesPreviouslyVisited">
-                {t('forms.step6.citiesPreviouslyVisited')}
+                {t('forms.step6.citiesPreviouslyVisited')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="citiesPreviouslyVisited"
                 value={formData.citiesPreviouslyVisited}
-                onChange={(e) => setFormData({ ...formData, citiesPreviouslyVisited: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, citiesPreviouslyVisited: e.target.value });
+                  setErrors(prev => ({ ...prev, citiesPreviouslyVisited: '' }));
+                }}
                 placeholder="NA if not remember"
+                className={errors.citiesPreviouslyVisited ? 'border-red-500' : ''}
               />
+              {errors.citiesPreviouslyVisited && <p className="text-sm text-red-600">{errors.citiesPreviouslyVisited}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="lastIndianVisaNo">
-                Last Indian Visa No/Currently valid Indian Visa No
+                Last Indian Visa No/Currently valid Indian Visa No <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="lastIndianVisaNo"
                 value={formData.lastIndianVisaNo}
-                onChange={(e) => setFormData({ ...formData, lastIndianVisaNo: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, lastIndianVisaNo: e.target.value });
+                  setErrors(prev => ({ ...prev, lastIndianVisaNo: '' }));
+                }}
                 placeholder="NA if not remember"
+                className={errors.lastIndianVisaNo ? 'border-red-500' : ''}
               />
+              {errors.lastIndianVisaNo && <p className="text-sm text-red-600">{errors.lastIndianVisaNo}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="oldVisaType">
-                Old Visa Type
+                Old Visa Type <span className="text-red-500">*</span>
               </Label>
               <Select 
                 value={formData.oldVisaType} 
-                onValueChange={(value) => setFormData({ ...formData, oldVisaType: value })}
+                onValueChange={(value) => {
+                  setFormData({ ...formData, oldVisaType: value });
+                  setErrors(prev => ({ ...prev, oldVisaType: '' }));
+                }}
               >
-                <SelectTrigger>
+                <SelectTrigger className={errors.oldVisaType ? 'border-red-500' : ''}>
                   <SelectValue placeholder="Select old visa type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -222,31 +301,42 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
                   <SelectItem value="Visit Visa">{t('forms.step6.visitVisa')}</SelectItem>
                 </SelectContent>
               </Select>
+              {errors.oldVisaType && <p className="text-sm text-red-600">{errors.oldVisaType}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="oldVisaIssuePlace">
-                Old Visa Issue Place
+                Old Visa Issue Place <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="oldVisaIssuePlace"
                 value={formData.oldVisaIssuePlace}
-                onChange={(e) => setFormData({ ...formData, oldVisaIssuePlace: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, oldVisaIssuePlace: e.target.value });
+                  setErrors(prev => ({ ...prev, oldVisaIssuePlace: '' }));
+                }}
                 placeholder="online if not remember"
+                className={errors.oldVisaIssuePlace ? 'border-red-500' : ''}
               />
+              {errors.oldVisaIssuePlace && <p className="text-sm text-red-600">{errors.oldVisaIssuePlace}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="oldVisaIssueDate">
-                Old Visa Issue Date
+                Old Visa Issue Date <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="oldVisaIssueDate"
                 type="date"
                 value={formData.oldVisaIssueDate}
-                onChange={(e) => setFormData({ ...formData, oldVisaIssueDate: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, oldVisaIssueDate: e.target.value });
+                  setErrors(prev => ({ ...prev, oldVisaIssueDate: '' }));
+                }}
                 max={new Date().toISOString().split('T')[0]}
+                className={errors.oldVisaIssueDate ? 'border-red-500' : ''}
               />
+              {errors.oldVisaIssueDate && <p className="text-sm text-red-600">{errors.oldVisaIssueDate}</p>}
             </div>
           </>
         )}
@@ -256,15 +346,14 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
           <h4 className="text-lg font-semibold text-gray-900 mb-4">{t('forms.step6.otherInfo')}</h4>
         </div>
 
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="countriesVisitedLast10Years">
-            Countries Visited in Last 10 years (Optional)
-          </Label>
-          <Input
-            id="countriesVisitedLast10Years"
+        <div className="md:col-span-2">
+          <MultiSelectCountries
+            label="Countries Visited in Last 10 years (Optional)"
             value={formData.countriesVisitedLast10Years}
-            onChange={(e) => setFormData({ ...formData, countriesVisitedLast10Years: e.target.value })}
-            placeholder="List countries separated by commas"
+            onChange={(val) => setFormData({ ...formData, countriesVisitedLast10Years: val })}
+            options={countries}
+            placeholder="Select countries visited..."
+            searchPlaceholder="Search countries..."
           />
         </div>
 
@@ -295,26 +384,34 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
 
             <div className="space-y-2">
               <Label htmlFor="companyName">
-                Name <span className="text-red-500">*</span>
+                {t('forms.step6.companyName')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="companyName"
                 value={formData.companyName}
-                onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                required={isBusinessVisa}
+                onChange={(e) => {
+                  setFormData({ ...formData, companyName: e.target.value });
+                  setErrors(prev => ({ ...prev, companyName: '' }));
+                }}
+                className={errors.companyName ? 'border-red-500' : ''}
               />
+              {errors.companyName && <p className="text-sm text-red-600">{errors.companyName}</p>}
             </div>
 
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="companyAddress">
-                Address <span className="text-red-500">*</span>
+                {t('forms.step6.companyAddress')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="companyAddress"
                 value={formData.companyAddress}
-                onChange={(e) => setFormData({ ...formData, companyAddress: e.target.value })}
-                required={isBusinessVisa}
+                onChange={(e) => {
+                  setFormData({ ...formData, companyAddress: e.target.value });
+                  setErrors(prev => ({ ...prev, companyAddress: '' }));
+                }}
+                className={errors.companyAddress ? 'border-red-500' : ''}
               />
+              {errors.companyAddress && <p className="text-sm text-red-600">{errors.companyAddress}</p>}
             </div>
 
             <div className="md:col-span-2">
@@ -323,15 +420,18 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
                 countryCode={formData.companyPhoneCountryCode}
                 phoneNumber={formData.companyPhoneNumber}
                 onCountryCodeChange={(value) => setFormData({ ...formData, companyPhoneCountryCode: value })}
-                onPhoneNumberChange={(value) => setFormData({ ...formData, companyPhoneNumber: value })}
+                onPhoneNumberChange={(value) => {
+                  setFormData({ ...formData, companyPhoneNumber: value });
+                  setErrors(prev => ({ ...prev, companyPhoneNumber: '' }));
+                }}
                 phoneCodes={phoneCodes}
-                required={isBusinessVisa}
               />
+              {errors.companyPhoneNumber && <p className="text-sm text-red-600 mt-1">{errors.companyPhoneNumber}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="companyWebsite">
-                Website
+                {t('common.website')}
               </Label>
               <Input
                 id="companyWebsite"
@@ -348,26 +448,34 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
 
             <div className="space-y-2">
               <Label htmlFor="indianFirmName">
-                Name <span className="text-red-500">*</span>
+                {t('forms.step6.indianFirmName')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="indianFirmName"
                 value={formData.indianFirmName}
-                onChange={(e) => setFormData({ ...formData, indianFirmName: e.target.value })}
-                required={isBusinessVisa}
+                onChange={(e) => {
+                  setFormData({ ...formData, indianFirmName: e.target.value });
+                  setErrors(prev => ({ ...prev, indianFirmName: '' }));
+                }}
+                className={errors.indianFirmName ? 'border-red-500' : ''}
               />
+              {errors.indianFirmName && <p className="text-sm text-red-600">{errors.indianFirmName}</p>}
             </div>
 
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="indianFirmAddress">
-                Address <span className="text-red-500">*</span>
+                {t('forms.step6.indianFirmAddress')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="indianFirmAddress"
                 value={formData.indianFirmAddress}
-                onChange={(e) => setFormData({ ...formData, indianFirmAddress: e.target.value })}
-                required={isBusinessVisa}
+                onChange={(e) => {
+                  setFormData({ ...formData, indianFirmAddress: e.target.value });
+                  setErrors(prev => ({ ...prev, indianFirmAddress: '' }));
+                }}
+                className={errors.indianFirmAddress ? 'border-red-500' : ''}
               />
+              {errors.indianFirmAddress && <p className="text-sm text-red-600">{errors.indianFirmAddress}</p>}
             </div>
 
             <div className="md:col-span-2">
@@ -376,15 +484,18 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
                 countryCode={formData.indianFirmPhoneCountryCode}
                 phoneNumber={formData.indianFirmPhoneNumber}
                 onCountryCodeChange={(value) => setFormData({ ...formData, indianFirmPhoneCountryCode: value })}
-                onPhoneNumberChange={(value) => setFormData({ ...formData, indianFirmPhoneNumber: value })}
+                onPhoneNumberChange={(value) => {
+                  setFormData({ ...formData, indianFirmPhoneNumber: value });
+                  setErrors(prev => ({ ...prev, indianFirmPhoneNumber: '' }));
+                }}
                 phoneCodes={phoneCodes}
-                required={isBusinessVisa}
               />
+              {errors.indianFirmPhoneNumber && <p className="text-sm text-red-600 mt-1">{errors.indianFirmPhoneNumber}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="indianFirmWebsite">
-                Website
+                {t('common.website')}
               </Label>
               <Input
                 id="indianFirmWebsite"
@@ -406,53 +517,69 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
 
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="conferenceName">
-                Name/subject of conference <span className="text-red-500">*</span>
+                {t('forms.step6.conferenceSubject')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="conferenceName"
                 value={formData.conferenceName}
-                onChange={(e) => setFormData({ ...formData, conferenceName: e.target.value })}
-                required={isConferenceVisa}
+                onChange={(e) => {
+                  setFormData({ ...formData, conferenceName: e.target.value });
+                  setErrors(prev => ({ ...prev, conferenceName: '' }));
+                }}
+                className={errors.conferenceName ? 'border-red-500' : ''}
               />
+              {errors.conferenceName && <p className="text-sm text-red-600">{errors.conferenceName}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="conferenceStartDate">
-                Start date <span className="text-red-500">*</span>
+                {t('forms.step6.startDate')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="conferenceStartDate"
                 type="date"
                 value={formData.conferenceStartDate}
-                onChange={(e) => setFormData({ ...formData, conferenceStartDate: e.target.value })}
-                required={isConferenceVisa}
+                onChange={(e) => {
+                  setFormData({ ...formData, conferenceStartDate: e.target.value });
+                  setErrors(prev => ({ ...prev, conferenceStartDate: '' }));
+                }}
+                className={errors.conferenceStartDate ? 'border-red-500' : ''}
               />
+              {errors.conferenceStartDate && <p className="text-sm text-red-600">{errors.conferenceStartDate}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="conferenceEndDate">
-                End date <span className="text-red-500">*</span>
+                {t('forms.step6.endDate')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="conferenceEndDate"
                 type="date"
                 value={formData.conferenceEndDate}
-                onChange={(e) => setFormData({ ...formData, conferenceEndDate: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, conferenceEndDate: e.target.value });
+                  setErrors(prev => ({ ...prev, conferenceEndDate: '' }));
+                }}
                 min={formData.conferenceStartDate}
-                required={isConferenceVisa}
+                className={errors.conferenceEndDate ? 'border-red-500' : ''}
               />
+              {errors.conferenceEndDate && <p className="text-sm text-red-600">{errors.conferenceEndDate}</p>}
             </div>
 
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="conferenceAddress">
-                Full address <span className="text-red-500">*</span>
+                {t('common.address')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="conferenceAddress"
                 value={formData.conferenceAddress}
-                onChange={(e) => setFormData({ ...formData, conferenceAddress: e.target.value })}
-                required={isConferenceVisa}
+                onChange={(e) => {
+                  setFormData({ ...formData, conferenceAddress: e.target.value });
+                  setErrors(prev => ({ ...prev, conferenceAddress: '' }));
+                }}
+                className={errors.conferenceAddress ? 'border-red-500' : ''}
               />
+              {errors.conferenceAddress && <p className="text-sm text-red-600">{errors.conferenceAddress}</p>}
             </div>
 
             <div className="md:col-span-2 border-t pt-4 mt-4">
@@ -461,26 +588,34 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
 
             <div className="space-y-2">
               <Label htmlFor="organizerName">
-                Name of organizer <span className="text-red-500">*</span>
+                {t('forms.step6.organizerName')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="organizerName"
                 value={formData.organizerName}
-                onChange={(e) => setFormData({ ...formData, organizerName: e.target.value })}
-                required={isConferenceVisa}
+                onChange={(e) => {
+                  setFormData({ ...formData, organizerName: e.target.value });
+                  setErrors(prev => ({ ...prev, organizerName: '' }));
+                }}
+                className={errors.organizerName ? 'border-red-500' : ''}
               />
+              {errors.organizerName && <p className="text-sm text-red-600">{errors.organizerName}</p>}
             </div>
 
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="organizerAddress">
-                Address <span className="text-red-500">*</span>
+                {t('forms.step6.organizerAddress')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="organizerAddress"
                 value={formData.organizerAddress}
-                onChange={(e) => setFormData({ ...formData, organizerAddress: e.target.value })}
-                required={isConferenceVisa}
+                onChange={(e) => {
+                  setFormData({ ...formData, organizerAddress: e.target.value });
+                  setErrors(prev => ({ ...prev, organizerAddress: '' }));
+                }}
+                className={errors.organizerAddress ? 'border-red-500' : ''}
               />
+              {errors.organizerAddress && <p className="text-sm text-red-600">{errors.organizerAddress}</p>}
             </div>
 
             <div className="md:col-span-2">
@@ -489,23 +624,30 @@ const Step6VisaDetails = ({ data, onNext, onBack }) => {
                 countryCode={formData.organizerPhoneCountryCode}
                 phoneNumber={formData.organizerPhoneNumber}
                 onCountryCodeChange={(value) => setFormData({ ...formData, organizerPhoneCountryCode: value })}
-                onPhoneNumberChange={(value) => setFormData({ ...formData, organizerPhoneNumber: value })}
+                onPhoneNumberChange={(value) => {
+                  setFormData({ ...formData, organizerPhoneNumber: value });
+                  setErrors(prev => ({ ...prev, organizerPhoneNumber: '' }));
+                }}
                 phoneCodes={phoneCodes}
-                required={isConferenceVisa}
               />
+              {errors.organizerPhoneNumber && <p className="text-sm text-red-600 mt-1">{errors.organizerPhoneNumber}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="organizerEmail">
-                Email id <span className="text-red-500">*</span>
+                {t('forms.step6.emailId')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="organizerEmail"
                 type="email"
                 value={formData.organizerEmail}
-                onChange={(e) => setFormData({ ...formData, organizerEmail: e.target.value })}
-                required={isConferenceVisa}
+                onChange={(e) => {
+                  setFormData({ ...formData, organizerEmail: e.target.value });
+                  setErrors(prev => ({ ...prev, organizerEmail: '' }));
+                }}
+                className={errors.organizerEmail ? 'border-red-500' : ''}
               />
+              {errors.organizerEmail && <p className="text-sm text-red-600">{errors.organizerEmail}</p>}
             </div>
           </>
         )}

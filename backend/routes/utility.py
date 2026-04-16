@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends
+from pydantic import BaseModel, EmailStr
 from models.utility_settings import UtilitySettings, UtilitySettingsUpdate, FEE_DISPLAY_MODES
 from utils.auth import get_current_user
 from datetime import datetime
@@ -93,3 +94,25 @@ async def update_utility_settings(
         "draft_expiry_minutes": doc.get("draft_expiry_minutes", 0),
         "draft_expiry_seconds": doc.get("draft_expiry_seconds", 0),
     }
+
+
+class ContactFormRequest(BaseModel):
+    name: str
+    email: EmailStr
+    subject: str = ""
+    message: str
+    category: str = ""
+
+
+@router.post("/contact")
+async def submit_contact_form(form: ContactFormRequest):
+    """Public endpoint — forwards a contact form message to the support inbox."""
+    from utils.email import send_contact_form_email
+    await send_contact_form_email(
+        name=form.name,
+        email=form.email,
+        category=form.category,
+        subject_line=form.subject,
+        message=form.message,
+    )
+    return {"message": "Message received. We will get back to you within 24 hours."}

@@ -3,8 +3,502 @@
 All notable changes to the Clear eVisa project are documented in this file.
 
 Format: `## [Date] - Description`
+---
+
+## [2026-04-16] - i18n: Legal page fallback system & expanded locale translations
+
+### Changed
+- **i18n architecture refactored with legal page fallback mechanism** (`frontend/src/i18n/index.js`)
+  - Created `mergeLegalPages()` function that ensures all locales inherit missing legal page translations from `en-US`
+  - Applied to all 34 supported locales: `['privacy', 'terms', 'cookies', 'refund']` keys are guaranteed to exist across all languages, preventing missing translation errors
+  - Improved robustness for legal compliance pages without requiring every locale to be manually updated
+
+#### English locale expanded — new homepage, auth, and application flow keys (`frontend/src/i18n/locales/en.json`)
+  - **Homepage content**: `selectCountry`, `noOptions`, `selectPurpose`, `visaRequirements`, `visaOptionsCount`, `embassyVisa`, `embassyDesc`, `trustedBy`, `statistics`, `stat1–4 Value/Label`, `howItWorks`, `howItWorksDesc`, `step1–3 Title/Desc`, `testimonialsTitle`, `trustpilotRating`, `partnersTitle`, `trustedByBrands`, `loadingCountries`, `visitorVisa`, `embassyVisaDesc`, `embassyVisaNote`, `ctaTitle`, `ctaSubtitle`, `ctaButton`
+  - **Application flow**: `submitting`, `submitApplication`
+  - **Auth form**: `confirmPassword`, `signingIn`, `creatingAccount`, `loginSuccess`, `loginError`, `registerSuccess`, `registerError`, `passwordMismatch`, `yourName`
+
+#### All 34 locale files updated with fallback support
+  - `ar.json`, `da.json`, `de.json`, `en-CA.json`, `en-GB.json`, `en.json`, `es-ES.json`, `es-LA.json`, `es.json`, `fi.json`, `fr-CA.json`, `fr.json`, `hi.json`, `id.json`, `is.json`, `it.json`, `ja.json`, `ko.json`, `lv.json`, `ms.json`, `my.json`, `nl.json`, `no.json`, `pl.json`, `pt-BR.json`, `pt-PT.json`, `pt.json`, `ru.json`, `sv.json`, `th.json`, `tr.json`, `uk.json`, `vi.json`, `zh-CN.json`, `zh-TW.json`, `zh.json`
+  - All locales now benefit from automatic English fallback for legal pages
 
 ---
+
+## [2026-04-13] - i18n: all 10 static pages fully translated (incl. Refund Policy); fr.json French content complete
+
+### Changed
+
+#### JSX components — hardcoded text replaced with `t()` calls
+
+- **`frontend/src/pages/AboutUs.jsx`**
+  - All body text now uses `t()`: `missionText1`, `missionText2`, `visionText`, 6 value descriptions (`transparencyDesc` → `customerFocusDesc`), stats section (`stat1–4 Value/Label`), `byTheNumbers`, `teamMemberRole`, legal section (`legalTitle`, `legalEntityLabel/Value`, `legalAddressLabel/Value`, `legalContactLabel`, `legalEmailLabel`)
+
+- **`frontend/src/pages/Careers.jsx`**
+  - `jobs` array converted from hardcoded objects to `{ id, titleKey, deptKey, descKey }` — rendered with `t(\`pages.careers.${job.titleKey}\`)`
+  - Added `perks` array (`{ titleKey, descKey }`) and `cultureItems` array (`{ labelKey, descKey }`) — both rendered via `.map()` using `t()`
+  - Culture intro uses `t('pages.careers.cultureIntro')`
+
+- **`frontend/src/pages/Press.jsx`**
+  - `pressReleases` array: `{ dateKey, titleKey, excerptKey, link }` — rendered using `t()`
+  - `inTheNews` array: `{ sourceKey, titleKey, dateKey }` — rendered using `t()`
+  - `companyFacts` array: `{ labelKey, valueKey }` — rendered using `t()`
+  - Media contact text and `mediaKitDesc` use `t()`
+
+- **`frontend/src/pages/HelpCenter.jsx`**
+  - `categories` array: `{ id, nameKey }` — rendered using `t(\`pages.helpCenter.${cat.nameKey}\`)`
+  - `articles` object: each entry is `{ id, questionKey, answerKey }` — rendered using `t()`
+  - `contactSupportDesc` uses `t()`
+
+- **`frontend/src/pages/ContactUs.jsx`**
+  - Info section headings/labels: `emailSectionTitle`, `generalInquiries`, `customerSupport`, `phoneSectionTitle`, `phoneHours`, `addressSectionTitle`, `hoursSectionTitle`, `hoursCustomerLabel/Value`, `hoursSalesLabel/Value`
+  - Error/state text: `sendError2`, `sending`, `requiredFields`
+  - Category select options: `catSupport`, `catSales`, `catPartnership`, `catPress`, `catOther`
+  - Other ways section: `liveChatTitle/Desc`, `mobileAppTitle/Desc`, `socialTitle`, `socialFollow`
+
+- **`frontend/src/pages/FAQ.jsx`**
+  - `faqs` array: `{ id, catKey, qKey, aKey }` — rendered using `t(\`pages.faq.${faq.catKey}\`)` etc.
+  - `categoryKeys` array replaces derived `categories`: `['cat1', …, 'cat10']`
+  - `cantFind` paragraph uses `t()`
+
+- **`frontend/src/pages/PrivacyPolicy.jsx`** — complete rewrite
+  - All 13 sections use `t()` with array-mapped `<li>` items for bullet lists
+  - Pattern: `{['s2_1i1','s2_1i2',...].map(k => <li key={k}>{t(\`pages.privacy.${k}\`)}</li>)}`
+
+- **`frontend/src/pages/TermsOfService.jsx`** — complete rewrite
+  - All 16 sections use `t()` with array-mapped bullet lists
+  - Fixed duplicate `s7Outro` bug: removed erroneous `<a>` wrapper around the refund outro line
+
+- **`frontend/src/pages/CookiePolicy.jsx`** — complete rewrite
+  - All 14 sections use `t()` with array-mapped bullet lists
+  - Section 12 cookie table: column headers and all 4 rows rendered dynamically via `{[1,2,3,4].map(n => ...)}` using template literal keys (`s12R${n}Name/Type/Purpose/Duration`)
+
+- **`frontend/src/pages/RefundPolicy.jsx`** — rewritten with `t()` calls
+  - Added `useTranslation` import (was missing entirely)
+  - Overview, sections 1–6 all use `t()` including the subsection paragraphs and bullet lists
+  - Section 1 bullet items use array-map pattern; inline `<a>` links in section 6 use their own keys (`s6ContactLink`, `s6TermsLink`, `s6PrivacyLink`)
+
+#### `frontend/src/i18n/locales/en-US.json` — new `pages.refund` section added
+  - 50+ keys covering all 6 sections: overview, eligibility (full/partial/no refund), application fee, government levy, our services, how to request, contact
+
+#### `frontend/src/i18n/locales/fr.json` — French translations added for all 10 pages
+
+- **`pages.about`**: added `missionText1`, `missionText2`, `visionText`, 6 value descriptions, `stat1–4 Value/Label`, `teamMemberRole`, full legal section (7 keys)
+- **`pages.careers`**: added `remote`, `fullTime`, `perk1–6 Title/Desc`, `cultureIntro`, 6 culture items (`cultureTrust` → `cultureTransparency`), `job1–6 Title/Dept/Desc`
+- **`pages.contact`**: added `emailSectionTitle`, `generalInquiries`, `customerSupport`, `phoneSectionTitle`, `phoneHours`, `addressSectionTitle`, `hoursSectionTitle`, hours labels/values, `sendError2`, `requiredFields`, 5 category labels, `liveChatTitle/Desc`, `mobileAppTitle/Desc`, `socialTitle`, `socialFollow`
+- **`pages.faq`**: added `cantFind`, `cat1–10`, `q1–18`, `a1–18`
+- **`pages.helpCenter`**: added `contactSupportDesc`, `catGettingStarted` through `catTechnical`, `q1–18`, `a1–18`
+- **`pages.press`**: added `mediaRelations`, `pressAddress`, `pressInquiries`, `mediaKitDesc`, all 8 `fact*` label/value pairs, `r1–6 Date/Title/Excerpt`, `n1–4 Source/Title/Date`
+- **`pages.privacy`**: added all 40+ keys for 13 sections (s1Title–s13P1) — intro/list/outro paragraphs and all bullet items
+- **`pages.terms`**: added all 50+ keys for 16 sections (s1Title–s16P1) — paragraphs, bullet lists, disclaimers
+- **`pages.cookies`**: added all 80+ keys for 14 sections (s1Title–s14P1) — paragraphs, bullet lists, browser instructions, table column headers, and all 4 cookie table row cells
+
+---
+
+## [2026-04-13] - Mobile-friendly header, admin tab icons-only on mobile, Step 8 blank page fix
+
+### Added
+- **Mobile hamburger menu** (`frontend/src/components/Header.jsx`)
+  - On screens narrower than `md` (768 px) the nav links and all auth buttons are hidden; a hamburger (☰ / ✕) toggle button appears in their place
+  - Tapping it opens a full-width dropdown beneath the logo bar containing: nav links, a 2-column language grid, and full-width auth buttons
+  - Navigating to any page or selecting a language automatically closes the menu
+  - Added `Menu` and `X` icons from `lucide-react`; added `isMobileMenuOpen` state; `onLogout` and `handleLanguageChange` both call `closeMobileMenu()`
+
+### Changed
+- **Admin panel tabs: icon-only on small screens** (`frontend/src/pages/AdminPanel.jsx`)
+  - All 7 tab trigger labels wrapped in `<span className="hidden sm:inline">` — on mobile only the icon is visible, eliminating the overlapping text
+  - Added `title` attribute to each trigger for tooltip on hover/long-press
+  - Removed `max-w-5xl` width cap from the `TabsList` so the 7-column grid fills the available container width at all breakpoints
+
+### Fixed
+- **Step 8 blank page on navigation from Step 7** (`frontend/src/components/application-steps/Step8AdditionalQuestions.jsx`)
+  - `useEffect(() => { onDataChange?.(formData); }, [formData])` was placed *before* the `useState` declaration for `formData`, causing a "Cannot access 'formData' before initialization" runtime error that rendered a blank page whenever Step 8 was mounted
+  - Moved the `useEffect` to after the `formData` `useState` declaration
+
+---
+
+## [2026-04-12] - Stepper: jump to any visited step, save live data on jump, persist maxVisitedStep
+
+### Changed
+
+#### `frontend/src/pages/VisaApplication.jsx`
+- **`maxVisitedStep` state + `maxVisitedStepRef`**: tracks the furthest step ever reached so the stepper can unlock forward navigation after going back. A ref mirror allows `saveDraft` (stable `useCallback`) to always read the current value without stale closures.
+- **`_maxVisitedStep` persisted in every draft save**: the furthest step is now stored in the backend draft document so forward navigation is fully restored on page reload / draft resume.
+- **Draft load restores `_maxVisitedStep`**: both the specific-draftId path and the same-visa modal click now read `draft._maxVisitedStep` (falling back to `savedStep`) and call `updateMaxVisitedStep()`.
+- **`jumpToStep(stepId)`**: saves any unsaved changes from the current step (merges `currentStepDataRef`) before navigating; works for both backward and forward jumps within `maxVisitedStep`.
+- **`handleBack` fixed**: previously saved the draft with `prevStep` which caused the draft's `currentStep` to decrease on every Back press — breaking forward navigation from the stepper on the next load. Now saves at `currentStep` and merges `currentStepDataRef.current` before switching, so live edits are not lost on Back either.
+- **Stepper dot 4-state coloring**: completed (solid green ✓), active (green `⋯`), visited-ahead / user went back (white with green border + green number — clickable), not yet reached (gray — disabled). Green connector line extends to `maxVisitedStep`.
+
+#### `frontend/src/components/application-steps/Step{1-9}*.jsx` (all 9 active form steps)
+- Added `onDataChange` prop to each component signature.
+- Added `useEffect(() => { onDataChange?.(formData); }, [formData])` — fires on every local field change, keeping `currentStepDataRef` in the parent up to date so `jumpToStep` and `handleBack` always have the latest unsaved values.
+- Steps 5, 6, 8, 9 had `useEffect` added to their React import (previously only had `useState`).
+
+---
+
+## [2026-04-12] - Form validation hardening: asterisks, error borders, Step8 reasons, Step9 doc gate
+
+### Fixed / Added
+
+#### Step 1 — Basic Info
+- **Port of Arrival** `SearchableSelect`: added `required` prop → shows red `*` asterisk next to label
+
+#### Step 2 — Applicant Details
+- **Visible Identification Marks**: added `*` to label, wired `border-red-500`, added `errors.visibleMarks` validation (`'This field is required.'`), clear-on-change, error message display
+
+#### Step 3 — Address Details
+- **Country** `SearchableSelect`: added `required` → shows `*`
+- **Phone No.** `PhoneInput`: added `required` → shows `*`; `error` prop was already wired — confirmed working
+
+#### Step 4 — Family Details
+- All 6 `SearchableSelect` fields now show `*`: Father's Nationality, Father's Country of Birth, Mother's Nationality, Mother's Country of Birth, Spouse's Nationality, Spouse's Country of Birth
+
+#### Step 7 — References
+- Both **Phone No.** `PhoneInput` fields (India reference + home country reference): added `required` → shows `*`; added `error={!!errors.<field>}` for red border on validation failure
+
+#### Step 8 — Additional Questions
+- Added `useToast` import and `errors` state
+- `handleSubmit` now validates: for each of the 6 Yes/No questions, if **Yes** is selected the reason field must be non-empty → `errors[reasonKey] = 'Please provide a reason.'`
+- Toast shown listing the problem; scroll-to-first-error fires after state update
+- Each reason `<Input>` now has `border-red-500` bound to `errors[question.reasonKey]`, inline error message below, and `setErrors` clear-on-change
+
+#### Step 9 — Document Upload
+- `handleSubmit` now **blocks proceeding** if any required document is missing
+- Always required: Passport copy, Recent photograph
+- Business visa: Indian firm invitation letter, Business card
+- Conference visa: Organizer invitation, MEA political clearance, MHA event clearance
+- Medical visa: Medical invitation letter
+- Transit visa: Confirmed travel ticket, Destination visa/passport
+- Missing documents listed by name in the destructive toast message
+
+#### Social media icons — Footer & ContactUs
+- **`frontend/src/components/Footer.jsx`**: Replaced plain text Twitter/Facebook/LinkedIn links with branded circular icon buttons (black for X/Twitter, `#1877F2` for Facebook, `#0A66C2` for LinkedIn) using `lucide-react` icons
+- **`frontend/src/pages/ContactUs.jsx`**: Same branded icon buttons in the "Social Media" card of the Additional Ways to Connect section
+
+#### Build fixes (scroll-to-error multi-replace regressions)
+- **`Step2ApplicantDetails.jsx`**: Restored missing `onNext(formData);` and `if (loading)` guard that were consumed by a bad multi-replace context match
+- **`Step3AddressDetails.jsx`**: Same restoration
+- **`Step5ProfessionalDetails.jsx`**: Restored missing `onNext(formData); };` and `return (<form ...>` opening
+- **`Step6VisaDetails.jsx`**: Restored missing `onNext(formData); };`, visa-type const declarations, and `return (<form ...>` opening
+
+---
+
+## [2026-04-12] - SearchableSelect error border fix + scroll-to-first-error on all steps
+
+### Fixed
+- **`frontend/src/components/ui/phone-input.jsx`**: Added `error` prop (default `false`). When truthy, applies `border-red-500` to the phone number `<Input>` (number field only, not the country code selector).
+- **`frontend/src/components/application-steps/Step1BasicInfo.jsx`**: Added `error={!!errors.portOfArrival}` to the Port of Arrival `SearchableSelect` — now turns red on validation failure.
+- **`frontend/src/components/application-steps/Step3AddressDetails.jsx`**: Added `error={!!errors.country}` to the Country `SearchableSelect` and `error={!!errors.phoneNumber}` to the `PhoneInput` — both turn red on validation failure.
+- **Scroll-to-first-error** added to `handleSubmit` in all 7 steps with validation (Steps 1–7). After validation fires and errors are set, the page smoothly scrolls to the first `.border-red-500` element so users aren't left looking at the Continue button while errors are off-screen.
+
+---
+
+## [2026-04-12] - SearchableSelect error border + Countries multi-select tags
+
+### Fixed
+- **`frontend/src/components/ui/searchable-select.jsx`**: Added `error` prop (default `false`). When truthy, applies `border-red-500` to the trigger button, so the dropdown goes red on validation failure just like plain `<Input>` fields.
+- **`frontend/src/components/application-steps/Step4FamilyDetails.jsx`**: Passed `error={!!errors.<field>}` to all 6 `SearchableSelect` fields that have validation (`fatherNationality`, `fatherCountryOfBirth`, `motherNationality`, `motherCountryOfBirth`, `spouseNationality`, `spouseCountryOfBirth`). Red border now appears correctly when users skip these fields.
+
+### Added
+- **`frontend/src/components/ui/multi-select-countries.jsx`**: New `MultiSelectCountries` component. Shows a searchable dropdown of countries; selected items render as removable tag chips. Stores the value as a comma-separated string for backend compatibility.
+- **`frontend/src/components/application-steps/Step6VisaDetails.jsx`**: Replaced the plain text `<Input>` for "Countries Visited in Last 10 years" with the new `MultiSelectCountries` component. Step6 now fetches the country list from `/api/constants/countries` on mount.
+
+---
+
+## [2026-04-12] - Consistent error styling: remove native browser validation from Steps 1–9
+
+### Fixed
+- **Browser native "Please fill out this field." tooltip suppressed across all active steps**
+  - Root cause: HTML `required` attribute on `<input>`, `<select>`, and `<PhoneInput>` elements causes the browser to run its own validation and show a native tooltip *before* the React `handleSubmit` logic fires, bypassing the custom red-border + red-text error pattern.
+  - **`frontend/src/components/ui/phone-input.jsx`**: Removed `required={required}` from the native `<input type="tel">` element. The `required` prop is still accepted by the component and controls the `*` asterisk label only.
+  - **Steps 1–9** (`Step1BasicInfo`, `Step2ApplicantDetails`, `Step3AddressDetails`, `Step4FamilyDetails`, `Step5ProfessionalDetails`, `Step6VisaDetails`, `Step7References`, `Step8AdditionalQuestions`, `Step9DocumentUpload`): Removed all HTML `required` / `required={expr}` attributes from every `<input>`, `<select>`, `<Select>`, `<SearchableSelect>`, and `<PhoneInput>` element (25 removals total).
+  - All validation is now 100% JS-driven via each step's `handleSubmit` → `errors` state → `border-red-500` input highlight + `text-sm text-red-600` inline message — consistent throughout the entire form.
+
+---
+
+## [2026-04-11] - eTourist CSV: visa-type-specific middle section (Business / Conference / Transit)
+
+### Changed
+- **`backend/utils/etourist_csv.py`**
+  - Middle section of the CSV (between VISA SOUGHT and PREVIOUS VISA) is now chosen automatically based on visa type:
+    | Visa type | Section rendered |
+    |---|---|
+    | Tourist / Medical / Medical Attendant | MEETINGS FRIENDS/RELATIVES/YOGA (unchanged) |
+    | Business | BUSINESS DETAILS (applicant company + Indian firm) |
+    | Conference | CONFERENCE DETAILS (conference name/dates/venue/organizer) |
+    | Transit | TRANSIT TRAVEL DETAILS (destination country + visa-on-arrival) |
+  - `_flatten()` now derives `visa_category` from `visaService` string or `selectedVisaOption.purpose` (case-insensitive match on "business", "conference", "transit"; everything else → "tourist")
+  - Template uses a `__VISA_TYPE_SECTION__` sentinel that `generate_etourist_rows()` replaces at runtime with the correct section
+  - Added 4 section constants: `_SECTION_YOGA`, `_SECTION_BUSINESS`, `_SECTION_CONFERENCE`, `_SECTION_TRANSIT`
+  - Business fields covered: `companyName`, `companyAddress+companyPhoneCountryCode+companyPhoneNumber`, `companyWebsite`, `indianFirmName`, `indianFirmAddress+indianFirmPhoneCountryCode+indianFirmPhoneNumber`, `indianFirmWebsite`
+  - Conference fields covered: `conferenceName`, `conferenceStartDate`, `conferenceEndDate`, `conferenceAddress`, `organizerName`, `organizerAddress`, `organizerPhoneCountryCode+organizerPhoneNumber`, `organizerEmail`
+  - Transit fields covered: `destinationVisaOrPassport`, `VisaOnArrival`
+
+---
+
+## [2026-04-11] - Admin panel per-application Download uses eTourist CSV format
+
+### Added
+- **`GET /api/applications/{application_id}/etourist-csv`** (`backend/routes/applications.py`)
+  - New endpoint that fetches the application from MongoDB and streams a freshly generated eTourist-format fill-in CSV
+  - Always re-generates from latest DB data so any admin edits are reflected immediately (no stale cached file)
+
+### Changed
+- **Admin panel per-application Download button** (`frontend/src/pages/AdminPanel.jsx`)
+  - `downloadCSV()` now calls `/api/applications/{applicationId}/etourist-csv` instead of the old `/export?ids=…` flat-dump endpoint
+  - "Download All" button is unchanged (still uses the flat `/export` endpoint — eTourist format is per-applicant only)
+
+---
+
+## [2026-04-11] - eTourist CSV module: portal fill-in sheet replaces generic CSV export
+
+### Added
+- **`backend/utils/etourist_csv.py`** — new reusable module that generates an eTourist-format 4-column CSV fill-in sheet
+  - `generate_etourist_rows(data)` → list of `[Label, Value, Notes, Extra]` rows matching the Indian eVisa online portal field order
+  - `generate_etourist_csv(data)` → returns CSV as a UTF-8 string (for streaming / email attachment)
+  - `save_etourist_csv(data, path)` → writes directly to a `Path` (for on-disk storage)
+  - **Field resolution logic:**
+    - `<<Check passport>>` and `<…>` instructions → kept verbatim for the operator to check manually
+    - Static literals (`NA`, `Yes`, `NO`, `Tick it`, `e-Visa`, `<BLANK>`, etc.) → copied as-is
+    - `fieldA+fieldB` concatenation specs → joined with a space (handles all phone number combos)
+    - camelCase/snake_case identifier → looked up in flattened form data
+    - Nested `selectedVisaOption` → automatically flattened: `duration` ← `stay_duration`, `entries`, `visa_type` ← `name`
+  - **Conditional rows:** spouse fields (`spouseName`, `spouseNationality`, `spousePreviousNationality`, `spousePlaceOfBirth`, `spouseCountryOfBirth`) output blank unless `maritalStatus == 'Married'`
+  - **Additional questions:** `spec_c` column holds the reason field name; resolved value written in col-C of output (e.g. `arrestedConvictedReason`)
+  - Complete 130+ row template covering all portal sections: First Page → Applicant Details → Passport Details → Address → Family → Professional → Visa Sought → Meetings/Yoga → Previous Visa → Other Info → SAARC → References → Additional Questions
+
+### Changed
+- **`POST /api/applications/generate-csv`** (`backend/routes/applications.py`)
+  - Replaced generic `Field, Value` transposed dump with `save_etourist_csv()` call
+  - Output file `{APP_ID}_application.csv` now follows the eTourist portal column order (Label / Value / Notes / Extra)
+  - This file is used by admin panel "Download" button (unchanged) and auto-created on payment
+
+---
+
+## [2026-04-11] - Redesigned application form progress stepper to match campaign-style UI
+
+### Changed
+- **Progress stepper** (`frontend/src/pages/VisaApplication.jsx`)
+  - Circles enlarged from `w-7 h-7` to `w-8 h-8` with a `ring-2 ring-white` border for a cleaner look.
+  - Completed steps: green filled circle with white ✓ checkmark (unchanged).
+  - **Active/current step**: changed from blue filled circle with step number → **green filled circle with `⋯` (MoreHorizontal) icon**, matching the campaign-style stepper in the screenshot.
+  - Future steps: light gray circle showing step number (text-xs font-semibold).
+  - Active step label now renders in `text-green-700 font-semibold`; completed labels in `text-gray-700`; future labels in `text-gray-400`.
+  - Connector line top offset updated from `14px` → `16px` to align with the larger circles.
+  - Added `MoreHorizontal` to the Lucide icon imports.
+
+---
+
+## [2026-04-10] - Steps 3–7 & 9 validation: inline errors on all required fields; Step 6 conditional previous-visit fields; Step 9 arrival date re-check
+
+### Changed
+- **Step 3 — Address Details** (`frontend/src/components/application-steps/Step3AddressDetails.jsx`)
+  - Added `errors` state and full `handleSubmit` validation; all `*` fields (house/street, town/city, country, state/province, postal code, phone number) now block Next with red border + "This field is required." inline message; errors clear on input
+
+- **Step 4 — Family Details** (`frontend/src/components/application-steps/Step4FamilyDetails.jsx`)
+  - Added `errors` state; father's name/nationality/place of birth/country of birth and mother's equivalent fields all required with inline errors; spouse fields (name, nationality, place of birth, country of birth) conditionally required when marital status = Married; Pakistan connection block preserved
+
+- **Step 5 — Professional Details** (`frontend/src/components/application-steps/Step5ProfessionalDetails.jsx`)
+  - Added `useToast` import, `errors` state and `handleSubmit` validation; Present Occupation (select), Employer Name, Employer Address are required with inline errors; red `SelectTrigger` border on unselected occupation
+
+- **Step 6 — Visa Details** (`frontend/src/components/application-steps/Step6VisaDetails.jsx`)
+  - Added `errors` state and full validation; Places to Visit always required
+  - **Previous visit conditional**: when "Have you visited India before?" = Yes, all 6 sub-fields become required — Previous Address, Cities Previously Visited, Last Indian Visa No, Old Visa Type (select), Old Visa Issue Place, Old Visa Issue Date; user must enter something (NA is acceptable)
+  - **Business visa**: Company name/address/phone and Indian firm name/address/phone required when visa type is business
+  - **Conference visa**: Conference name/start date/end date/address and organiser name/address/phone/email required when visa type is conference
+  - All conditional fields show red border + inline error message; clear on change
+
+- **Step 7 — References** (`frontend/src/components/application-steps/Step7References.jsx`)
+  - Added `errors` state and validation; India reference name/address/phone and home-country reference name/address/phone all required with inline errors
+
+- **Step 9 — Document Upload** (`frontend/src/components/application-steps/Step9DocumentUpload.jsx`)
+  - On Continue, re-checks `data.expectedArrivalDate` is still ≥ today +4 days IST (same rule as Step 1); if the date has become too soon since Step 1 was filled, a blocking toast fires directing the user back to Step 1 to choose a new arrival date
+
+- **Step 2 — Applicant Details** (`frontend/src/components/application-steps/Step2ApplicantDetails.jsx`)
+  - Added `errors` state; surname, given names, religion (select), educational qualification (select), qualification from all required with red border + inline error on submit; errors clear on change
+
+---
+
+## [2026-04-10] - Step 1 validation: IST arrival date, expiry cross-check, phone with country code, required field blocking
+
+### Changed
+- **Step 1 — Basic Info** (`frontend/src/components/application-steps/Step1BasicInfo.jsx`)
+  - **Port of Arrival**: already keyboard-searchable via `SearchableSelect`; added inline error if not selected on submit
+  - **Expected Date of Arrival**: fixed `getMinArrivalDateIST()` to use true IST (UTC+5:30) +4 days (was UTC +5, one day off); inline red error appears if selected date is too early; changing arrival date auto-clears expiry if it would become invalid
+  - **Date of Expiry**: dynamic `min` attribute set to arrival date + 6 months via `getMinExpiryDate()`; inline error fires in real-time on selection if under the 6-month threshold; hint text shown when arrival date is set
+  - **Phone Number (Additional Information section)**: split into country code prefix input (default `+91`, max 4 digits, digits-only enforcement) and phone number input; validates 5–15 digits on submit
+  - **Required field blocking**: replaced incomplete `handleSubmit` with full validation — blocks `onNext()` if any `*` field is empty/invalid (port of arrival, arrival date, expiry date, visa subtype, passport number, date of issue, conditional yoga/additional fields); toast shown listing errors; inline `errors` state drives per-field red messages
+  - Added `errors` state for per-field inline error display
+  - Added `yogaInstitutePhoneCode` field to `formData` (default `+91`)
+
+---
+
+## [2026-04-10] - IST timezone throughout; Admin Panel table improvements; My Applications countdown + date fix
+
+### Changed
+- **IST timezone — all backend timestamps** (`backend/utils/constants.py`, `backend/routes/applications.py`, `backend/routes/auth.py`, `backend/routes/payment_gateways.py`, `backend/server.py`)
+  - Added `now_ist()` helper in `backend/utils/constants.py` — returns current naive datetime in IST (UTC+05:30) using `datetime.now(timezone(timedelta(hours=5, minutes=30))).replace(tzinfo=None)`
+  - Replaced every `datetime.utcnow()` call across all backend route files and background tasks with `now_ist()`
+  - Affected: OTP expiry, password reset token expiry, draft creation/update/expiry, application submission timestamps, `paidAt`, `updatedAt`, `createdAt`, background cleanup loop comparisons
+
+- **IST timezone — all frontend date displays** (`frontend/src/pages/MyApplications.jsx`, `frontend/src/pages/AdminPanel.jsx`)
+  - `formatDate()` in `MyApplications.jsx` updated to use `timeZone: 'Asia/Kolkata'` with `en-IN` locale → displays as `10 Apr 2026, 10:15 PM`
+  - Admin Panel Submitted column updated to `toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', ... })` including time with AM/PM
+
+- **Admin Panel — Applications table** (`frontend/src/pages/AdminPanel.jsx`, `backend/routes/applications.py`)
+  - **Name column**: now shows `GivenNames Surname` (first name first) instead of reversed order
+  - **Nationality column**: shows flag icon (via `FlagIcon` component) + passport country name side by side
+  - **Visa Type column**: replaced raw visa string with short labels — `Tourist 30D`, `Tourist 1Y`, `Tourist 5Y`, `Business`, `Medical`, `Med. Attendant`, `Conference`, `Transit`
+  - **Submitted column**: shows `paidAt` (IST) for any status in paid/pending_review/submitted/processed/approved/rejected; falls back to `submittedDate` otherwise; formatted with time
+  - Backend `my-applications` response now includes `nationality`, `passportCountryCode` (derived from visaId prefix), and `paidAt` fields
+
+### Added
+- **Live IST clock banner** (`frontend/src/pages/MyApplications.jsx`, `frontend/src/pages/VisaApplication.jsx`)
+  - `ISTClock` component renders a blue info banner on the My Applications page and on every step of the visa application form (between the progress stepper and the step content card)
+  - Ticks every second using `setInterval`
+  - Displays: `Time in India (UTC+05:30) — 10:15:30 PM · Friday, 10 April 2026`
+
+- **Expiry countdown timer on draft cards** (`frontend/src/pages/MyApplications.jsx`)
+  - `ExpiryCountdown` component shows remaining time until draft expires below the status badge
+  - Format: `2d 3h 14m remaining` / `5h 22m 10s remaining` / `14m 30s remaining`
+  - Colour: grey (> 24h), orange (< 24h), red (< 1h), red "Expired" when time is up
+  - Live ticking via `setInterval`, cleans up on unmount
+
+- **Submitted date fix** (`frontend/src/pages/MyApplications.jsx`)
+  - For paid/processed/approved/rejected statuses, shows `paidAt` (actual payment timestamp) instead of the previously empty `submittedDate`
+
+---
+
+## [2026-04-10] - India Tourism landing page + default route change
+
+### Added
+- **India Tourism page** (`frontend/src/pages/IndiaTourism.jsx`) — new purely visual page accessible at `/india-tourism` and now the default root route (`/`)
+  - Full-screen hero with Unsplash imagery, headline "Discover the Soul of India", and dual CTAs
+  - Stats bar: 28+ States, 40 UNESCO Heritage Sites, 193+ Nationalities Welcome
+  - Destinations grid: 6 iconic locations (Taj Mahal, Kerala Backwaters, Rajasthan, Goa, Varanasi, Himachal Pradesh) with image cards and category tags
+  - "Why India" split section: 6 experience tiles (Cuisine, Heritage, Coastline, Wildlife, Festivals, Photography)
+  - Photo mosaic: 5-tile grid with hover zoom effects
+  - eVisa process steps band (4-step consultancy flow, dark blue background)
+  - Best time to visit: 3 seasonal cards (Peak/Summer/Monsoon)
+  - FAQ accordion: 5 India travel + eVisa questions
+  - Final full-bleed CTA section with Holi festival background image
+  - All "Get Your India eVisa" buttons navigate to `/home` (the visa application widget)
+  - No API calls or auth required — fully static/visual page
+
+### Changed
+- **App.js** (`frontend/src/App.js`)
+  - Root route `/` changed from `Home` to `IndiaTourism` — `clearevisa.com` now lands on the India Tourism page
+  - `Home` (visa application widget) moved to `/home`
+  - `IndiaTourism` retained as alias at `/india-tourism`
+  - `IndiaTourism` import added
+
+---
+
+## [2026-04-10] - Legal/static pages: real business details + Indian eVisa consultancy positioning
+
+### Changed
+- **About Us** (`frontend/src/pages/AboutUs.jsx`)
+  - Mission and Vision rewritten to describe Indian eVisa document verification & preparation consultancy (not an application submission service)
+  - Stats updated: `50K+ Clients Assisted`, `193+ Passport Nationalities Served`, `India eVisa Specialist`, `24/7 Support`
+  - Fake placeholder team (John Smith, Sarah Johnson, Michael Chen) replaced with real team member: **Sipra Satpathi — Sole Proprietor**
+  - Added **Legal Information** section: entity name `Clear eVisa Services`, registered address, phone `+91-9474475384`, email `admin@clearevisa.com`
+
+- **Contact Us** (`frontend/src/pages/ContactUs.jsx`)
+  - Legal entity name and full registered address updated
+  - Phone number `+91-9474475384` added (was commented out)
+  - General email updated to `admin@clearevisa.com`
+  - Contact form now submits to `POST /api/utility/contact` (real email delivery to support@clearevisa.com) instead of silently resetting; includes loading state and error fallback
+
+- **Privacy Policy** (`frontend/src/pages/PrivacyPolicy.jsx`)
+  - Section 12 Contact: replaced generic "Visa Application Platform" with real entity name, email, and phone
+
+- **Terms of Service** (`frontend/src/pages/TermsOfService.jsx`)
+  - Section 4 Service Description: rewritten to describe document verification + preparation; customer submits on official portal themselves; added no-Government-affiliation disclaimer
+  - Section 5 Visa Application Process: removed "we submit on your behalf"; added "you submit on indianvisaonline.gov.in"
+  - Section 7 Refund Policy: tied to work commenced/completed, not Government submission
+  - Section 16 Contact: updated with real entity name, email, and phone
+
+- **Refund Policy** (`frontend/src/pages/RefundPolicy.jsx`)
+  - All "submitted on your behalf" / "forwarded to Government on your behalf" language removed
+  - Government fee clarified as paid directly by the customer on the official portal
+  - Section 4 Our Services: explicitly states we don't submit on behalf of customers
+
+- **FAQ** (`frontend/src/pages/FAQ.jsx`)
+  - 7 answers rewritten: platform description, legality, service scope (India eVisa only, 5 visa types, 193+ nationalities), document checklist, fee breakdown, processing time, refunds
+
+- **Help Center** (`frontend/src/pages/HelpCenter.jsx`)
+  - 3 articles rewritten: application process, consultancy fee description, processing timeline
+
+### Added
+- **`POST /api/utility/contact`** (`backend/routes/utility.py`, `backend/utils/email.py`)
+  - New public endpoint that forwards contact form submissions to `support@clearevisa.com` via the existing email provider chain
+  - `send_contact_form_email()` helper added to `backend/utils/email.py`
+  - `ContactFormRequest` Pydantic model (name, EmailStr, category, subject, message)
+
+---
+
+## [2026-04-09] - Forgot Password flow; scroll-to-top on navigation + button
+
+### Added
+- **Forgot Password / Reset Password flow** (`backend/routes/auth.py`, `backend/models/user.py`, `backend/utils/email.py`, `frontend/src/pages/ForgotPassword.jsx`, `frontend/src/pages/ResetPassword.jsx`, `frontend/src/pages/SignIn.jsx`, `frontend/src/App.js`)
+  - New `POST /api/auth/forgot-password` endpoint — generates a `secrets.token_urlsafe(32)` reset token, stores it in a `password_reset_tokens` collection (1-hour expiry), and emails a reset link. Always returns 200 to prevent user enumeration.
+  - New `POST /api/auth/reset-password` endpoint — validates token (expiry + single-use flag), enforces 8-character minimum, hashes and saves the new password, marks the token used.
+  - `send_password_reset_email()` added to `backend/utils/email.py` with a styled HTML email matching the OTP template.
+  - `ForgotPasswordRequest` and `ResetPasswordRequest` Pydantic models added to `backend/models/user.py`.
+  - New `ForgotPassword.jsx` page at `/forgot-password` — email input form with success confirmation screen.
+  - New `ResetPassword.jsx` page at `/reset-password?token=…` — new password + confirm fields, success state, and invalid-token guard.
+  - "Forgot password?" link added below the Sign In button in `SignIn.jsx`.
+  - Both routes registered as public in `App.js`.
+  - Reset link domain controlled by `FRONTEND_URL` env variable (defaults to `https://clearevisa.com`).
+
+- **Scroll-to-top on navigation + floating button** (`frontend/src/components/ScrollToTop.jsx`, `frontend/src/App.js`)
+  - `ScrollToTopOnNav` — placed inside `<BrowserRouter>`, scrolls to top instantly on every route change so footer links always land at page top.
+  - `ScrollToTopButton` — fixed blue circle button (↑) in the bottom-right corner; appears after scrolling 300 px; smoothly returns to top on click.
+
+---
+
+## [2026-04-08] - Feature: multiple draft applications per visa (family members)
+
+Users can now have multiple draft applications for the same visa (e.g. for family members travelling together).
+
+### What changed
+
+**Backend (`backend/routes/applications.py`)**
+- `PATCH /api/applications/draft` — reworked upsert logic:
+  - If `__draftId` (MongoDB `_id` string) is present in the payload, the specific draft is updated
+  - If not, a **new draft is always created** (no more one-per-visa deduplication)
+  - Existing APP/TEMP ID preservation and security checks still apply
+- `GET /api/applications/drafts` — now includes each draft's `_id` as an `id` field in the response (was excluded); results sorted newest-first
+- `POST /api/applications/assign-id` — now accepts `draftId` in the body to scope the lookup to the exact draft; falls back to `userId+visaId` when omitted
+
+**Frontend (`frontend/src/pages/VisaApplication.jsx`)**
+- Added `draftIdRef` (`useRef`) to track the active draft's MongoDB `_id` throughout the session
+- `loadDraft` logic rewritten:
+  - If `location.state.draftId` is set (navigating from My Applications "Continue") → directly loads that specific draft, no popup
+  - If same-visa drafts exist (and no specific draftId in nav state) → shows a **"Continue existing application?" popup** listing all drafts with applicant name, step progress, and last-saved date; plus a "Start New Application" button
+  - If no drafts for this visa → fresh start with no popup (other-visa drafts are now silently ignored; old "conflict modal" removed)
+- `saveDraft` — injects `__draftId` into every payload save so the backend updates the correct document; captures the returned `draftId` from the first new-draft creation response
+- `assign-id` call — passes `draftId: draftIdRef.current` alongside `visaId` so the upload folder is associated with the correct draft
+
+**Frontend (`frontend/src/pages/MyApplications.jsx`)**
+- "Continue" button now navigates with `state: { draftId: app.id }` so `VisaApplication` can load the exact draft directly without showing the popup
+
+
+- Backend: all 3 payment gateways (PayPal, Razorpay, Tazapay) now set `status: "paid"` + `paidAt` timestamp on successful payment (was `"submitted"`)
+- Backend (`server.py`): new `paid_to_pending_review_loop()` background task — every 60 s promotes applications where `status == "paid"` and `paidAt < now - 1 hour` to `"pending_review"` automatically
+- Frontend `AdminPanel.jsx`: updated `ALLOWED_TRANSITIONS` map (`paid → pending_review → submitted → processed → approved/rejected`); `getStatusBadge` includes `pending_review`; stats cards updated (Paid, Pending Review, Submitted, Processed, Approved, Rejected); filter dropdown and super_admin select updated; labels formatted correctly
+- Frontend `MyApplications.jsx`: `statusConfig` and `WORKFLOW_STEPS` updated to new order (Paid → Pending Review → Submitted → Processed → Approved); legacy `pending` status mapped to `pending_review` in stepper
+
+
+- `with_discount` display mode now shows `our_fee - discount_amount` everywhere (was `full_total - discount` or `price - discount`)
+- Strikethrough "original price" now shows `our_fee` (not the full total / visa price)
+- Affected files: `Home.jsx` (visa cards), `VisaDetail.jsx` (pricing sidebar), `Step10Payment.jsx` (fee breakdown)
+
+## [2026-04-08] - User Management: show only admins, add promote-by-email form
+- Backend: `GET /api/auth/users` now returns only `admin` and `super_admin` users (excludes regular users)
+- Backend: new `PATCH /api/auth/users/promote` endpoint — accepts `{email, role}` to promote any user to admin/super_admin by email (super_admin only)
+- Backend: added `UserEmailRoleUpdate` Pydantic model in `models/user.py`
+- Frontend: User Management page now lists only admins and super admins
+- Frontend: added "Assign Admin Role" form — enter a user's email, select Admin or Super Admin, click Save to apply the role and return to the user list
 
 ## [2026-04-07] - Transactions tab added to Admin Panel (super admin only)
 - Backend: all 3 payment gateways (PayPal, Razorpay, Tazapay) now record a document in the `payments` MongoDB collection on successful payment

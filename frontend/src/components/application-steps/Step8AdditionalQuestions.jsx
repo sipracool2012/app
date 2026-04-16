@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { ChevronLeft } from 'lucide-react';
+import { useToast } from '../../hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 
-const Step8AdditionalQuestions = ({ data, onNext, onBack }) => {
+const Step8AdditionalQuestions = ({ data, onNext, onBack, onDataChange }) => {
+  const { toast } = useToast();
   const { t } = useTranslation();
+  const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
     arrestedConvicted: data?.arrestedConvicted || 'No',
     arrestedConvictedReason: data?.arrestedConvictedReason || '',
@@ -22,9 +25,30 @@ const Step8AdditionalQuestions = ({ data, onNext, onBack }) => {
     asylumSought: data?.asylumSought || 'No',
     asylumSoughtReason: data?.asylumSoughtReason || ''
   });
+  // Report local changes to parent so jumping away via stepper saves latest data
+  useEffect(() => { onDataChange?.(formData); }, [formData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const newErrors = {};
+    questions.forEach((q) => {
+      if (formData[q.key] === 'Yes' && !formData[q.reasonKey].trim()) {
+        newErrors[q.reasonKey] = t('errors.reasonRequired');
+      }
+    });
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      toast({
+        title: t('errors.fixErrors'),
+        description: t('errors.reasonRequiredDesc'),
+        variant: 'destructive'
+      });
+      setTimeout(() => {
+        const firstError = document.querySelector('.border-red-500');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
+      return;
+    }
     onNext(formData);
   };
 
@@ -32,32 +56,32 @@ const Step8AdditionalQuestions = ({ data, onNext, onBack }) => {
     {
       key: 'arrestedConvicted',
       reasonKey: 'arrestedConvictedReason',
-      text: 'Has any applicant been arrested/ prosecuted/ convicted by Court of Law of any country?'
+      textKey: 'forms.step8.question1'
     },
     {
       key: 'refusedEntry',
       reasonKey: 'refusedEntryReason',
-      text: 'Has any applicant been refused entry / deported by any country including India?'
+      textKey: 'forms.step8.question2'
     },
     {
       key: 'humanTrafficking',
       reasonKey: 'humanTraffickingReason',
-      text: 'Has any applicant been engaged in Human trafficking/ Drug trafficking/ Child abuse/ Crime against women/ Economic offense / Financial fraud?'
+      textKey: 'forms.step8.question3'
     },
     {
       key: 'cyberCrime',
       reasonKey: 'cyberCrimeReason',
-      text: 'Has any applicant been engaged in Cyber crime/ Fake Indian Currency Notes/ Hawala transactions/ IPR violations?'
+      textKey: 'forms.step8.question4'
     },
     {
       key: 'terroristViews',
       reasonKey: 'terroristViewsReason',
-      text: 'Has any applicant at any time been associated with any organization declared as terrorist organization by the Government of India OR by any country/ international organization?'
+      textKey: 'forms.step8.question5'
     },
     {
       key: 'asylumSought',
       reasonKey: 'asylumSoughtReason',
-      text: 'Has any applicant sought asylum (political or otherwise) in any country?'
+      textKey: 'forms.step8.question6'
     }
   ];
 
@@ -71,7 +95,7 @@ const Step8AdditionalQuestions = ({ data, onNext, onBack }) => {
           <div key={question.key} className="border rounded-lg p-4 space-y-4">
             <div className="space-y-2">
               <Label className="text-base font-medium">
-                {index + 1}. {question.text} <span className="text-red-500">*</span>
+                {index + 1}. {t(question.textKey)} <span className="text-red-500">*</span>
               </Label>
               <Select 
                 value={formData[question.key]} 
@@ -100,10 +124,16 @@ const Step8AdditionalQuestions = ({ data, onNext, onBack }) => {
                 <Input
                   id={question.reasonKey}
                   value={formData[question.reasonKey]}
-                  onChange={(e) => setFormData({ ...formData, [question.reasonKey]: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, [question.reasonKey]: e.target.value });
+                    setErrors(prev => ({ ...prev, [question.reasonKey]: '' }));
+                  }}
                   placeholder={t('forms.step8.reasonPlaceholder')}
-                  required={formData[question.key] === 'Yes'}
+                  className={errors[question.reasonKey] ? 'border-red-500' : ''}
                 />
+                {errors[question.reasonKey] && (
+                  <p className="text-sm text-red-600">{errors[question.reasonKey]}</p>
+                )}
               </div>
             )}
           </div>
