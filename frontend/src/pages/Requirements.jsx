@@ -115,8 +115,22 @@ const CountryDropdown = ({ value, onChange, countries }) => {
 };
 
 /* ── Visa Option Card ─────────────────────────────────── */
-const VisaCard = ({ option, onApply }) => {
+const VisaCard = ({ option, onApply, feeDisplayMode }) => {
   const { t } = useTranslation();
+  const discount = parseFloat(option.discount_amount) || 0;
+  const visaOurFee = parseFloat(option.our_fee) || 0;
+  const displayedPrice =
+    feeDisplayMode === 'our_fee_only'
+      ? visaOurFee
+      : feeDisplayMode === 'with_discount'
+      ? Math.max(0, visaOurFee - discount)
+      : parseFloat(option.price) || 0;
+  const priceLabel =
+    feeDisplayMode === 'our_fee_only'
+      ? t('pages.requirements.serviceFee')
+      : feeDisplayMode === 'with_discount' && discount > 0
+      ? t('pages.requirements.afterDiscount')
+      : null;
   return (
     <div className="border rounded-xl p-4 hover:border-blue-400 hover:shadow-sm transition bg-white">
       <div className="flex items-start justify-between gap-2">
@@ -138,8 +152,11 @@ const VisaCard = ({ option, onApply }) => {
           </div>
         </div>
         <div className="text-right shrink-0">
-          <p className="text-xl font-bold text-gray-900">${option.price}</p>
-          <p className="text-xs text-gray-500">{t('pages.requirements.perPerson')}</p>
+          {feeDisplayMode === 'with_discount' && discount > 0 && (
+            <p className="text-xs line-through text-gray-400">USD ${visaOurFee.toFixed(2)}</p>
+          )}
+          <p className="text-xl font-bold text-gray-900">USD ${displayedPrice.toFixed(2)}</p>
+          {priceLabel && <p className="text-xs text-gray-500">{priceLabel}</p>}
         </div>
       </div>
       <Button
@@ -165,6 +182,15 @@ export default function Requirements() {
   const [results, setResults] = useState(null);   // null = not searched yet
   const [loading, setLoading] = useState(false);
   const [countryMeta, setCountryMeta] = useState(null);
+  const [feeDisplayMode, setFeeDisplayMode] = useState('full_breakdown');
+
+  /* Fetch utility settings for fee display mode */
+  useEffect(() => {
+    fetch(`${BACKEND_URL}/api/utility/settings`)
+      .then(r => r.json())
+      .then(d => setFeeDisplayMode(d.fee_display_mode ?? 'full_breakdown'))
+      .catch(() => {});
+  }, []);
 
   /* Load all countries once */
   useEffect(() => {
@@ -403,7 +429,7 @@ export default function Requirements() {
                     </h3>
                     <div className="space-y-3">
                       {results.options.map(opt => (
-                        <VisaCard key={opt.id} option={opt} onApply={handleApply} />
+                        <VisaCard key={opt.id} option={opt} onApply={handleApply} feeDisplayMode={feeDisplayMode} />
                       ))}
                     </div>
                   </CardContent>

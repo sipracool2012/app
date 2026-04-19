@@ -24,6 +24,18 @@ const PaymentReturn = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [retrying, setRetrying] = useState(false);
 
+  // Fire Google Ads conversion when payment is confirmed
+  useEffect(() => {
+    if (state === 'success' && typeof window.gtag === 'function') {
+      window.gtag('event', 'conversion', {
+        send_to: 'AW-18096686955/L3gLCJ36wJ0cEOuOlrVD',
+        value: amount,
+        currency: 'INR',
+        transaction_id: transactionId,
+      });
+    }
+  }, [state, transactionId, amount]);
+
   useEffect(() => {
     if (cancelled) {
       setState('failed');

@@ -1264,6 +1264,8 @@
       "availableOptions": "Available {{purpose}} Options",
       "approvedBy": "Approved by",
       "perPerson": "per person",
+      "serviceFee": "Service fee",
+      "afterDiscount": "After discount",
       "applyNow": "Apply Now",
       "requiredDocs": "Required Documents",
       "entryRequirements": "Entry Requirements",

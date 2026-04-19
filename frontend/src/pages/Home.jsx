@@ -133,7 +133,7 @@ const Home = () => {
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-blue-50 via-white to-blue-50 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             {/* Left side - Search */}
             <div className="space-y-8">
               {/* Country Selector */}
@@ -308,12 +308,13 @@ const Home = () => {
               )}
             </div>
 
-            {/* Right side - Image */}
-            <div className="hidden lg:block">
+            {/* Right side - Image (sticky: floats alongside visa cards while scrolling) */}
+            <div className="hidden lg:block sticky top-20">
               <img
                 src="https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=800&h=1000&fit=crop"
                 alt="Taj Mahal India"
-                className="rounded-lg shadow-2xl w-full h-[700px] object-cover"
+                className="rounded-lg shadow-2xl w-full object-cover"
+                style={{ height: 'calc(100vh - 6rem)', maxHeight: '800px' }}
               />
             </div>
           </div>
