@@ -22,7 +22,8 @@
     "termsOfService": "Điều khoản dịch vụ",
     "cookiePolicy": "Chính sách Cookie",
     "connect": "Kết nối",
-    "copyright": "© {{year}} Clear eVisa. Bảo lưu mọi quyền."
+    "copyright": "© {{year}} Clear eVisa Services. Bảo lưu mọi quyền.",
+    "disclaimer": "Clear eVisa Services (www.clearevisa.com) là cơ quan độc lập và không có liên kết với Chính phủ Ấn Độ. Chúng tôi không phải công ty luật và không cung cấp tư vấn pháp lý. Dịch vụ của chúng tôi bao gồm hỗ trợ và xem xét đơn xin thị thực chuyên nghiệp với một khoản phí, bao gồm phí chính phủ chính thức cộng với phí dịch vụ của chúng tôi. Bạn có thể nộp đơn trực tiếp qua cổng thông tin chính phủ chính thức với chi phí thấp hơn mà không cần dịch vụ xem xét chuyên gia và hỗ trợ của chúng tôi."
   },
   "home": {
     "yourPassport": "Hộ chiếu của bạn",
@@ -53,7 +54,7 @@
     "stat2Label": "Tỷ lệ phê duyệt",
     "stat3Value": "24hrs",
     "stat3Label": "Xử lý trung bình",
-    "stat4Value": "190+",
+    "stat4Value": "175+",
     "stat4Label": "Quốc gia được hỗ trợ",
     "howItWorks": "Cách Clear eVisa hoạt động",
     "howItWorksDesc": "Nhận eVisa Ấn Độ của bạn trong 3 bước đơn giản",

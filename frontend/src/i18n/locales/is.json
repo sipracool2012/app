@@ -22,7 +22,8 @@
     "termsOfService": "Þjónustuskilmálar",
     "cookiePolicy": "Vafrakökustefna",
     "connect": "Tengjast",
-    "copyright": "© {{year}} Clear eVisa. Allur réttur áskilinn."
+    "copyright": "© {{year}} Clear eVisa Services. Allur réttur áskilinn.",
+    "disclaimer": "Clear eVisa Services (www.clearevisa.com) er sjálfstætt stofnun og er ekki tengd ríkisstjórn Indlands. Við erum ekki lögfræðistofa og veitum ekki lögfræðiráðgjöf. Þjónusta okkar felur í sér faglega aðstoð við umsóknir um vegabréfsáritun og yfirferð gegn gjaldi, sem felur í sér opinber stjórnvaldsgjöld auk þjónustugjalda okkar. Þú getur sótt um beint í gegnum opinbera ríkisgáttina á lægra verði án sérfræðiyfirferðar okkar og stuðningsþjónustu."
   },
   "home": {
     "yourPassport": "Vegabréfið þitt",
@@ -53,7 +54,7 @@
     "stat2Label": "Hlutfall samþykkta",
     "stat3Value": "24 klst",
     "stat3Label": "Meðalafgreiðslutími",
-    "stat4Value": "190+",
+    "stat4Value": "175+",
     "stat4Label": "Lönd studd",
     "howItWorks": "Hvernig Clear eVisa virkar",
     "howItWorksDesc": "Fáðu indverska rafræna vegabréfsáritun þína í 3 einföldum skrefum",

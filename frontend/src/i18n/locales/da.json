@@ -22,7 +22,8 @@
     "termsOfService": "Servicevilkår",
     "cookiePolicy": "Cookiepolitik",
     "connect": "Forbind",
-    "copyright": "© {{year}} Clear eVisa. Alle rettigheder forbeholdes."
+    "copyright": "© {{year}} Clear eVisa Services. Alle rettigheder forbeholdes.",
+    "disclaimer": "Clear eVisa Services (www.clearevisa.com) er et uafhængigt bureau og er ikke tilknyttet den indiske regering. Vi er ikke et advokatfirma og yder ikke juridisk rådgivning. Vores tjenester inkluderer professionel hjælp og gennemgang af visumansøgninger mod et gebyr, som inkluderer officielle statslige gebyrer plus vores servicegebyrer. Du kan ansøge direkte via den officielle statsportal til en lavere pris uden vores ekspertgennemgang og supporttjenester."
   },
   "home": {
     "yourPassport": "Dit pas",
@@ -53,7 +54,7 @@
     "stat2Label": "Godkendelsesrate",
     "stat3Value": "24 timer",
     "stat3Label": "Gennemsnitlig behandling",
-    "stat4Value": "190+",
+    "stat4Value": "175+",
     "stat4Label": "Lande understøttet",
     "howItWorks": "Sådan fungerer Clear eVisa",
     "howItWorksDesc": "Få dit indiske eVisa i 3 enkle trin",
@@ -1247,18 +1248,18 @@
       "destination": "Destination",
       "fixed": "Fast",
       "passportCountry": "Pasland",
-      "selectPassportCountry": "Vælg pasland\u2026",
-      "searchCountry": "Søg land\u2026",
+      "selectPassportCountry": "Vælg pasland…",
+      "searchCountry": "Søg land…",
       "noResults": "Ingen resultater fundet",
       "travelPurpose": "Rejseformål",
       "checkBtn": "Tjek krav",
       "disclaimer": "Resultater er baseret på dit pasland og rejseformål.",
       "emptyTitle": "Vælg dit pasland",
       "emptyDesc": "Vælg dit pasland og rejseformål for øjeblikkeligt at se dine Indien eVisa-krav og tilgængelige muligheder.",
-      "checking": "Tjekker krav\u2026",
+      "checking": "Tjekker krav…",
       "evisaAvailable": "eVisa tilgængeligt for",
       "passportHolders": "pasindehavere",
-      "applyOnlineDesc": "Du kan ansøge online \u2014 intet ambassadebesøg påkrævet. Visum sendes til din e-mail.",
+      "applyOnlineDesc": "Du kan ansøge online — intet ambassadebesøg påkrævet. Visum sendes til din e-mail.",
       "evisaNotAvailable": "eVisa er i øjeblikket ikke tilgængeligt for {{purpose}} rejse",
       "noEvisaDesc": "Ansøg venligst gennem den indiske ambassade eller konsulat i dit land.",
       "availableOptions": "Tilgængelige {{purpose}} muligheder",
@@ -1327,9 +1328,9 @@
         "step2": "Upload dokumenter",
         "step2Desc": "Upload et foto og eventuelle påkrævede understøttende dokumenter.",
         "step3": "Betal visumgebyret",
-        "step3Desc": "Sikker online betaling \u2014 alle større kort accepteres.",
+        "step3Desc": "Sikker online betaling — alle større kort accepteres.",
         "step4": "Modtag dit eVisa",
-        "step4Desc": "Godkendt eVisa leveret til din e-mail inden for 2\u20135 hverdage."
+        "step4Desc": "Godkendt eVisa leveret til din e-mail inden for 2–5 hverdage."
       }
     },
     "indiaTourism": {

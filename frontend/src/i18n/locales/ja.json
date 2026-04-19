@@ -22,7 +22,8 @@
     "termsOfService": "利用規約",
     "cookiePolicy": "クッキーポリシー",
     "connect": "公式SNS",
-    "copyright": "© {{year}} Clear eVisa. All rights reserved."
+    "copyright": "© {{year}} Clear eVisa Services. All rights reserved.",
+    "disclaimer": "Clear eVisa Services（www.clearevisa.com）は独立した代理店であり、インド政府とは一切関係ありません。当社は法律事務所ではなく、法的アドバイスは提供しておりません。当社のサービスには、公式政府手数料および当社のサービス料を含む費用でのビザ申請サポートおよびレビューが含まれます。専門的なレビューおよびサポートサービスなしで、公式政府ポータルから直接より低コストで申請することもできます。"
   },
   "home": {
     "yourPassport": "パスポート",
@@ -53,7 +54,7 @@
     "stat2Label": "承認率",
     "stat3Value": "24時間",
     "stat3Label": "平均処理時間",
-    "stat4Value": "190+",
+    "stat4Value": "175+",
     "stat4Label": "対応国数",
     "howItWorks": "Clear eVisaの仕組み",
     "howItWorksDesc": "3つの簡単なステップでインドeビザを取得",

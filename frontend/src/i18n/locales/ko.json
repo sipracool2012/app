@@ -22,7 +22,8 @@
     "termsOfService": "이용약관",
     "cookiePolicy": "쿠키 정책",
     "connect": "소셜 미디어",
-    "copyright": "© {{year}} Clear eVisa. All rights reserved."
+    "copyright": "© {{year}} Clear eVisa Services. All rights reserved.",
+    "disclaimer": "Clear eVisa Services(www.clearevisa.com)는 독립 기관으로 인도 정부와 관련이 없습니다. 당사는 법률 사무소가 아니며 법적 조언을 제공하지 않습니다. 당사 서비스에는 공식 정부 수수료 및 서비스 수수료를 포함한 요금으로 전문적인 비자 신청 지원 및 검토가 포함됩니다. 전문 검토 및 지원 서비스 없이 공식 정부 포털을 통해 직접 더 낮은 비용으로 신청할 수 있습니다."
   },
   "home": {
     "yourPassport": "여권 국적",
@@ -53,7 +54,7 @@
     "stat2Label": "승인율",
     "stat3Value": "24시간",
     "stat3Label": "평균 처리 시간",
-    "stat4Value": "190+",
+    "stat4Value": "175+",
     "stat4Label": "지원 국가",
     "howItWorks": "Clear eVisa 이용 방법",
     "howItWorksDesc": "간단한 3단계로 인도 전자비자를 발급받으세요",
@@ -1330,7 +1331,8 @@
         "step3Desc": "안전한 온라인 결제 진행",
         "step4": "전자비자 수령",
         "step4Desc": "2~5일 내 이메일로 비자 발송"
-      }    },
+      }
+    },
     "indiaTourism": {
       "hero": {
         "badge": "Incredible India",
@@ -1437,6 +1439,7 @@
         "heading2": "올바른 비자로 시작하세요.",
         "subtitle": "저희가 서류를 완벽하게 검증해 드립니다.",
         "cta": "인도 전자비자 받기"
-      }    }
+      }
+    }
   }
 }

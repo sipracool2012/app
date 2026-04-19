@@ -38,7 +38,7 @@
     "stat2Label": "Taux d'approbation",
     "stat3Value": "24h",
     "stat3Label": "Traitement moyen",
-    "stat4Value": "190+",
+    "stat4Value": "175+",
     "stat4Label": "Pays pris en charge",
     "howItWorks": "Comment fonctionne Clear eVisa",
     "howItWorksDesc": "Obtenez votre eVisa indien en 3 étapes simples",
@@ -260,7 +260,8 @@
     "termsOfService": "Terms of Service",
     "cookiePolicy": "Cookie Policy",
     "connect": "Connect",
-    "copyright": "© {{year}} Clear eVisa. All rights reserved."
+    "copyright": "© {{year}} Clear eVisa Services. All rights reserved.",
+    "disclaimer": "Clear eVisa Services (www.clearevisa.com) est une agence indépendante et n'est pas affiliée au gouvernement indien. Nous ne sommes pas un cabinet d'avocats et ne fournissons pas de conseils juridiques. Nos services comprennent une assistance professionnelle à la demande de visa et une révision moyennant des frais, qui incluent les frais gouvernementaux officiels ainsi que nos frais de service. Vous pouvez déposer une demande directement via le portail gouvernemental officiel à un coût inférieur, sans notre révision experte et nos services d'assistance."
   },
   "appSuccess": {
     "title": "Application Submitted Successfully!",

@@ -22,7 +22,8 @@
     "termsOfService": "Nutzungsbedingungen",
     "cookiePolicy": "Cookie-Richtlinie",
     "connect": "Verbinden",
-    "copyright": "© {{year}} Clear eVisa. Alle Rechte vorbehalten."
+    "copyright": "© {{year}} Clear eVisa Services. Alle Rechte vorbehalten.",
+    "disclaimer": "Clear eVisa Services (www.clearevisa.com) ist eine unabhängige Agentur und steht in keiner Verbindung zur indischen Regierung. Wir sind keine Anwaltskanzlei und bieten keine Rechtsberatung an. Unsere Dienstleistungen umfassen professionelle Unterstützung bei der Visabeantragung und -prüfung gegen eine Gebühr, die offizielle Regierungsgebühren sowie unsere Servicegebühren beinhaltet. Sie können den Antrag auch direkt über das offizielle Regierungsportal zu geringeren Kosten einreichen, allerdings ohne unsere fachkundige Prüfung und Unterstützung."
   },
   "home": {
     "yourPassport": "Ihr Reisepass",
@@ -53,7 +54,7 @@
     "stat2Label": "Genehmigungsrate",
     "stat3Value": "24 Std.",
     "stat3Label": "Durchschnittliche Bearbeitung",
-    "stat4Value": "190+",
+    "stat4Value": "175+",
     "stat4Label": "Unterstützte Länder",
     "howItWorks": "So funktioniert Clear eVisa",
     "howItWorksDesc": "Erhalten Sie Ihr indisches eVisum in 3 einfachen Schritten",

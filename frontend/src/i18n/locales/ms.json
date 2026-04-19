@@ -22,7 +22,8 @@
     "termsOfService": "Syarat Perkhidmatan",
     "cookiePolicy": "Dasar Kuki",
     "connect": "Sambung",
-    "copyright": "© {{year}} Clear eVisa. Hak cipta terpelihara."
+    "copyright": "© {{year}} Clear eVisa Services. Hak cipta terpelihara.",
+    "disclaimer": "Clear eVisa Services (www.clearevisa.com) adalah agensi bebas dan tidak berafiliasi dengan Kerajaan India. Kami bukan firma undang-undang dan tidak memberikan nasihat undang-undang. Perkhidmatan kami merangkumi bantuan dan semakan permohonan visa secara profesional dengan bayaran, yang merangkumi caj kerajaan rasmi ditambah bayaran perkhidmatan kami. Anda boleh memohon terus melalui portal kerajaan rasmi pada kos yang lebih rendah tanpa semakan pakar dan perkhidmatan sokongan kami."
   },
   "home": {
     "yourPassport": "Pasport anda",
@@ -53,7 +54,7 @@
     "stat2Label": "Kadar Kelulusan",
     "stat3Value": "24jam",
     "stat3Label": "Purata Pemprosesan",
-    "stat4Value": "190+",
+    "stat4Value": "175+",
     "stat4Label": "Negara Disokong",
     "howItWorks": "Cara Clear eVisa berfungsi",
     "howItWorksDesc": "Dapatkan eVisa India anda dalam 3 langkah mudah",

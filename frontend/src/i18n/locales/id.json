@@ -22,7 +22,8 @@
     "termsOfService": "Syarat dan Ketentuan",
     "cookiePolicy": "Kebijakan Cookie",
     "connect": "Terhubung",
-    "copyright": "© {{year}} Clear eVisa. Seluruh hak cipta dilindungi undang-undang."
+    "copyright": "© {{year}} Clear eVisa Services. Seluruh hak cipta dilindungi undang-undang.",
+    "disclaimer": "Clear eVisa Services (www.clearevisa.com) adalah lembaga independen dan tidak berafiliasi dengan Pemerintah India. Kami bukan firma hukum dan tidak memberikan nasihat hukum. Layanan kami mencakup bantuan dan peninjauan aplikasi visa secara profesional dengan biaya tertentu, yang mencakup biaya resmi pemerintah ditambah biaya layanan kami. Anda dapat mengajukan permohonan langsung melalui portal pemerintah resmi dengan biaya lebih rendah tanpa layanan peninjauan ahli dan dukungan kami."
   },
   "home": {
     "yourPassport": "Paspor Anda",
@@ -53,7 +54,7 @@
     "stat2Label": "Tingkat Persetujuan",
     "stat3Value": "24 jam",
     "stat3Label": "Rata-rata Pemrosesan",
-    "stat4Value": "190+",
+    "stat4Value": "175+",
     "stat4Label": "Negara Didukung",
     "howItWorks": "Cara kerja Clear eVisa",
     "howItWorksDesc": "Dapatkan eVisa India Anda dalam 3 langkah mudah",

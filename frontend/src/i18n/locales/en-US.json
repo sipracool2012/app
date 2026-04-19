@@ -22,7 +22,8 @@
     "termsOfService": "Terms of Service",
     "cookiePolicy": "Cookie Policy",
     "connect": "Connect",
-    "copyright": "© {{year}} Clear eVisa. All rights reserved."
+    "copyright": "© {{year}} Clear eVisa Services. All rights reserved.",
+    "disclaimer": "Clear eVisa Services (www.clearevisa.com) is an independent agency and is not affiliated with the Government of India. We are not a law firm and do not provide legal advice. Our services include professional visa application assistance and review for a fee, which includes official government charges plus our service fees. You may apply directly through the official government portal at a lower cost without our expert review and support services."
   },
   "home": {
     "yourPassport": "Your passport",
@@ -53,7 +54,7 @@
     "stat2Label": "Approval Rate",
     "stat3Value": "24hrs",
     "stat3Label": "Average Processing",
-    "stat4Value": "190+",
+    "stat4Value": "175+",
     "stat4Label": "Countries Supported",
     "howItWorks": "How Clear eVisa works",
     "howItWorksDesc": "Get your Indian eVisa in 3 simple steps",
@@ -451,7 +452,7 @@
     "arrivalDateTooSoon": "Arrival date must be at least 4 days from today (IST).",
     "expiryDateRequired": "Date of expiry is required.",
     "passportExpiry6Months": "Passport must be valid for at least 6 months from the arrival date.",
-    "phoneInvalid": "Enter a valid phone number (5\u201315 digits)."
+    "phoneInvalid": "Enter a valid phone number (5–15 digits)."
   },
   "myApps": {
     "title": "My Applications",
@@ -1247,18 +1248,18 @@
       "destination": "Destination",
       "fixed": "Fixed",
       "passportCountry": "Passport Country",
-      "selectPassportCountry": "Select passport country\u2026",
-      "searchCountry": "Search country\u2026",
+      "selectPassportCountry": "Select passport country…",
+      "searchCountry": "Search country…",
       "noResults": "No results found",
       "travelPurpose": "Travel Purpose",
       "checkBtn": "Check Requirements",
       "disclaimer": "Results are based on your passport country and travel purpose.",
       "emptyTitle": "Select your passport country",
       "emptyDesc": "Choose your passport country and travel purpose to instantly see your India eVisa requirements and available options.",
-      "checking": "Checking requirements\u2026",
+      "checking": "Checking requirements…",
       "evisaAvailable": "eVisa available for",
       "passportHolders": "passport holders",
-      "applyOnlineDesc": "You can apply online \u2014 no embassy visit required. Visa is sent to your email.",
+      "applyOnlineDesc": "You can apply online — no embassy visit required. Visa is sent to your email.",
       "evisaNotAvailable": "eVisa not currently available for {{purpose}} travel",
       "noEvisaDesc": "Please apply through the Indian embassy or consulate in your country.",
       "availableOptions": "Available {{purpose}} Options",
@@ -1329,10 +1330,11 @@
         "step2": "Upload documents",
         "step2Desc": "Upload a photo and any required supporting documents.",
         "step3": "Pay the visa fee",
-        "step3Desc": "Secure online payment \u2014 all major cards accepted.",
+        "step3Desc": "Secure online payment — all major cards accepted.",
         "step4": "Receive your eVisa",
-        "step4Desc": "Approved eVisa delivered to your email within 2\u20135 business days."
-      }    },
+        "step4Desc": "Approved eVisa delivered to your email within 2–5 business days."
+      }
+    },
     "indiaTourism": {
       "hero": {
         "badge": "Incredible India",
@@ -1439,6 +1441,7 @@
         "heading2": "starts with the right visa.",
         "subtitle": "Let Clear eVisa Services verify your documents and prepare your application package — so you can submit with complete confidence.",
         "cta": "Get Your India eVisa"
-      }    }
+      }
+    }
   }
 }

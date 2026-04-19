@@ -22,7 +22,8 @@
     "termsOfService": "Terms of Service",
     "cookiePolicy": "Cookie Policy",
     "connect": "Connect",
-    "copyright": "© {{year}} Clear eVisa. All rights reserved."
+    "copyright": "© {{year}} Clear eVisa Services. All rights reserved.",
+    "disclaimer": "Clear eVisa Services (www.clearevisa.com) bağımsız bir ajans olup Hindistan Hükümeti ile herhangi bir bağlantısı bulunmamaktadır. Bir hukuk bürosu değiliz ve hukuki tavsiye vermiyoruz. Hizmetlerimiz, resmi devlet ücretleri ve hizmet ücretlerimizi kapsayan bir ücret karşılığında profesyonel vize başvurusu yardımını ve incelemeyi kapsamaktadır. Uzman inceleme ve destek hizmetlerimiz olmaksızın resmi devlet portalı üzerinden doğrudan daha düşük maliyetle başvurabilirsiniz."
   },
   "home": {
     "yourPassport": "Your passport",
@@ -53,7 +54,7 @@
     "stat2Label": "Approval Rate",
     "stat3Value": "24hrs",
     "stat3Label": "Average Processing",
-    "stat4Value": "190+",
+    "stat4Value": "175+",
     "stat4Label": "Countries Supported",
     "howItWorks": "How Clear eVisa works",
     "howItWorksDesc": "Get your Indian eVisa in 3 simple steps",

@@ -22,7 +22,8 @@
     "termsOfService": "服务条款",
     "cookiePolicy": "Cookie 政策",
     "connect": "关注我们",
-    "copyright": "© {{year}} Clear eVisa。保留所有权利。"
+    "copyright": "© {{year}} Clear eVisa Services。保留所有权利。",
+    "disclaimer": "Clear eVisa Services（www.clearevisa.com）是一家独立机构，与印度政府无任何关联。我们不是律师事务所，不提供法律建议。我们的服务包括收费的专业签证申请协助和审核，费用包含官方政府费用及我们的服务费用。您也可以直接通过官方政府门户网站以较低成本申请，但将不享有我们的专业审核和支持服务。"
   },
   "home": {
     "yourPassport": "您的护照",
@@ -53,7 +54,7 @@
     "stat2Label": "批准率",
     "stat3Value": "24小时",
     "stat3Label": "平均处理时间",
-    "stat4Value": "190+",
+    "stat4Value": "175+",
     "stat4Label": "支持国家",
     "howItWorks": "Clear eVisa 工作流程",
     "howItWorksDesc": "只需 3 个简单步骤即可获得您的印度电子签证",

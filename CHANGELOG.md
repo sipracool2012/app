@@ -5,6 +5,24 @@ All notable changes to the Clear eVisa project are documented in this file.
 Format: `## [Date] - Description`
 ---
 
+## [2026-04-19] - Landing page updates: footer disclaimer text, Tovik removal
+
+### Changed
+
+- **`frontend/public/landing-offer.html`** & **`frontend/build/landing-offer.html`**
+  - Updated `footer-desc` text to full independent agency disclaimer: "Clear eVisa Services (www.clearevisa.com) is an independent agency and is not affiliated with the Government of India…"
+  - Removed Tovik analytics script (`<script type="module" src="https://tovik.app/tovik.js">`)
+
+- **`frontend/public/landing-google-ads.html`** & **`frontend/build/landing-google-ads.html`**
+  - Added yellow disclaimer box (⚠️ Important Disclaimer) before the "Simple Process / How It Works" section
+  - Updated `footer-desc` text to match the full independent agency disclaimer (same as landing-offer.html)
+  - Removed Tovik analytics script
+
+- **`frontend/public/index.html`** & **`frontend/build/index.html`**
+  - Removed Tovik analytics script
+
+---
+
 ## [2026-04-16] - i18n: Legal page fallback system & expanded locale translations
 
 ### Changed

@@ -22,7 +22,8 @@
     "termsOfService": "Términos de servicio",
     "cookiePolicy": "Política de cookies",
     "connect": "Conectar",
-    "copyright": "© {{year}} Clear eVisa. Todos los derechos reservados."
+    "copyright": "© {{year}} Clear eVisa Services. Todos los derechos reservados.",
+    "disclaimer": "Clear eVisa Services (www.clearevisa.com) es una agencia independiente y no está afiliada al Gobierno de la India. No somos un bufete de abogados y no ofrecemos asesoramiento legal. Nuestros servicios incluyen asistencia profesional en la solicitud de visas y su revisión por una tarifa, que incluye los cargos gubernamentales oficiales más nuestras tarifas de servicio. Puede solicitar directamente a través del portal gubernamental oficial a un costo menor sin nuestra revisión experta y servicios de soporte."
   },
   "home": {
     "yourPassport": "Tu pasaporte",
@@ -53,7 +54,7 @@
     "stat2Label": "Tasa de aprobación",
     "stat3Value": "24h",
     "stat3Label": "Procesamiento promedio",
-    "stat4Value": "190+",
+    "stat4Value": "175+",
     "stat4Label": "Países compatibles",
     "howItWorks": "Cómo funciona Clear eVisa",
     "howItWorksDesc": "Obtén tu eVisa para la India en 3 sencillos pasos",

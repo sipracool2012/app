@@ -22,7 +22,8 @@
     "termsOfService": "Käyttöehdot",
     "cookiePolicy": "Evästekäytäntö",
     "connect": "Yhteydenpito",
-    "copyright": "© {{year}} Clear eVisa. Kaikki oikeudet pidätetään."
+    "copyright": "© {{year}} Clear eVisa Services. Kaikki oikeudet pidätetään.",
+    "disclaimer": "Clear eVisa Services (www.clearevisa.com) on riippumaton toimisto, eikä se ole yhteydessä Intian hallitukseen. Emme ole lakitoimisto, emmekä tarjoa oikeudellista neuvontaa. Palveluihimme kuuluu ammattimainen viisumihakemusapu ja -tarkistus maksua vastaan, johon sisältyvät viralliset hallitusmaksut sekä palvelumaksumme. Voit hakea suoraan virallisen hallitusportaalin kautta pienemmällä kustannuksella ilman asiantuntijatarkastustamme ja tukipalveluitamme."
   },
   "home": {
     "yourPassport": "Passisi",
@@ -53,7 +54,7 @@
     "stat2Label": "Hyväksymisaste",
     "stat3Value": "24h",
     "stat3Label": "Keskimääräinen käsittely",
-    "stat4Value": "190+",
+    "stat4Value": "175+",
     "stat4Label": "Tuettua maata",
     "howItWorks": "Kuinka Clear eVisa toimii",
     "howItWorksDesc": "Hanki Intian eVisa kolmessa helpossa vaiheessa",
@@ -1330,7 +1331,8 @@
         "step3Desc": "Turvallinen verkkomaksu.",
         "step4": "Vastaanota",
         "step4Desc": "Sähköposti 2-5 päivässä."
-      }    },
+      }
+    },
     "indiaTourism": {
       "hero": {
         "badge": "Incredible India",
@@ -1437,6 +1439,7 @@
         "heading2": "alkaa oikealla viisumilla.",
         "subtitle": "Anna meidän varmentaa asiakirjasi.",
         "cta": "Hanki Intian eVisa"
-      }   }
+      }
+    }
   }
 }

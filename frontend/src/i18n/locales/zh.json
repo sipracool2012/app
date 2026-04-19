@@ -38,7 +38,7 @@
     "stat2Label": "Approval Rate",
     "stat3Value": "24hrs",
     "stat3Label": "Average Processing",
-    "stat4Value": "190+",
+    "stat4Value": "175+",
     "stat4Label": "Countries Supported",
     "howItWorks": "How Clear eVisa works",
     "howItWorksDesc": "Get your Indian eVisa in 3 simple steps",
@@ -260,7 +260,8 @@
     "termsOfService": "Terms of Service",
     "cookiePolicy": "Cookie Policy",
     "connect": "Connect",
-    "copyright": "© {{year}} Clear eVisa. All rights reserved."
+    "copyright": "© {{year}} Clear eVisa Services. All rights reserved.",
+    "disclaimer": "Clear eVisa Services（www.clearevisa.com）是一家独立机构，与印度政府无任何关联。我们不是律师事务所，不提供法律建议。我们的服务包括收费的专业签证申请协助和审核，费用包含官方政府费用及我们的服务费用。您也可以直接通过官方政府门户网站以较低成本申请，但将不享有我们的专业审核和支持服务。"
   },
   "appSuccess": {
     "title": "Application Submitted Successfully!",

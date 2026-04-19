@@ -22,7 +22,8 @@
     "termsOfService": "Warunki świadczenia usług",
     "cookiePolicy": "Polityka plików cookie",
     "connect": "Połącz się",
-    "copyright": "© {{year}} Clear eVisa. Wszelkie prawa zastrzeżone."
+    "copyright": "© {{year}} Clear eVisa Services. Wszelkie prawa zastrzeżone.",
+    "disclaimer": "Clear eVisa Services (www.clearevisa.com) jest niezależną agencją i nie jest powiązana z rządem Indii. Nie jesteśmy kancelarią prawną i nie świadczymy porad prawnych. Nasze usługi obejmują profesjonalną pomoc przy składaniu wniosków wizowych i ich weryfikację za opłatą, która obejmuje oficjalne opłaty rządowe oraz nasze opłaty serwisowe. Możesz złożyć wniosek bezpośrednio przez oficjalny portal rządowy za niższą cenę, bez naszego fachowego przeglądu i usług wsparcia."
   },
   "home": {
     "yourPassport": "Twój paszport",
@@ -53,7 +54,7 @@
     "stat2Label": "Wskaźnik zatwierdzeń",
     "stat3Value": "24h",
     "stat3Label": "Średni czas procesowania",
-    "stat4Value": "190+",
+    "stat4Value": "175+",
     "stat4Label": "Obsługiwanych krajów",
     "howItWorks": "Jak działa Clear eVisa",
     "howItWorksDesc": "Uzyskaj indyjską e-wizę w 3 prostych krokach",

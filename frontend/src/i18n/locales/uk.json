@@ -22,7 +22,8 @@
     "termsOfService": "Terms of Service",
     "cookiePolicy": "Cookie Policy",
     "connect": "Connect",
-    "copyright": "© {{year}} Clear eVisa. All rights reserved."
+    "copyright": "© {{year}} Clear eVisa Services. All rights reserved.",
+    "disclaimer": "Clear eVisa Services (www.clearevisa.com) є незалежним агентством і не пов'язане з урядом Індії. Ми не є юридичною фірмою та не надаємо юридичних консультацій. Наші послуги включають професійну допомогу у поданні заявок на візу та їх перевірку за плату, що включає офіційні державні збори та наші сервісні збори. Ви можете подати заявку безпосередньо через офіційний державний портал за нижчою вартістю без нашої експертної перевірки та послуг підтримки."
   },
   "home": {
     "yourPassport": "Your passport",
@@ -53,7 +54,7 @@
     "stat2Label": "Approval Rate",
     "stat3Value": "24hrs",
     "stat3Label": "Average Processing",
-    "stat4Value": "190+",
+    "stat4Value": "175+",
     "stat4Label": "Countries Supported",
     "howItWorks": "How Clear eVisa works",
     "howItWorksDesc": "Get your Indian eVisa in 3 simple steps",

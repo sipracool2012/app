@@ -22,7 +22,8 @@
     "termsOfService": "Algemene voorwaarden",
     "cookiePolicy": "Cookiebeleid",
     "connect": "Verbinden",
-    "copyright": "© {{year}} Clear eVisa. Alle rechten voorbehouden."
+    "copyright": "© {{year}} Clear eVisa Services. Alle rechten voorbehouden.",
+    "disclaimer": "Clear eVisa Services (www.clearevisa.com) is een onafhankelijk bureau en is niet gelieerd aan de Indiase regering. We zijn geen advocatenkantoor en geven geen juridisch advies. Onze diensten omvatten professionele assistentie bij visaanvragen en beoordeling tegen een vergoeding, die officiële overheidskosten plus onze servicekosten omvat. U kunt rechtstreeks via het officiële overheidsportaal aanvragen voor lagere kosten zonder onze deskundige beoordeling en ondersteuningsdiensten."
   },
   "home": {
     "yourPassport": "Uw paspoort",
@@ -53,7 +54,7 @@
     "stat2Label": "Goedkeuringspercentage",
     "stat3Value": "24 uur",
     "stat3Label": "Gemiddelde verwerkingstijd",
-    "stat4Value": "190+",
+    "stat4Value": "175+",
     "stat4Label": "Ondersteunde landen",
     "howItWorks": "Hoe Clear eVisa werkt",
     "howItWorksDesc": "Ontvang uw Indiase eVisa in 3 eenvoudige stappen",

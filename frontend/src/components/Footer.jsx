@@ -80,6 +80,12 @@ const Footer = () => {
           <p className="text-center text-gray-600 text-sm">
             {t('footer.copyright', { year: currentYear })}
           </p>
+          <p className="mt-4 text-center text-gray-500 text-xs leading-5 max-w-3xl mx-auto">
+            {t('footer.disclaimer')}
+          </p>
+          <p className="mt-3 text-center text-gray-400 text-xs">
+            Udyam Registration Number: <strong className="text-gray-500">UDYAM-MH-26-1069031</strong>
+          </p>
         </div>
       </div>
     </footer>

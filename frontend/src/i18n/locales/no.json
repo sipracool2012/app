@@ -22,7 +22,8 @@
     "termsOfService": "Brukervilkår",
     "cookiePolicy": "Cookie-erklæring",
     "connect": "Kontakt",
-    "copyright": "© {{year}} Clear eVisa. Alle rettigheter forbeholdt."
+    "copyright": "© {{year}} Clear eVisa Services. Alle rettigheter forbeholdt.",
+    "disclaimer": "Clear eVisa Services (www.clearevisa.com) er et uavhengig byrå og er ikke tilknyttet den indiske regjeringen. Vi er ikke et advokatfirma og gir ikke juridisk rådgivning. Våre tjenester inkluderer profesjonell hjelp til visumansøkning og gjennomgang mot et gebyr, som inkluderer offisielle statsgebyrer pluss våre servicegebyrer. Du kan søke direkte via den offisielle statsportalen til en lavere kostnad uten vår ekspertgjennomgang og støttetjenester."
   },
   "home": {
     "yourPassport": "Ditt pass",
@@ -53,7 +54,7 @@
     "stat2Label": "Godkjenningsrate",
     "stat3Value": "24 timer",
     "stat3Label": "Gjennomsnittlig behandlingstid",
-    "stat4Value": "190+",
+    "stat4Value": "175+",
     "stat4Label": "Land støttet",
     "howItWorks": "Slik fungerer Clear eVisa",
     "howItWorksDesc": "Få ditt indiske eVisa i 3 enkle trinn",

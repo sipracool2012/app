@@ -22,7 +22,8 @@
     "termsOfService": "Pakalpojuma sniegšanas noteikumi",
     "cookiePolicy": "Sīkdatņu politika",
     "connect": "Sazināties",
-    "copyright": "© {{year}} Clear eVisa. Visas tiesības aizsargātas."
+    "copyright": "© {{year}} Clear eVisa Services. Visas tiesības aizsargātas.",
+    "disclaimer": "Clear eVisa Services (www.clearevisa.com) ir neatkarīga aģentūra, kas nav saistīta ar Indijas valdību. Mēs neesam juridiskā firma un nesniedzam juridiskas konsultācijas. Mūsu pakalpojumi ietver profesionālu vīzas pieteikuma palīdzību un pārskatīšanu par maksu, kas ietver oficiālās valdības nodevas un mūsu pakalpojumu maksas. Jūs varat pieteikties tieši caur oficiālo valdības portālu par zemākām izmaksām bez mūsu ekspertu pārskata un atbalsta pakalpojumiem."
   },
   "home": {
     "yourPassport": "Jūsu pase",
@@ -53,7 +54,7 @@
     "stat2Label": "Apstiprināšanas līmenis",
     "stat3Value": "24st",
     "stat3Label": "Vidējais apstrādes laiks",
-    "stat4Value": "190+",
+    "stat4Value": "175+",
     "stat4Label": "Atbalstītās valstis",
     "howItWorks": "Kā darbojas Clear eVisa",
     "howItWorksDesc": "Saņemiet savu Indijas e-vīzu 3 vienkāršos soļos",
