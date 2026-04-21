@@ -36,6 +36,15 @@ const PaymentReturn = () => {
     }
   }, [state, transactionId, amount]);
 
+  // Immediately strip sensitive payment params from the address bar so the
+  // URL cannot be bookmarked, shared, or replayed by simply reloading the page.
+  useEffect(() => {
+    const clean = new URLSearchParams();
+    if (applicationId) clean.set('application_id', applicationId);
+    window.history.replaceState({}, '', `/payment-return?${clean.toString()}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     if (cancelled) {
       setState('failed');

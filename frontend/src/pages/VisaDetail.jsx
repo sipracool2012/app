@@ -180,10 +180,10 @@ const VisaDetail = () => {
   const ourFeeUnit = parseFloat(visaOption.our_fee) || 0;
   const displayedUnitPrice =
     feeDisplayMode === 'our_fee_only'
-      ? ourFeeUnit
-      : feeDisplayMode === 'with_discount'
       ? Math.max(0, ourFeeUnit - discount)
-      : basePrice;
+      : Math.max(0, basePrice - discount);
+  const originalUnitPrice =
+    feeDisplayMode === 'our_fee_only' ? ourFeeUnit : basePrice;
   const totalPrice = displayedUnitPrice * travellers;
   const totalGovtFee = visaOption.govt_fee * travellers;
   const totalProcessingFee = visaOption.processing_fee * travellers;
@@ -344,10 +344,10 @@ const VisaDetail = () => {
                     ${displayedUnitPrice.toFixed(2)} × {travellers}
                   </span>
                 </div>
-                {feeDisplayMode === 'with_discount' && discount > 0 && (
+                {discount > 0 && (
                   <div className="flex items-center justify-between text-sm text-gray-400">
                     <span>Original price</span>
-                    <span className="line-through">${(ourFeeUnit * travellers).toFixed(2)}</span>
+                    <span className="line-through">${(originalUnitPrice * travellers).toFixed(2)}</span>
                   </div>
                 )}
                 <div className="flex items-center justify-between">
@@ -380,6 +380,26 @@ const VisaDetail = () => {
                     </div>
                     <span>${totalOurFee.toFixed(2)}</span>
                   </div>
+                  {discount > 0 && (
+                    <div className="flex items-center justify-between text-sm text-green-600 font-medium">
+                      <div className="flex items-center gap-1">
+                        <span>Discount applied</span>
+                        <InfoTooltip text="Special discount applied to your order." />
+                      </div>
+                      <span>-${totalDiscount.toFixed(2)}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              {feeDisplayMode === 'total_only' && discount > 0 && (
+                <div className="px-5 pb-2 border-t border-gray-100 pt-2">
+                  <div className="flex items-center justify-between text-sm text-green-600 font-medium">
+                    <div className="flex items-center gap-1">
+                      <span>Discount applied</span>
+                      <InfoTooltip text="Special discount applied to your order." />
+                    </div>
+                    <span>-${totalDiscount.toFixed(2)}</span>
+                  </div>
                 </div>
               )}
               {feeDisplayMode === 'our_fee_only' && (
@@ -389,8 +409,17 @@ const VisaDetail = () => {
                       <span>Service fee</span>
                       <InfoTooltip text="Our fee for reviewing and processing your application." />
                     </div>
-                    <span>${totalOurFee.toFixed(2)}</span>
+                    <span>${(ourFeeUnit * travellers).toFixed(2)}</span>
                   </div>
+                  {discount > 0 && (
+                    <div className="flex items-center justify-between text-sm text-green-600 font-medium">
+                      <div className="flex items-center gap-1">
+                        <span>Discount applied</span>
+                        <InfoTooltip text="Special discount applied to your order." />
+                      </div>
+                      <span>-${totalDiscount.toFixed(2)}</span>
+                    </div>
+                  )}
                 </div>
               )}
               {feeDisplayMode === 'with_discount' && discount > 0 && (
@@ -411,7 +440,7 @@ const VisaDetail = () => {
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold py-3"
                   onClick={handleStartApplication}
                 >
-                  Start Application
+                  Continue
                 </Button>
               </div>
             </div>

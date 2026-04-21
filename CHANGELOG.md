@@ -5,6 +5,19 @@ All notable changes to the Clear eVisa project are documented in this file.
 Format: `## [Date] - Description`
 ---
 
+## [2026-04-21] - PayPal payment replay vulnerability fix
+
+### Security
+
+- **`backend/routes/payment_gateways.py`** — `paypal_capture_order` endpoint hardened with three layered guards:
+  - **Idempotency check**: if the application is already `paid`, returns the stored `transaction_id` immediately without calling PayPal again
+  - **Order-ID ownership check**: verifies that the `token` (PayPal order ID) in the request matches the `paypal_order_id` stored in the DB at order-creation time; mismatched or stale tokens are rejected with `400`. The `paypal_order_id` is cleared from the DB after a successful capture, making the token single-use
+  - **Atomic in-progress lock**: uses MongoDB `find_one_and_update` to set `payment_capture_lock: true` atomically, preventing two concurrent tab replays from both passing the idempotency check before either marks the application as `paid`; lock is released on success or any error
+
+- **`frontend/src/pages/PaymentReturn.jsx`** — on component mount, `window.history.replaceState` strips `token`, `PayerID`, and `amount` from the browser address bar immediately, leaving only `application_id`; prevents the full callback URL from being bookmarked, shared, or replayed by reloading the page
+
+---
+
 ## [2026-04-19] - Landing page updates: footer disclaimer text, Tovik removal
 
 ### Changed

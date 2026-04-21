@@ -120,9 +120,9 @@ export default function HelpCenter() {
            {/*} <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
               Start Live Chat
             </button>*/}
-            <button className="bg-white text-blue-600 px-6 py-2 rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors">
+            <a href="mailto:support@clearevisa.com" className="bg-white text-blue-600 px-6 py-2 rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors">
               {t('pages.helpCenter.emailSupport')}
-            </button>
+            </a>
           </div>
           {/*<p className="mt-6 text-sm text-gray-600">
             📞 Phone: +1 (555) 123-4567 | Available 24/7

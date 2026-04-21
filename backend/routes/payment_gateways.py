@@ -371,8 +371,56 @@ async def paypal_capture_order(
     current_user_id: str = Depends(get_current_user),
 ):
     """Capture an approved PayPal order and mark the application as submitted."""
+
+    # ── Guard 1: idempotency — already paid ────────────────────────────────
+    app_doc = await db.applications.find_one({"applicationId": req.application_id})
+    if not app_doc:
+        raise HTTPException(status_code=404, detail="Application not found")
+
+    if app_doc.get("status") == "paid":
+        # Return the stored transaction id so the frontend can show success
+        return {
+            "success": True,
+            "transaction_id": app_doc.get("paypal_transaction_id", ""),
+            "status": "COMPLETED",
+        }
+
+    # ── Guard 2: order-id ownership — reject mismatched tokens ────────────
+    stored_order_id = app_doc.get("paypal_order_id")
+    if not stored_order_id or stored_order_id != req.order_id:
+        logger.warning(
+            "PayPal capture rejected: order_id mismatch for %s "
+            "(submitted=%s, stored=%s)",
+            req.application_id, req.order_id, stored_order_id,
+        )
+        raise HTTPException(status_code=400, detail="Invalid or expired payment session")
+
+    # ── Guard 3: atomic in-progress lock — prevent concurrent replays ─────
+    lock_result = await db.applications.find_one_and_update(
+        {
+            "applicationId": req.application_id,
+            "payment_capture_lock": {"$ne": True},
+            "status": {"$ne": "paid"},
+        },
+        {"$set": {"payment_capture_lock": True}},
+    )
+    if lock_result is None:
+        # Another request is already capturing — return idempotent response
+        app_doc = await db.applications.find_one({"applicationId": req.application_id})
+        if app_doc and app_doc.get("status") == "paid":
+            return {
+                "success": True,
+                "transaction_id": app_doc.get("paypal_transaction_id", ""),
+                "status": "COMPLETED",
+            }
+        raise HTTPException(status_code=409, detail="Payment is already being processed")
+
     config = await db.payment_gateway_config.find_one({})
     if not config or not config.get("paypal_client_id"):
+        await db.applications.update_one(
+            {"applicationId": req.application_id},
+            {"$unset": {"payment_capture_lock": ""}},
+        )
         raise HTTPException(status_code=400, detail="PayPal is not configured")
 
     client_id = config["paypal_client_id"]
@@ -408,8 +456,8 @@ async def paypal_capture_order(
                 "paidAt": now_ist(),
                 "paypal_transaction_id": transaction_id,
                 "paypal_capture": capture,
-                "updatedAt": now_ist()
-            }}
+                "updatedAt": now_ist(),
+            }, "$unset": {"payment_capture_lock": "", "paypal_order_id": ""}},
         )
         await _record_transaction(req.application_id, "paypal", transaction_id, capture_amount, capture_currency)
 
@@ -417,9 +465,23 @@ async def paypal_capture_order(
 
     except httpx.HTTPStatusError as e:
         logger.exception("PayPal capture failed")
+        await db.applications.update_one(
+            {"applicationId": req.application_id},
+            {"$unset": {"payment_capture_lock": ""}},
+        )
         raise HTTPException(status_code=502, detail=f"PayPal error: {e.response.text}")
+    except HTTPException:
+        await db.applications.update_one(
+            {"applicationId": req.application_id},
+            {"$unset": {"payment_capture_lock": ""}},
+        )
+        raise
     except Exception as e:
         logger.exception("PayPal capture unexpected error")
+        await db.applications.update_one(
+            {"applicationId": req.application_id},
+            {"$unset": {"payment_capture_lock": ""}},
+        )
         raise HTTPException(status_code=500, detail=str(e))
 
 

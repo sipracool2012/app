@@ -6,13 +6,10 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import en from './locales/en.json';
 import ar from './locales/ar.json';
 import de from './locales/de.json';
-import es from './locales/es.json';
 import fr from './locales/fr.json';
 import hi from './locales/hi.json';
 import ja from './locales/ja.json';
-import pt from './locales/pt.json';
 import ru from './locales/ru.json';
-import zh from './locales/zh.json';
 
 // New locales
 import da from './locales/da.json';
@@ -65,13 +62,10 @@ const resources = {
   en: mergeLegalPages(en),
   ar: mergeLegalPages(ar),
   de: mergeLegalPages(de),
-  es: mergeLegalPages(es),
   fr: mergeLegalPages(fr),
   hi: mergeLegalPages(hi),
   ja: mergeLegalPages(ja),
-  pt: mergeLegalPages(pt),
   ru: mergeLegalPages(ru),
-  zh: mergeLegalPages(zh),
   da: mergeLegalPages(da),
   'en-CA': mergeLegalPages(enCA),
   'en-GB': mergeLegalPages(enGB),

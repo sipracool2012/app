@@ -233,16 +233,19 @@ const Home = () => {
                       {visaOptions.map((visa) => {
                         const discount = parseFloat(visa.discount_amount) || 0;
                         const visaOurFee = parseFloat(visa.our_fee) || 0;
+                        const govtFee = parseFloat(visa.govt_fee) || 0;
+                        const processingFee = parseFloat(visa.processing_fee) || 0;
+                        // Always apply discount when one exists, for every display mode
                         const displayedPrice =
                           feeDisplayMode === 'our_fee_only'
-                            ? visaOurFee
-                            : feeDisplayMode === 'with_discount'
                             ? Math.max(0, visaOurFee - discount)
-                            : visa.price;
+                            : Math.max(0, visa.price - discount);
+                        const originalPrice =
+                          feeDisplayMode === 'our_fee_only' ? visaOurFee : visa.price;
                         const priceLabel =
                           feeDisplayMode === 'our_fee_only'
-                            ? 'Service fee'
-                            : feeDisplayMode === 'with_discount' && discount > 0
+                            ? discount > 0 ? 'Service fee (after discount)' : 'Service fee'
+                            : discount > 0
                             ? 'After discount'
                             : null;
                         return (
@@ -259,8 +262,8 @@ const Home = () => {
                                 </div>
                               </div>
                               <div className="text-right">
-                                {feeDisplayMode === 'with_discount' && discount > 0 && (
-                                  <p className="text-sm line-through text-gray-400">USD ${visaOurFee.toFixed(2)}</p>
+                                {discount > 0 && (
+                                  <p className="text-sm line-through text-gray-400">USD ${originalPrice.toFixed(2)}</p>
                                 )}
                                 <p className="text-2xl font-bold text-gray-900">USD ${displayedPrice.toFixed(2)}</p>
                                 {priceLabel && (
@@ -268,6 +271,88 @@ const Home = () => {
                                 )}
                               </div>
                             </div>
+
+                            {/* Fee Breakdown — respects Utility Settings > Pricing Display */}
+                            {feeDisplayMode === 'full_breakdown' && (
+                              <div className="border-t pt-3 mb-4 space-y-1.5">
+                                <div className="flex justify-between text-sm text-gray-600">
+                                  <span>Government fee</span>
+                                  <span>USD ${govtFee.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between text-sm text-gray-600">
+                                  <span>Processing fee</span>
+                                  <span>USD ${processingFee.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between text-sm text-gray-600">
+                                  <span>Service fee</span>
+                                  <span>USD ${visaOurFee.toFixed(2)}</span>
+                                </div>
+                                {discount > 0 && (
+                                  <div className="flex justify-between text-sm font-medium text-green-600">
+                                    <span>Discount</span>
+                                    <span>-USD ${discount.toFixed(2)}</span>
+                                  </div>
+                                )}
+                                <div className="flex justify-between text-sm font-semibold text-gray-900 border-t pt-1.5">
+                                  <span>Total</span>
+                                  <span>USD ${displayedPrice.toFixed(2)}</span>
+                                </div>
+                              </div>
+                            )}
+                            {feeDisplayMode === 'total_only' && discount > 0 && (
+                              <div className="border-t pt-3 mb-4">
+                                <div className="flex justify-between text-sm font-medium text-green-600">
+                                  <span>Discount applied</span>
+                                  <span>-USD ${discount.toFixed(2)}</span>
+                                </div>
+                              </div>
+                            )}
+                            {feeDisplayMode === 'our_fee_only' && (
+                              <div className="border-t pt-3 mb-4 space-y-1.5">
+                                {discount > 0 && (
+                                  <div className="flex justify-between text-sm text-gray-500 line-through">
+                                    <span>Service fee</span>
+                                    <span>USD ${visaOurFee.toFixed(2)}</span>
+                                  </div>
+                                )}
+                                <div className="flex justify-between text-sm text-gray-600">
+                                  <span>{discount > 0 ? 'Service fee (after discount)' : 'Service fee'}</span>
+                                  <span>USD ${displayedPrice.toFixed(2)}</span>
+                                </div>
+                                {discount > 0 && (
+                                  <div className="flex justify-between text-sm font-medium text-green-600">
+                                    <span>Discount</span>
+                                    <span>-USD ${discount.toFixed(2)}</span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            {feeDisplayMode === 'with_discount' && (
+                              <div className="border-t pt-3 mb-4 space-y-1.5">
+                                {discount > 0 ? (
+                                  <>
+                                    <div className="flex justify-between text-sm text-gray-500 line-through">
+                                      <span>Original price</span>
+                                      <span>USD ${visaOurFee.toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm font-medium text-green-600">
+                                      <span>Discount applied</span>
+                                      <span>-USD ${discount.toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm font-semibold text-gray-900 border-t pt-1.5">
+                                      <span>After discount</span>
+                                      <span>USD ${displayedPrice.toFixed(2)}</span>
+                                    </div>
+                                  </>
+                                ) : (
+                                  <div className="flex justify-between text-sm text-gray-600">
+                                    <span>Total</span>
+                                    <span>USD ${displayedPrice.toFixed(2)}</span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
                             <div className="flex items-center text-sm text-blue-600 mb-4">
                               <Clock className="w-4 h-4 mr-1" />
                               <span>{t('home.approvedBy', { date: visa.approved_by })}</span>

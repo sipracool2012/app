@@ -34,7 +34,7 @@
     .topbar span { background: #fff; color: #dc2626; padding: 2px 8px; border-radius: 4px; font-weight: 800; margin: 0 4px; }
 
     /* ── NAV ── */
-    .nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.08); position: sticky; top: 0; z-index: 100; }
+    .nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
     .nav-brand { font-size: 1.35rem; font-weight: 800; color: #1d4ed8; letter-spacing: -.5px; }
     .nav-brand span { color: #f97316; }
     .nav-cta { background: #dc2626; color: #fff; padding: 10px 22px; border-radius: 8px; font-weight: 700; font-size: .9rem; transition: background .2s; }
@@ -145,6 +145,27 @@
     .footer-col a:hover { color: #fff; }
     .footer-bottom { border-top: 1px solid #1e293b; padding-top: 20px; text-align: center; font-size: .8rem; max-width: 1080px; margin: 0 auto; }
 
+    /* ── ABOVE-FOLD DISCLAIMER BANNER ── */
+    .disclaimer-banner {
+      background: #0f172a;
+      color: #e2e8f0;
+      text-align: center;
+      padding: 18px 24px;
+      font-size: 1rem;
+      font-weight: 500;
+      line-height: 1.7;
+      border-bottom: 3px solid #fbbf24;
+    }
+    .disclaimer-banner strong { color: #fbbf24; }
+    .disclaimer-banner a { color: #93c5fd; text-decoration: underline; font-weight: 700; }
+
+    /* ── PRICING TABLE ── */
+    .pricing-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: .9rem; }
+    .pricing-table th { background: #1d4ed8; color: #fff; padding: 10px 14px; text-align: left; }
+    .pricing-table td { padding: 10px 14px; border-bottom: 1px solid #e2e8f0; color: #334155; }
+    .pricing-table tr:last-child td { font-weight: 800; color: #0f172a; border-bottom: none; background: #f0fdf4; }
+    .pricing-table tr:last-child td:last-child { color: #15803d; }
+
     @media (max-width: 768px) {
       .nav { padding: 14px 18px; }
       .countdown-strip { gap: 14px; padding: 14px 18px; }
@@ -163,6 +184,14 @@
 </head>
 <body>
 
+  <!-- STICKY HEADER WRAPPER -->
+  <div style="position:sticky;top:0;z-index:100;">
+
+  <!-- ABOVE-FOLD DISCLAIMER BANNER -->
+  <div class="disclaimer-banner">
+    <strong>Disclaimer:</strong> www.clearevisa.com is a private entity and is <strong>NOT affiliated with any government agency</strong>. We provide professional visa assistance for a service fee. You may apply directly at <a href="https://indianvisaonline.gov.in" target="_blank" rel="noopener noreferrer">indianvisaonline.gov.in</a> at a lower cost.
+  </div>
+
   <!-- ANNOUNCEMENT BAR -->
   <div class="topbar">
     🔥 LIMITED TIME: <span>$50 OFF</span> automatically applied — India eVisa application! Offer expires in 24 hours.
@@ -173,6 +202,8 @@
     <div class="nav-brand">Clear <span>e</span>Visa</div>
     <a href="/home" class="nav-cta">Claim $50 Off →</a>
   </nav>
+
+  </div><!-- /STICKY HEADER WRAPPER -->
 
   <!-- COUNTDOWN STRIP -->
   <div class="countdown-strip">
@@ -193,16 +224,16 @@
         <span class="cd-unit">Secs</span>
       </div>
     </div>
-    <a href="/home" class="btn-red" style="padding:10px 22px;font-size:.9rem;">Claim Now</a>
+    <a href="/home" class="btn-red" style="padding:10px 22px;font-size:.9rem;">Start Assisted Application</a>
   </div>
 
   <!-- HERO -->
   <section class="hero">
     <div class="hero-badge">🎉 Exclusive 24-Hour Offer — Limited Spots</div>
-    <h1>Get <span class="discount">$50 OFF</span> Your<br><span class="brand">India eVisa</span> Today</h1>
+    <h1>Get <span class="discount">$50 OFF</span> Your<br><span class="brand">Assisted India eVisa</span> Today</h1>
     <p class="hero-sub">Expert document review and preparation for your Indian eVisa. Trusted by 50,000+ travellers. This discount won't last — grab it before the timer runs out.</p>
     <div class="hero-ctas">
-      <a href="/home" class="btn-red">🎉 Apply Now — Save $50</a>
+      <a href="/home" class="btn-red">🎉 Start Assisted Application — Save $50</a>
       <a href="/requirements" class="btn-outline">Check Requirements</a>
     </div>
     <div class="hero-note">✔ No hidden fees &nbsp;·&nbsp; ✔ Discount auto-applied at checkout &nbsp;·&nbsp; ✔ Valid for 24 hours only</div>
@@ -229,7 +260,7 @@
   </div>
 
   <!-- OFFER COUPON BOX -->
-  <div style="max-width:1080px;margin:0 auto;">
+  <div id="apply" style="max-width:1080px;margin:0 auto;">
     <section class="section" style="padding-bottom:0;">
       <div class="offer-box">
         <h3>🎁 Your $50 Discount — Auto-Applied</h3>
@@ -239,25 +270,43 @@
           <span style="font-size:1.1rem;font-weight:800;color:#15803d;">$50 discount auto-applied</span>
         </div>
         <br>
-        <a href="/home" class="btn-red">Apply Now — $50 Off Auto-Applied →</a>
+        <a href="/home" class="btn-red">Start Assisted Application — $50 Off →</a>
       </div>
     </section>
   </div>
 
   <hr class="divider" style="margin-top:64px;">
 
-  <!-- DISCLAIMER -->
-  <div style="max-width:1080px;margin:0 auto;">
+  <!-- DISCLAIMER + PRICING -->
+  <div id="pricing" style="max-width:1080px;margin:0 auto;">
     <section class="section" style="padding-top:48px;padding-bottom:48px;">
-      <div style="background:#fffbeb;border-left:4px solid #f59e0b;border-radius:8px;padding:24px 28px;font-size:0.9rem;line-height:1.6;color:#64748b;">
+      <div style="background:#fffbeb;border-left:4px solid #f59e0b;border-radius:8px;padding:24px 28px;font-size:0.9rem;line-height:1.6;color:#64748b;margin-bottom:32px;">
         <strong style="color:#d97706;display:block;margin-bottom:8px;">⚠️ Important Disclaimer:</strong>
-        <p style="margin:0;">Clear eVisa provides advisory and support services for visa applications. There is a service fee which includes expert help and assistance in addition to the fees charged by the Indian Government. Clear eVisa is not affiliated with the Indian Government or its sponsors. An application can also be submitted directly through the India Government at a lower cost, though this would be without our professional document review and expert guidance service.</p>
+        <p style="margin:0;">Clear eVisa Services (www.clearevisa.com) is an independent agency and is not affiliated with the Government of India. We are not a law firm. Our services include professional visa assistance and review for a fee, which includes official government charges plus our service fees. You may apply directly through the <a href="https://indianvisaonline.gov.in" target="_blank" rel="noopener noreferrer" style="color:#d97706;text-decoration:underline;">official government portal</a> at a lower cost without our expert review.</p>
+      </div>
+
+      <!-- PRICING TRANSPARENCY -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:28px 28px;">
+        <h3 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin-bottom:6px;">💡 Transparent Pricing — No Hidden Fees</h3>
+        <p style="font-size:.85rem;color:#64748b;margin-bottom:16px;">All costs are shown before you enter personal data. Prices vary by visa type; the example below is for a 30-Day Tourist eVisa.</p>
+        <table class="pricing-table">
+          <thead>
+            <tr><th>Fee Component</th><th>Amount (USD)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Government Fee (paid to Indian Government)</td><td>USD $10.00</td></tr>
+            <tr><td>Government Payment Processing fee</td><td>USD $0.25</td></tr>
+            <tr><td>Our Assistance Service fee</td><td>$49.00 <span style="background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:999px;font-size:.78rem;font-weight:700;">$50 OFF applied</span></td></tr>
+            <tr><td><strong>Total Cost</strong></td><td><strong>$59.25</strong></td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:.78rem;color:#94a3b8;margin-top:10px;">Exact fees for all visa types are displayed at checkout before payment. You may also apply at <a href="https://indianvisaonline.gov.in" target="_blank" rel="noopener noreferrer" style="color:#1d4ed8;">indianvisaonline.gov.in</a> directly to pay only the government fee.</p>
       </div>
     </section>
   </div>
 
   <!-- HOW IT WORKS -->
-  <div style="max-width:1080px;margin:0 auto;">
+  <div id="how-it-works" style="max-width:1080px;margin:0 auto;">
     <section class="section">
       <div class="section-tag">Simple Process</div>
       <h2 class="section-title">How Clear eVisa Works</h2>
@@ -345,7 +394,7 @@
         <span class="u-unit">Secs</span>
       </div>
     </div>
-    <a href="/home" class="btn-white">Claim $50 Off Now — Auto-Applied →</a>
+    <a href="/home" class="btn-white">Start Assisted Application — $50 Off →</a>
   </section>
 
   <!-- TESTIMONIALS -->
@@ -384,7 +433,7 @@
     <div class="footer-inner">
       <div>
         <div class="footer-brand">Clear <span>e</span>Visa</div>
-        <div class="footer-desc">Clear eVisa Services (www.clearevisa.com) is an independent agency and is not affiliated with the Government of India. We are not a law firm and do not provide legal advice. Our services include professional visa application assistance and review for a fee, which includes official government charges plus our service fees. You may apply directly through the official government portal at a lower cost without our expert review and support services.</div>
+        <div class="footer-desc">Clear eVisa Services (www.clearevisa.com) is an independent agency and is not affiliated with the Government of India. We are not a law firm. Our services include professional visa assistance and review for a fee, which includes official government charges plus our service fees. You may apply directly through the <a href="https://indianvisaonline.gov.in" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:underline;">official government portal</a> at a lower cost without our expert review.</div>
       </div>
       <div class="footer-col">
         <h4>Company</h4>
@@ -392,7 +441,7 @@
         <a href="/careers">Careers</a>
         <a href="/press">Press</a>
       </div>
-      <div class="footer-col">
+      <div class="footer-col" id="support">
         <h4>Support</h4>
         <a href="/help">Help Center</a>
         <a href="/contact">Contact Us</a>
