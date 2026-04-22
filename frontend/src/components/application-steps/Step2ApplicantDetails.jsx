@@ -78,6 +78,17 @@ const Step2ApplicantDetails = ({ data, onNext, onBack, onDataChange }) => {
     onNext(formData);
   };
 
+  const isFormValid = () => {
+    return (
+      formData.surname.trim() &&
+      formData.givenNames.trim() &&
+      formData.religion &&
+      formData.visibleMarks.trim() &&
+      formData.educationalQualification &&
+      formData.qualificationFrom.trim()
+    );
+  };
+
   if (loading) {
     return <div className="flex justify-center p-8">{t('common.loading')}</div>;
   }
@@ -235,7 +246,11 @@ const Step2ApplicantDetails = ({ data, onNext, onBack, onDataChange }) => {
           <ChevronLeft className="w-4 h-4 mr-2" />
           {t('application.back')}
         </Button>
-        <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+        <Button 
+          type="submit" 
+          disabled={!isFormValid()}
+          className={`${isFormValid() ? 'bg-primary hover:bg-primary/90' : 'bg-gray-300 hover:bg-gray-300'} text-white`}
+        >
           {t('application.continue')}
         </Button>
       </div>

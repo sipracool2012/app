@@ -140,6 +140,25 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep, onDataChange }) => {
            subtype !== 'Tourism, Recreation, Sight-seeing';
   };
 
+  const isFormValid = () => {
+    // Check all required fields
+    if (!formData.portOfArrival) return false;
+    if (!formData.visaServiceSubtype) return false;
+    if (!formData.passportNumber.trim()) return false;
+    if (!formData.dateOfIssue) return false;
+    if (!formData.expectedArrivalDate) return false;
+    if (!formData.dateOfExpiry) return false;
+    
+    // If yoga fields are shown, check those too
+    if (showYogaFields()) {
+      if (!formData.yogaInstituteName.trim()) return false;
+      if (!formData.yogaInstituteAddress.trim()) return false;
+      if (!formData.yogaInstitutePhone.trim()) return false;
+    }
+    
+    return true;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const newErrors = {};
@@ -523,7 +542,11 @@ const Step1BasicInfo = ({ data, onNext, isFirstStep, onDataChange }) => {
       </div>
 
       <div className="flex justify-end">
-        <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+        <Button 
+          type="submit" 
+          disabled={!isFormValid()}
+          className={`${isFormValid() ? 'bg-primary hover:bg-primary/90' : 'bg-gray-300 hover:bg-gray-300'} text-white`}
+        >
           {t('application.continue')}
         </Button>
       </div>

@@ -437,7 +437,7 @@ const VisaDetail = () => {
               {/* CTA */}
               <div className="px-5 pb-5">
                 <Button
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold py-3"
+                  className="w-full bg-primary hover:bg-primary/90 text-white text-base font-semibold py-3"
                   onClick={handleStartApplication}
                 >
                   Continue

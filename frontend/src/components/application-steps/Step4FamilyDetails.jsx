@@ -60,6 +60,30 @@ const Step4FamilyDetails = ({ data, onNext, onBack, onDataChange }) => {
     }
   };
 
+  const isFormValid = () => {
+    // Required father fields
+    if (!formData.fatherName?.trim()) return false;
+    if (!formData.fatherNationality) return false;
+    if (!formData.fatherPlaceOfBirth?.trim()) return false;
+    if (!formData.fatherCountryOfBirth) return false;
+
+    // Required mother fields
+    if (!formData.motherName?.trim()) return false;
+    if (!formData.motherNationality) return false;
+    if (!formData.motherPlaceOfBirth?.trim()) return false;
+    if (!formData.motherCountryOfBirth) return false;
+
+    // If married, validate spouse fields
+    if (formData.maritalStatus === 'Married') {
+      if (!formData.spouseName?.trim()) return false;
+      if (!formData.spouseNationality) return false;
+      if (!formData.spousePlaceOfBirth?.trim()) return false;
+      if (!formData.spouseCountryOfBirth) return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const newErrors = {};
@@ -413,7 +437,11 @@ const Step4FamilyDetails = ({ data, onNext, onBack, onDataChange }) => {
           <ChevronLeft className="w-4 h-4 mr-2" />
           {t('application.back')}
         </Button>
-        <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+        <Button 
+          type="submit" 
+          disabled={!isFormValid()}
+          className={`${isFormValid() ? 'bg-primary hover:bg-primary/90' : 'bg-gray-300 hover:bg-gray-300'} text-white`}
+        >
           {t('application.continue')}
         </Button>
       </div>

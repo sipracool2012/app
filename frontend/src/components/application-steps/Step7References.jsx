@@ -202,7 +202,7 @@ const Step7References = ({ data, onNext, onBack, onDataChange }) => {
           <ChevronLeft className="w-4 h-4 mr-2" />
           {t('application.back')}
         </Button>
-        <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+        <Button type="submit" className="bg-primary hover:bg-primary/90 text-white">
           {t('application.continue')}
         </Button>
       </div>

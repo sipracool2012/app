@@ -196,7 +196,11 @@ const Step3AddressDetails = ({ data, onNext, onBack, onDataChange }) => {
           <ChevronLeft className="w-4 h-4 mr-2" />
           {t('application.back')}
         </Button>
-        <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+        <Button 
+          type="submit" 
+          disabled={!formData.houseNoStreet?.trim() || !formData.villageTownCity?.trim() || !formData.stateProvince?.trim() || !formData.postalCode?.trim() || !formData.country?.trim() || !formData.phoneNumber?.trim()}
+          className={`${(formData.houseNoStreet?.trim() && formData.villageTownCity?.trim() && formData.stateProvince?.trim() && formData.postalCode?.trim() && formData.country?.trim() && formData.phoneNumber?.trim()) ? 'bg-primary hover:bg-primary/90' : 'bg-gray-300 hover:bg-gray-300'} text-white`}
+        >
           {t('application.continue')}
         </Button>
       </div>

@@ -402,7 +402,7 @@ const VisaApplication = () => {
               })}
             </div>
             <Button
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              className="w-full bg-primary hover:bg-primary/90 text-white"
               onClick={() => { setShowSameVisaModal(false); draftIdRef.current = null; }}
             >
               + Start New Application

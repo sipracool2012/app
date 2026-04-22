@@ -496,7 +496,7 @@ const Step10Payment = ({ data, onNext, onBack, isLastStep, onDataChange }) => {
         </Button>
         <Button
           onClick={handlePayment}
-          className="bg-blue-600 hover:bg-blue-700 text-white"
+          className="bg-primary hover:bg-primary/90 text-white"
           disabled={processing || !canPay}
         >
           {processing ? t('forms.step10.processing') : t('forms.step10.payNow', { amount: totalAmount.toFixed(2) })}

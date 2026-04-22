@@ -5,6 +5,42 @@ All notable changes to the Clear eVisa project are documented in this file.
 Format: `## [Date] - Description`
 ---
 
+## [2026-04-22] - Form styling update: Pink/Magenta theme & Continue button validation
+
+### Changed
+
+#### Frontend color scheme updated from blue to pink/magenta
+- **`frontend/src/index.css`** — Updated CSS variables:
+  - `--primary` color changed to `327 100% 50%` (bright magenta/pink #FF1493-like)
+  - `--ring` color changed to match primary (pink focus rings)
+  - `--accent` color changed to match primary (pink accents)
+  - All inputs and selects now show pink focus rings instead of blue
+
+#### Input and Select components enhanced with pink focus styling
+- **`frontend/src/components/ui/input.jsx`** — Updated focus ring styling:
+  - Changed from `ring-1 ring-ring` to `ring-2 ring-primary border-primary` for stronger pink focus border
+  
+- **`frontend/src/components/ui/select.jsx`** — Updated SelectTrigger focus styling:
+  - Changed from `ring-1 ring-ring` to `ring-2 ring-primary border-primary` for consistent pink focus
+
+#### Application step form validation — Continue button disabled until all mandatory fields filled
+- **All Step components** (`Step1BasicInfo`, `Step2ApplicantDetails`, `Step3AddressDetails`, `Step3PassportDetails`, `Step4AddressDetails`, `Step4FamilyDetails`, `Step5FamilyDetails`, `Step5ProfessionalDetails`, `Step6ProfessionalDetails`, `Step6VisaDetails`, `Step7References`, `Step7VisaDetails`, `Step8PreviousVisit`, `Step8AdditionalQuestions`, `Step9OtherInfo`, `Step9DocumentUpload`, `Step10References`, `Step10Payment`, `Step11AdditionalQuestions`, `Step12DocumentUpload`, `Step13Payment`) — Button styling and validation updates:
+  - All "Continue" buttons changed from blue (`bg-blue-600 hover:bg-blue-700`) to pink (`bg-primary hover:bg-primary/90`)
+  - Key steps (`Step1BasicInfo`, `Step2ApplicantDetails`, `Step3AddressDetails`, `Step3PassportDetails`, `Step4FamilyDetails`) now have validation logic:
+    - Button is disabled (grayed out, `bg-gray-300`) when mandatory fields are empty
+    - Button becomes pink and clickable (`bg-primary`) only when all required fields are filled
+    - User gets real-time visual feedback: empty form = gray disabled button, completed form = pink enabled button
+
+#### Main application pages updated to pink theme
+- **`frontend/src/pages/VisaDetail.jsx`** — "Continue" button uses pink primary color
+- **`frontend/src/pages/VisaApplication.jsx`** — "Start New Application" button uses pink primary color
+
+### Result
+
+Users now see a cohesive pink/magenta color scheme throughout the visa application workflow. The Continue button provides clear visual feedback: it's only clickable (bright pink) when all mandatory fields on the current step are filled, encouraging form completion and preventing submission errors.
+
+---
+
 ## [2026-04-22] - API origin validation security
 
 ### Security
