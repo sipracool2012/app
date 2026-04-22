@@ -5,6 +5,19 @@ All notable changes to the Clear eVisa project are documented in this file.
 Format: `## [Date] - Description`
 ---
 
+## [2026-04-22] - API origin validation security
+
+### Security
+
+- **`backend/server.py`** — Implemented `OriginValidationMiddleware` to restrict `/api/*` endpoints:
+  - All API requests now require valid `origin` or `referer` headers from whitelisted domains
+  - Allowed origins: `https://clearevisa.com`, `http://localhost`, `http://127.0.0.1`
+  - Requests from unauthorized origins, external scripts, curl, Postman, or without origin/referer headers return `404 Not Found`
+  - Prevents unauthorized external access to API endpoints while maintaining development flexibility
+  - Updated CORS configuration to allow only whitelisted origins instead of wildcard (`*`)
+
+---
+
 ## [2026-04-21] - PayPal payment replay vulnerability fix
 
 ### Security

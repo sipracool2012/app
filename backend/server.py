@@ -1,12 +1,15 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Request
+from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 import asyncio
 from datetime import datetime, timedelta
 from pathlib import Path
+from urllib.parse import urlparse
 from utils.constants import now_ist
 
 # Import routes
@@ -22,6 +25,57 @@ db = client[os.environ['DB_NAME']]
 
 # Create the main app without a prefix
 app = FastAPI(title="Clear eVisa Visa Application API")
+
+# Custom middleware to enforce origin restrictions for /api/* routes
+class OriginValidationMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # Only enforce for /api routes
+        if request.url.path.startswith("/api/"):
+            origin = request.headers.get("origin", "").lower()
+            referer = request.headers.get("referer", "").lower()
+            
+            # Allowed origins
+            allowed_origins = [
+                "https://clearevisa.com",
+                "http://localhost",
+                "http://127.0.0.1"
+            ]
+            
+            # Check if origin or referer is valid
+            is_valid_origin = any(
+                origin == allowed or origin.startswith(allowed) 
+                for allowed in allowed_origins
+            )
+            is_valid_referer = any(
+                referer.startswith(allowed) 
+                for allowed in allowed_origins
+            )
+            
+            # If origin header exists, must be valid
+            if origin and not is_valid_origin:
+                return JSONResponse(
+                    status_code=404,
+                    content={"detail": "Not found"}
+                )
+            
+            # If referer exists but origin doesn't, check referer
+            if not origin and referer and not is_valid_referer:
+                return JSONResponse(
+                    status_code=404,
+                    content={"detail": "Not found"}
+                )
+            
+            # Block requests without origin/referer (external scripts, curl, postman)
+            if not origin and not referer:
+                return JSONResponse(
+                    status_code=404,
+                    content={"detail": "Not found"}
+                )
+        
+        response = await call_next(request)
+        return response
+
+app.add_middleware(OriginValidationMiddleware)
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
@@ -50,7 +104,11 @@ app.include_router(api_router)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://clearevisa.com",
+        "http://localhost:3000",  # For development
+        "http://127.0.0.1:3000"   # For development
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
