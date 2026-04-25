@@ -75,6 +75,17 @@ const Step7References = ({ data, onNext, onBack, onDataChange }) => {
     onNext(formData);
   };
 
+  const isFormValid = () => {
+    return (
+      formData.indiaReferenceName?.trim() &&
+      formData.indiaReferenceAddress?.trim() &&
+      formData.indiaReferencePhoneNumber?.trim() &&
+      formData.homeReferenceName?.trim() &&
+      formData.homeReferenceAddress?.trim() &&
+      formData.homeReferencePhoneNumber?.trim()
+    );
+  };
+
   if (loading) {
     return <div className="flex justify-center p-8">{t('common.loading')}</div>;
   }
@@ -202,7 +213,11 @@ const Step7References = ({ data, onNext, onBack, onDataChange }) => {
           <ChevronLeft className="w-4 h-4 mr-2" />
           {t('application.back')}
         </Button>
-        <Button type="submit" className="bg-primary hover:bg-primary/90 text-white">
+        <Button           
+          type="submit" 
+          disabled={!formData.indiaReferenceName?.trim() || !formData.indiaReferenceAddress?.trim() || !formData.indiaReferencePhoneNumber?.trim() || !formData.homeReferenceName?.trim() || !formData.homeReferenceAddress?.trim() || !formData.homeReferencePhoneNumber?.trim()}
+          className={`${(formData.indiaReferenceName?.trim() && formData.indiaReferenceAddress?.trim() && formData.indiaReferencePhoneNumber?.trim() && formData.homeReferenceName?.trim() && formData.homeReferenceAddress?.trim() && formData.homeReferencePhoneNumber?.trim()) ? 'bg-primary hover:bg-primary/90' : 'bg-gray-300 hover:bg-gray-300'} text-white`}
+        >
           {t('application.continue')}
         </Button>
       </div>
